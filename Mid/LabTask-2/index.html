@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Service Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+    <h1>University Student Service Portal</h1>
+    <p>Digital system for student service requests</p>
+</header>
+
+<nav>
+    <a href="#">Home</a>
+    <a href="#">Services</a>
+    <a href="#">Contact</a>
+</nav>
+
+<main>
+
+<section class="info">
+    <h2>Available Services</h2>
+    <p>
+        Students can submit requests for transcripts, ID card issues, certificate verification, and general academic inquiries.
+    </p>
+</section>
+
+<section class="form-container">
+
+    <h2>Service Request Form</h2>
+
+    <form>
+
+        <label>Student Name</label>
+        <input type="text" required>
+
+        <label>Student ID</label>
+        <input type="text" required>
+
+        <label>Email</label>
+        <input type="email" required>
+
+        <label>Service Type</label>
+        <select>
+            <option>Transcript</option>
+            <option>ID Card Issue</option>
+            <option>Certificate Verification</option>
+            <option>General Inquiry</option>
+        </select>
+
+        <!-- ✅ FIXED URGENCY SECTION -->
+        <label>Urgency Level</label>
+
+        <div class="urgency-grid">
+
+            <div class="urgency-row">
+                <span>Low</span>
+                <input type="radio" name="urgency" value="low">
+            </div>
+
+            <div class="urgency-row">
+                <span>Medium</span>
+                <input type="radio" name="urgency" value="medium">
+            </div>
+
+            <div class="urgency-row">
+                <span>High</span>
+                <input type="radio" name="urgency" value="high">
+            </div>
+
+        </div>
+
+        <label>Additional Details</label>
+        <textarea rows="5"></textarea>
+
+        <button type="submit">Submit Request</button>
+
+    </form>
+
+</section>
+
+</main>
+
+<footer>
+    <p> 2026 University Portal | All Rights Reserved</p>
+</footer>
+
+</body>
+</html>

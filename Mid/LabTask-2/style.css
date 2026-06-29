@@ -1,0 +1,96 @@
+body {
+    font-family: "Times New Roman", Times, serif;
+    margin: 0;
+    background: #D3D3FF;
+    color: #1f2a35;
+}
+
+
+header {
+    background: #9400D3;
+    color: white;
+    text-align: center;
+    padding: 25px;
+}
+
+
+nav {
+    background: #D8BFD8;
+    text-align: center;
+    padding: 12px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px;
+}
+
+
+.info {
+    background: white;
+    margin: 20px;
+    padding: 20px;
+    border-left: 5px solid #1b3a4b;
+}
+
+
+.form-container {
+    width: 55%;
+    margin: auto;
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+
+.urgency-grid{
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+
+
+.urgency-row{
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 16px;
+}
+
+
+.urgency-row input{
+    transform: scale(1.2);
+    justify-self: end;
+}
+
+
+button {
+    width: 100%;
+    padding: 12px;
+    background: #D3D3FF;
+    color: white;
+    border: none;
+}
+
+button:hover {
+    background: #ffd166;
+    color: black;
+}
+
+
+footer {
+    text-align: center;
+    padding: 15px;
+    background: #1b3a4b;
+    color: white;
+}
