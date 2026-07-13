@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JavaScript Task 1</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h1 id="pageTitle">JavaScript</h1>
+
+
+
+<h2>Contact Form Validation</h2>
+
+<form onsubmit="return handleSubmit()">
+    <table>
+        <tr>
+            <td>Name:</td>
+            <td>
+                <input type="text" id="name" onkeyup="validateName()">
+                <br>
+                <span id="nameError" class="error"></span>
+            </td>
+        </tr>
+
+        <tr>
+            <td>Email:</td>
+            <td>
+                <input type="text" id="email" onkeyup="validateEmail()">
+                <br>
+                <span id="emailError" class="error"></span>
+            </td>
+        </tr>
+
+        <tr>
+            <td>Phone Number:</td>
+            <td>
+                <input type="text" id="phone" onkeyup="validatePhone()">
+                <br>
+                <span id="phoneError" class="error"></span>
+            </td>
+        </tr>
+
+        <tr>
+            <td>Password:</td>
+            <td>
+                <input type="password" id="password" onkeyup="validatePassword()">
+                <br>
+                <span id="passwordError" class="error"></span>
+            </td>
+        </tr>
+
+        <tr>
+            <td>Age:</td>
+            <td>
+                <input type="text" id="age" onkeyup="validateAge()">
+                <br>
+                <span id="ageError" class="error"></span>
+            </td>
+        </tr>
+
+        <tr>
+            <td>Message:</td>
+            <td>
+                <textarea id="message" rows="4" onkeyup="validateMessage()"></textarea>
+                <br>
+                <span id="messageError" class="error"></span>
+            </td>
+        </tr>
+
+        <tr>
+            <td></td>
+            <td>
+                <button type="submit">Submit</button>
+            </td>
+        </tr>
+    </table>
+</form>
+
+<div id="successMsg"></div>
+
+<hr>
+
+
+
+<h2>Portfolio Website</h2>
+
+<h2 id="greeting"></h2>
+
+<button id="switchBtn" onclick="ToggleMode()">Switch to Dark Mood</button>
+
+<table>
+    <tr>
+        <td colspan="2">
+            <h2>About Me</h2>
+            <p>Hello, my name is Nadim. I am learning HTML, CSS and JavaScript.</p>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <h2>Skills</h2>
+            <p>HTML</p>
+            <p>CSS</p>
+            <p>JavaScript</p>
+        </td>
+
+        <td>
+            <h2>Projects</h2>
+            <p>Contact Form Validation</p>
+            <p>Portfolio Website</p>
+            <p>Theme Switcher</p>
+        </td>
+    </tr>
+
+    <tr>
+        <td colspan="2">
+            <h2>Contact</h2>
+            <p>Email: mailforyounadim@gmail.com</p>
+            <p>Phone: 018831414342</p>
+        </td>
+    </tr>
+</table>
+
+<script>
+    function validateName()
+    {
+        var name = document.getElementById("name").value;
+        var nameError = document.getElementById("nameError");
+        var namePattern = /^[A-Za-z ]+$/;
+
+        if(name === "")
+        {
+            nameError.innerHTML = "Name is required";
+            return false;
+        }
+        else if(name.length < 3)
+        {
+            nameError.innerHTML = "Name must be minimum 3 characters";
+            return false;
+        }
+        else if(!namePattern.test(name))
+        {
+            nameError.innerHTML = "Name must contain only alphabets and spaces";
+            return false;
+        }
+        else
+        {
+            nameError.innerHTML = "";
+            return true;
+        }
+    }
+
+    function validateEmail()
+    {
+        var email = document.getElementById("email").value;
+        var emailError = document.getElementById("emailError");
+        var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if(email === "")
+        {
+            emailError.innerHTML = "Email is required";
+            return false;
+        }
+        else if(!emailPattern.test(email))
+        {
+            emailError.innerHTML = "Enter a valid email address";
+            return false;
+        }
+        else
+        {
+            emailError.innerHTML = "";
+            return true;
+        }
+    }
+
+    function validatePhone()
+    {
+        var phone = document.getElementById("phone").value;
+        var phoneError = document.getElementById("phoneError");
+
+        if(phone === "")
+        {
+            phoneError.innerHTML = "Phone number is required";
+            return false;
+        }
+        else if(phone.length !== 10 || isNaN(phone))
+        {
+            phoneError.innerHTML = "Phone number must be exactly 10 digits";
+            return false;
+        }
+        else
+        {
+            phoneError.innerHTML = "";
+            return true;
+        }
+    }
+
+    function validatePassword()
+    {
+        var password = document.getElementById("password").value;
+        var passwordError = document.getElementById("passwordError");
+
+        var upper = /[A-Z]/;
+        var lower = /[a-z]/;
+        var number = /[0-9]/;
+        var special = /[!@#$%^&*]/;
+
+        if(password === "")
+        {
+            passwordError.innerHTML = "Password is required";
+            return false;
+        }
+        else if(password.length < 8)
+        {
+            passwordError.innerHTML = "Password must be minimum 8 characters";
+            return false;
+        }
+        else if(!upper.test(password))
+        {
+            passwordError.innerHTML = "Password must contain at least 1 uppercase letter";
+            return false;
+        }
+        else if(!lower.test(password))
+        {
+            passwordError.innerHTML = "Password must contain at least 1 lowercase letter";
+            return false;
+        }
+        else if(!number.test(password))
+        {
+            passwordError.innerHTML = "Password must contain at least 1 number";
+            return false;
+        }
+        else if(!special.test(password))
+        {
+            passwordError.innerHTML = "Password must contain at least 1 special character";
+            return false;
+        }
+        else
+        {
+            passwordError.innerHTML = "";
+            return true;
+        }
+    }
+
+    function validateAge()
+    {
+        var age = document.getElementById("age").value;
+        var ageError = document.getElementById("ageError");
+
+        if(age === "")
+        {
+            ageError.innerHTML = "Age is required";
+            return false;
+        }
+        else if(isNaN(age))
+        {
+            ageError.innerHTML = "Age must be number";
+            return false;
+        }
+        else if(age < 18)
+        {
+            ageError.innerHTML = "Age must be 18 years or older";
+            return false;
+        }
+        else
+        {
+            ageError.innerHTML = "";
+            return true;
+        }
+    }
+
+    function validateMessage()
+    {
+        var message = document.getElementById("message").value;
+        var messageError = document.getElementById("messageError");
+
+        if(message === "")
+        {
+            messageError.innerHTML = "Message is required";
+            return false;
+        }
+        else if(message.length < 10)
+        {
+            messageError.innerHTML = "Message must be minimum 10 characters";
+            return false;
+        }
+        else
+        {
+            messageError.innerHTML = "";
+            return true;
+        }
+    }
+
+    function handleSubmit()
+    {
+        var validName = validateName();
+        var validEmail = validateEmail();
+        var validPhone = validatePhone();
+        var validPassword = validatePassword();
+        var validAge = validateAge();
+        var validMessage = validateMessage();
+
+        if(validName && validEmail && validPhone && validPassword && validAge && validMessage)
+        {
+            var name = document.getElementById("name").value;
+            var email = document.getElementById("email").value;
+            var phone = document.getElementById("phone").value;
+            var age = document.getElementById("age").value;
+            var message = document.getElementById("message").value;
+
+            var successMsg = document.getElementById("successMsg");
+
+            successMsg.style.display = "block";
+
+            successMsg.innerHTML =
+            "<h3>Registration Successful!</h3>" +
+            "Name: " + name + "<br>" +
+            "Email: " + email + "<br>" +
+            "Phone: " + phone + "<br>" +
+            "Age: " + age + "<br>" +
+            "Message: " + message + "<br><br>" +
+            "Thank you for registering successfully.";
+
+            return false;
+        }
+        else
+        {
+            document.getElementById("successMsg").style.display = "none";
+            return false;
+        }
+    }
+
+    function ToggleMode()
+    {
+        var body = document.body;
+        var title = document.getElementById("pageTitle");
+        var button = document.getElementById("switchBtn");
+
+        if(body.style.backgroundColor === "black")
+        {
+            body.style.backgroundColor = "white";
+            body.style.color = "black";
+            title.innerHTML = "JavaScript Task 1";
+            button.innerHTML = "Switch to Dark Mood";
+        }
+        else
+        {
+            body.style.backgroundColor = "black";
+            body.style.color = "white";
+            title.innerHTML = "JavaScript Task 1";
+            button.innerHTML = "Switch to Light Mode";
+        }
+    }
+
+    function showGreeting()
+    {
+        var greeting = document.getElementById("greeting");
+        var date = new Date();
+        var hour = date.getHours();
+
+        if(hour < 12)
+        {
+            greeting.innerHTML = "Good Morning";
+        }
+        else if(hour < 18)
+        {
+            greeting.innerHTML = "Good Afternoon";
+        }
+        else
+        {
+            greeting.innerHTML = "Good Evening";
+        }
+    }
+
+    showGreeting();
+</script>
+
+</body>
+</html>
