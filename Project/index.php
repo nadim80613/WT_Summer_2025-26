@@ -3,5 +3,5 @@
 include "config/database.php";
 
 echo "Database Connected Successfully!";
-
+echo "Database Connected !";
 ?>
