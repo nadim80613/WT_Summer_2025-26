@@ -78,7 +78,7 @@
 
                 <div class="metric-card">
                     <div class="metric-info">
-                        <span class="metric-title">PASSENGERS TODAY</span>
+                        <span class="metrRS TODAY</span>ic-title">PASSENGE
                         <h2 class="metric-value">4,821</h2>
                         <span class="metric-sub success">↑ ↑ 8% vs yesterday</span>
                     </div>
