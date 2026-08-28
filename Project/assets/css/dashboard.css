@@ -7,10 +7,13 @@ body.dark-theme {
     --border-color: #172338;
     --text-primary: #ffffff;
     --text-secondary: #7f93af;
+    --user-card-bg: #0d1824;
+    --user-card-border: #1c2b3d;
     --accent-blue: #1c75bc;
     --accent-cyan: #00a8ff;
     --nav-active-bg: #092023;
     --nav-active-text: #20e3b2;
+    --nav-hover: #0f1c2c;
     --gate-active-bg: #092620;
     --gate-active-border: #135d4e;
     --gate-active-text: #20e3b2;
@@ -24,16 +27,19 @@ body.dark-theme {
 
 body.light-theme {
     --bg-main: #f0f4f9;
-    --bg-sidebar: #000000;
+    --bg-sidebar: #ffffff;
     --bg-card: #ffffff;
     --bg-table-header: #eef3f8;
     --border-color: #dce5ef;
     --text-primary: #1e293b;
     --text-secondary: #64748b;
+    --user-card-bg: #f8fafc;
+    --user-card-border: #e2e8f0;
     --accent-blue: #0284c7;
     --accent-cyan: #0284c7;
-    --nav-active-bg: #072220;
-    --nav-active-text: #20e3b2;
+    --nav-active-bg: #e6f9f3;
+    --nav-active-text: #059669;
+    --nav-hover: #f1f5f9;
     --gate-active-bg: #e6f9f3;
     --gate-active-border: #b3ecdb;
     --gate-active-text: #059669;
@@ -56,7 +62,8 @@ body.light-theme {
 body {
     background-color: var(--bg-main);
     color: var(--text-primary);
-    transition: background-color 0.2s ease, color 0.2s ease;
+    overflow-x: hidden;
+    transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 .app-layout {
@@ -64,14 +71,21 @@ body {
     min-height: 100vh;
 }
 
-/* Sidebar */
+/* Fixed Sticky Sidebar */
 .sidebar {
-    width: 250px;
+    width: 260px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
     background-color: var(--bg-sidebar);
     padding: 24px 16px;
     display: flex;
     flex-direction: column;
     border-right: 1px solid var(--border-color);
+    z-index: 1000;
+    overflow-y: auto;
+    transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 .brand {
@@ -91,27 +105,29 @@ body {
     justify-content: center;
     border-radius: 10px;
     font-size: 18px;
+    flex-shrink: 0;
 }
 
 .brand-text h2 {
     font-size: 16px;
-    color: #ffffff;
+    color: var(--text-primary);
 }
 
 .brand-text span {
     font-size: 11px;
-    color: #7f93af;
+    color: var(--text-secondary);
 }
 
 .user-card {
-    background-color: #0d1824;
-    border: 1px solid #1c2b3d;
+    background-color: var(--user-card-bg);
+    border: 1px solid var(--user-card-border);
     border-radius: 10px;
     padding: 12px;
     display: flex;
     align-items: center;
     gap: 12px;
     margin-bottom: 24px;
+    transition: background-color 0.25s ease;
 }
 
 .user-avatar {
@@ -125,11 +141,12 @@ body {
     align-items: center;
     justify-content: center;
     font-size: 13px;
+    flex-shrink: 0;
 }
 
 .user-info h4 {
     font-size: 13px;
-    color: #ffffff;
+    color: var(--text-primary);
 }
 
 .user-info span {
@@ -140,7 +157,7 @@ body {
 .nav-section-title {
     font-size: 10px;
     letter-spacing: 1px;
-    color: #5d6f85;
+    color: var(--text-secondary);
     margin-bottom: 12px;
     font-weight: 700;
 }
@@ -157,7 +174,7 @@ body {
     align-items: center;
     gap: 10px;
     padding: 10px 14px;
-    color: #8c9eb4;
+    color: var(--text-secondary);
     text-decoration: none;
     font-size: 13px;
     font-weight: 500;
@@ -166,21 +183,21 @@ body {
 }
 
 .nav-item:hover {
-    background-color: #0f1c2c;
-    color: #ffffff;
+    background-color: var(--nav-hover);
+    color: var(--text-primary);
 }
 
 .nav-item.active {
     background-color: var(--nav-active-bg);
     color: var(--nav-active-text);
-    border: 1px solid #14493e;
+    border: 1px solid var(--border-color);
     position: relative;
 }
 
 .active-dot {
     width: 6px;
     height: 6px;
-    background-color: #20e3b2;
+    background-color: var(--nav-active-text);
     border-radius: 50%;
     margin-left: auto;
 }
@@ -189,7 +206,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    border-top: 1px solid #182436;
+    border-top: 1px solid var(--border-color);
     padding-top: 16px;
 }
 
@@ -199,24 +216,26 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    color: #8c9eb4;
+    color: var(--text-secondary);
     font-size: 13px;
     cursor: pointer;
     padding: 8px;
     border-radius: 6px;
     text-decoration: none;
+    transition: 0.15s;
 }
 
 .footer-btn:hover {
-    color: #ffffff;
-    background-color: #0f1c2c;
+    color: var(--text-primary);
+    background-color: var(--nav-hover);
 }
 
-/* Main Dashboard Area */
+/* Scrollable Main Dashboard Area */
 .main-content {
     flex-grow: 1;
+    margin-left: 260px; /* Exact offset matching the sidebar width */
     padding: 32px;
-    overflow-y: auto;
+    min-height: 100vh;
 }
 
 .top-header h1 {
@@ -365,7 +384,7 @@ body {
 .badge-checked  { background-color: #1a2536; color: #94a3b8; }
 .badge-transit  { background-color: #382813; color: #fbbf24; }
 
-/* Gate Grid */
+/* Gate Status Grid */
 .gate-status-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
