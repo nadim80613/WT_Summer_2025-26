@@ -1,6 +1,17 @@
 <?php
-// Include your team's database configuration
-// include '../config/database.php';
+session_start();
+
+// Comment these out temporarily so the page loads without logging in:
+
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'staff') {
+    header("Location: ../login.php");
+    exit();
+}
+
+
+// Set fallback values for preview
+$staffName = $_SESSION['name'] ?? 'Jem';
+$staffInitials = "JR";
 ?>
 <!DOCTYPE html>
 <html lang="en">
