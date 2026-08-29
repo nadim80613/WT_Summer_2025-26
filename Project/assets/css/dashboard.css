@@ -1533,9 +1533,6 @@ body.light-mode .aircraft-text {
 }
 
 
-/* ==================================================
-   STATISTIC BOXES
-================================================== */
 
 .gate-stat-cards {
     display: grid;
