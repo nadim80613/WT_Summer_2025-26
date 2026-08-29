@@ -39,14 +39,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     );
 
     $departure_time = mysqli_real_escape_string(
-        $conn,
-        trim($_POST['departure_time'])
-    );
+    $conn,
+    date('Y-m-d') . ' ' . $_POST['departure_time'] . ':00'
+);
 
-    $arrival_time = mysqli_real_escape_string(
-        $conn,
-        trim($_POST['arrival_time'])
-    );
+$arrival_time = mysqli_real_escape_string(
+    $conn,
+    date('Y-m-d') . ' ' . $_POST['arrival_time'] . ':00'
+);
 
     $aircraft = mysqli_real_escape_string(
         $conn,
