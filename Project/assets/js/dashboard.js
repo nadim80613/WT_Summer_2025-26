@@ -298,5 +298,170 @@ document.addEventListener("DOMContentLoaded", function () {
 
     });
 
+    /* =========================================
+   EDIT FLIGHT
+   ========================================= */
+
+const editButtons =
+    document.querySelectorAll(".edit-flight-btn");
+
+const editScheduleCard =
+    document.getElementById("editScheduleCard");
+
+const closeEditFormBtn =
+    document.getElementById("closeEditFormBtn");
+
+const cancelEditFormBtn =
+    document.getElementById("cancelEditFormBtn");
+
+
+editButtons.forEach(function (button) {
+
+    button.addEventListener("click", function () {
+
+        const row =
+            this.closest(".flight-row");
+
+        if (!row) {
+            return;
+        }
+
+
+        /* Get values from table */
+
+        const flightNumber =
+            row.querySelector(".flight-no-link").textContent.trim();
+
+        const airline =
+            row.querySelector(".airline-text").textContent.trim();
+
+        const route =
+            row.querySelectorAll(".route-iata");
+
+        const departure =
+            route[0].textContent.trim();
+
+        const destination =
+            route[1].textContent.trim();
+
+        const times =
+            row.querySelectorAll(".schedule-time-box span");
+
+        const departureTime =
+            times[0].textContent.trim();
+
+        const arrivalTime =
+            times[1].textContent.trim();
+
+        const aircraft =
+            row.querySelector(".aircraft-text").textContent.trim();
+
+        const gate =
+            row.querySelector(".gate-bold-cyan").textContent.trim();
+
+
+        /* Put values into edit form */
+
+        document.getElementById(
+            "edit_flight_id"
+        ).value =
+            this.getAttribute("data-id");
+
+
+        document.getElementById(
+            "edit_flight_number"
+        ).value =
+            flightNumber;
+
+
+        document.getElementById(
+            "edit_airline"
+        ).value =
+            airline;
+
+
+        document.getElementById(
+            "edit_departure"
+        ).value =
+            departure;
+
+
+        document.getElementById(
+            "edit_destination"
+        ).value =
+            destination;
+
+
+        document.getElementById(
+            "edit_departure_time"
+        ).value =
+            departureTime;
+
+
+        document.getElementById(
+            "edit_arrival_time"
+        ).value =
+            arrivalTime;
+
+
+        document.getElementById(
+            "edit_aircraft"
+        ).value =
+            aircraft;
+
+
+        document.getElementById(
+            "edit_gate_number"
+        ).value =
+            gate === "TBD" ? "" : gate;
+
+
+        /* Show edit form */
+
+        editScheduleCard.style.display =
+            "block";
+
+        editScheduleCard.scrollIntoView({
+            behavior: "smooth"
+        });
+
+    });
+
+});
+
+
+/* Close Edit Form */
+
+if (closeEditFormBtn) {
+
+    closeEditFormBtn.addEventListener(
+        "click",
+        function () {
+
+            editScheduleCard.style.display =
+                "none";
+
+        }
+    );
+
+}
+
+
+/* Cancel Edit */
+
+if (cancelEditFormBtn) {
+
+    cancelEditFormBtn.addEventListener(
+        "click",
+        function () {
+
+            editScheduleCard.style.display =
+                "none";
+
+        }
+    );
+
+}
+
 });
 

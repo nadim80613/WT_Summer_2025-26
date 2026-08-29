@@ -58,7 +58,251 @@ $arrival_time = mysqli_real_escape_string(
         trim($_POST['gate_number'])
     );
 
+/* Update Flight */
 
+if (
+    $_SERVER['REQUEST_METHOD'] === 'POST'
+    && isset($_POST['update_schedule'])
+) {
+
+    $flight_id = (int) $_POST['edit_flight_id'];
+
+    $flight_number = mysqli_real_escape_string(
+        $conn,
+        trim($_POST['edit_flight_number'])
+    );
+
+    $airline = mysqli_real_escape_string(
+        $conn,
+        trim($_POST['edit_airline'])
+    );
+
+    $departure = mysqli_real_escape_string(
+        $conn,
+        trim($_POST['edit_departure'])
+    );
+
+    $destination = mysqli_real_escape_string(
+        $conn,
+        trim($_POST['edit_destination'])
+    );
+
+    $departure_time = mysqli_real_escape_string(
+        $conn,
+        date('Y-m-d') . ' ' .
+        $_POST['edit_departure_time'] . ':00'
+    );
+
+    $arrival_time = mysqli_real_escape_string(
+        $conn,
+        date('Y-m-d') . ' ' .
+        $_POST['edit_arrival_time'] . ':00'
+    );
+
+    $aircraft = mysqli_real_escape_string(
+        $conn,
+        trim($_POST['edit_aircraft'])
+    );
+
+    $gate_number = mysqli_real_escape_string(
+        $conn,
+        trim($_POST['edit_gate_number'])
+    );
+
+
+    /* Find Airplane */
+
+    $airplane_sql = "
+        SELECT id
+        FROM airplanes
+        WHERE airline_name = '$airline'
+        AND model = '$aircraft'
+        LIMIT 1
+    ";
+
+    $airplane_result =
+        mysqli_query($conn, $airplane_sql);
+
+
+    if (!$airplane_result) {
+
+        die(
+            "Airplane search error: "
+            . mysqli_error($conn)
+        );
+
+    }
+
+
+    if ($airplane = mysqli_fetch_assoc($airplane_result)) {
+
+        $airplane_id =
+            $airplane['id'];
+
+    } else {
+
+        /* Create Airplane */
+
+        $registration_number =
+            'REG-' . rand(100, 999);
+
+
+        $airplane_insert = "
+            INSERT INTO airplanes
+            (
+                airline_name,
+                model,
+                registration_number,
+                capacity,
+                status
+            )
+
+            VALUES
+            (
+                '$airline',
+                '$aircraft',
+                '$registration_number',
+                200,
+                'Active'
+            )
+        ";
+
+
+        if (!mysqli_query(
+            $conn,
+            $airplane_insert
+        )) {
+
+            die(
+                "Airplane insert error: "
+                . mysqli_error($conn)
+            );
+
+        }
+
+
+        $airplane_id =
+            mysqli_insert_id($conn);
+
+    }
+
+
+    /* Update Flight */
+
+    $update_flight = "
+        UPDATE flights
+        SET
+            flight_number = '$flight_number',
+            airplane_id = '$airplane_id',
+            departure = '$departure',
+            destination = '$destination',
+            departure_time = '$departure_time',
+            arrival_time = '$arrival_time'
+
+        WHERE id = '$flight_id'
+    ";
+
+
+    if (!mysqli_query(
+        $conn,
+        $update_flight
+    )) {
+
+        die(
+            "Flight update error: "
+            . mysqli_error($conn)
+        );
+
+    }
+
+
+    /* Update Gate */
+
+    $gate_check = "
+        SELECT id
+        FROM gates
+        WHERE flight_id = '$flight_id'
+        LIMIT 1
+    ";
+
+    $gate_result =
+        mysqli_query($conn, $gate_check);
+
+
+    if ($gate_row =
+        mysqli_fetch_assoc($gate_result)) {
+
+
+        if (!empty($gate_number)) {
+
+            $update_gate = "
+                UPDATE gates
+
+                SET gate_number = '$gate_number'
+
+                WHERE id = '{$gate_row['id']}'
+            ";
+
+            mysqli_query(
+                $conn,
+                $update_gate
+            );
+
+        } else {
+
+            $delete_gate = "
+                DELETE FROM gates
+                WHERE id = '{$gate_row['id']}'
+            ";
+
+            mysqli_query(
+                $conn,
+                $delete_gate
+            );
+
+        }
+
+
+    } else {
+
+
+        if (!empty($gate_number)) {
+
+            $insert_gate = "
+                INSERT INTO gates
+                (
+                    gate_number,
+                    flight_id,
+                    availability
+                )
+
+                VALUES
+                (
+                    '$gate_number',
+                    '$flight_id',
+                    'Occupied'
+                )
+            ";
+
+            mysqli_query(
+                $conn,
+                $insert_gate
+            );
+
+        }
+
+    }
+
+
+    /* Refresh Page */
+
+    header(
+        "Location: flight_schedule.php"
+    );
+
+    exit();
+
+}
     /* Find Existing Airplane */
 
     $airplane_sql = "
@@ -1053,13 +1297,13 @@ function getScheduleBadgeClass($status)
                     <td>
 
                         <button
-                            type="button"
-                            class="btn-edit-action"
-                            onclick="editFlight(<?php echo $flight['id']; ?>)">
+    type="button"
+    class="btn-edit-action edit-flight-btn"
+    data-id="<?php echo $flight['id']; ?>">
 
-                            Edit
+    Edit
 
-                        </button>
+</button>
 
                     </td>
 
@@ -1091,6 +1335,194 @@ function getScheduleBadgeClass($status)
         </tbody>
 
     </table>
+
+</div>
+
+<!-- =================================================
+     EDIT SCHEDULE FORM
+     ================================================= -->
+
+<div
+    id="editScheduleCard"
+    class="form-card"
+    style="display:none;">
+
+    <div class="form-header">
+
+        <h3>
+            Edit Flight Schedule
+        </h3>
+
+        <span
+            id="closeEditFormBtn"
+            class="close-x">
+
+            ✕
+
+        </span>
+
+    </div>
+
+
+    <form method="POST" action="">
+
+        <!-- Flight ID -->
+        <input
+            type="hidden"
+            name="edit_flight_id"
+            id="edit_flight_id">
+
+
+        <div class="form-grid">
+
+
+            <div class="form-group">
+
+                <label>
+                    Flight Number
+                </label>
+
+                <input
+                    type="text"
+                    name="edit_flight_number"
+                    id="edit_flight_number"
+                    required>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Airline
+                </label>
+
+                <input
+                    type="text"
+                    name="edit_airline"
+                    id="edit_airline"
+                    required>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Origin
+                </label>
+
+                <input
+                    type="text"
+                    name="edit_departure"
+                    id="edit_departure"
+                    maxlength="3"
+                    required>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Destination
+                </label>
+
+                <input
+                    type="text"
+                    name="edit_destination"
+                    id="edit_destination"
+                    maxlength="3"
+                    required>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Departure Time
+                </label>
+
+                <input
+                    type="time"
+                    name="edit_departure_time"
+                    id="edit_departure_time"
+                    required>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Arrival Time
+                </label>
+
+                <input
+                    type="time"
+                    name="edit_arrival_time"
+                    id="edit_arrival_time"
+                    required>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Aircraft
+                </label>
+
+                <input
+                    type="text"
+                    name="edit_aircraft"
+                    id="edit_aircraft"
+                    required>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Gate
+                </label>
+
+                <input
+                    type="text"
+                    name="edit_gate_number"
+                    id="edit_gate_number">
+
+            </div>
+
+        </div>
+
+
+        <div class="form-actions">
+
+            <button
+                type="submit"
+                name="update_schedule"
+                class="btn-save">
+
+                Update Schedule
+
+            </button>
+
+
+            <button
+                type="button"
+                id="cancelEditFormBtn"
+                class="btn-cancel">
+
+                Cancel
+
+            </button>
+
+        </div>
+
+    </form>
 
 </div>
 
