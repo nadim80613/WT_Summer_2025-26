@@ -1,35 +1,72 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const themeToggleBtn = document.getElementById('themeToggle');
-    const themeIcon = document.getElementById('themeIcon');
-    const themeText = document.getElementById('themeText');
-    const body = document.body;
 
-    // Check saved theme preference in browser storage
-    const savedTheme = localStorage.getItem('theme') || 'dark';
+document.addEventListener("DOMContentLoaded", function () {
 
-    function applyTheme(theme) {
-        if (theme === 'light') {
-            body.classList.remove('dark-theme');
-            body.classList.add('light-theme');
-            themeIcon.textContent = '🌙';
-            themeText.textContent = 'Dark Mode';
-        } else {
-            body.classList.remove('light-theme');
-            body.classList.add('dark-theme');
-            themeIcon.textContent = '☀️';
-            themeText.textContent = 'Light Mode';
-        }
+    const themeToggle = document.getElementById("themeToggle");
+    const themeIcon = document.getElementById("themeIcon");
+    const themeText = document.getElementById("themeText");
+
+    if (!themeToggle) {
+        console.error("Theme toggle not found!");
+        return;
     }
 
-    // Apply preference on page load
-    applyTheme(savedTheme);
 
-    // Toggle click event
-    themeToggleBtn.addEventListener('click', () => {
-        const isDark = body.classList.contains('dark-theme');
-        const newTheme = isDark ? 'light' : 'dark';
-        
-        applyTheme(newTheme);
-        localStorage.setItem('theme', newTheme);
+    /* =========================
+       LOAD SAVED THEME
+    ========================= */
+
+    const savedTheme = localStorage.getItem("staffTheme");
+
+    if (savedTheme === "light") {
+        document.body.classList.add("light-mode");
+    }
+
+
+    updateTheme();
+
+
+    /* =========================
+       TOGGLE THEME
+    ========================= */
+
+    themeToggle.addEventListener("click", function () {
+
+        document.body.classList.toggle("light-mode");
+
+        if (document.body.classList.contains("light-mode")) {
+
+            localStorage.setItem("staffTheme", "light");
+
+        } else {
+
+            localStorage.setItem("staffTheme", "dark");
+
+        }
+
+        updateTheme();
+
     });
+
+
+    /* =========================
+       UPDATE ICON + TEXT
+    ========================= */
+
+    function updateTheme() {
+
+        if (document.body.classList.contains("light-mode")) {
+
+            themeIcon.textContent = "🌙";
+            themeText.textContent = "Night Mode";
+
+        } else {
+
+            themeIcon.textContent = "☀️";
+            themeText.textContent = "Day Mode";
+
+        }
+
+    }
+
 });
+
