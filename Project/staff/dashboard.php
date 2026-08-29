@@ -1,114 +1,288 @@
-
+```php
 <?php
+
 session_start();
 
 /* =========================
    LOGIN CHECK
 ========================= */
+
 if (!isset($_SESSION['user_id'])) {
+
     header("Location: ../login.php");
     exit();
+
 }
+
+
+/* =========================
+   DATABASE CONNECTION
+========================= */
+
+include "../config/database.php";
+
+
+$user_id = $_SESSION['user_id'];
+
 
 /* =========================
    STAFF INFORMATION
 ========================= */
-$staff_name = $_SESSION['name'] ?? 'Staff';
-$staff_role = $_SESSION['role'] ?? 'Staff Manager';
+
+$user_sql = "
+    SELECT
+        id,
+        name,
+        email,
+        role
+    FROM users
+    WHERE id = '$user_id'
+    LIMIT 1
+";
+
+$user_result = mysqli_query($conn, $user_sql);
+
+if (!$user_result) {
+
+    die(
+        "User query error: "
+        . mysqli_error($conn)
+    );
+
+}
+
+$user_data = mysqli_fetch_assoc($user_result);
+
+if (!$user_data) {
+
+    session_destroy();
+
+    header("Location: ../login.php");
+    exit();
+
+}
+
+
+$staff_name = $user_data['name'];
+
+$staff_role = $user_data['role'];
+
+$staff_initials =
+    strtoupper(
+        substr($staff_name, 0, 2)
+    );
+
 
 /* =========================
    DASHBOARD STATISTICS
 ========================= */
-$dashboard = [
-    'total_flights'    => 24,
-    'delayed_flights'  => 3,
-    'total_passengers' => 4821,
-    'active_gates'     => 18
-];
+
+
+/* Total Flights */
+
+$total_flights_sql = "
+    SELECT COUNT(*) AS total
+    FROM flights
+";
+
+$total_flights_result =
+    mysqli_query(
+        $conn,
+        $total_flights_sql
+    );
+
+$total_flights_data =
+    mysqli_fetch_assoc(
+        $total_flights_result
+    );
+
+$total_flights =
+    $total_flights_data['total'];
+
+
+/* Delayed Flights */
+
+$delayed_flights_sql = "
+    SELECT COUNT(*) AS total
+    FROM flights
+    WHERE LOWER(status) = 'delayed'
+";
+
+$delayed_flights_result =
+    mysqli_query(
+        $conn,
+        $delayed_flights_sql
+    );
+
+$delayed_flights_data =
+    mysqli_fetch_assoc(
+        $delayed_flights_result
+    );
+
+$delayed_flights =
+    $delayed_flights_data['total'];
+
+
+/* Active Gates */
+
+$active_gates_sql = "
+    SELECT COUNT(*) AS total
+    FROM gates
+    WHERE LOWER(availability) = 'occupied'
+";
+
+$active_gates_result =
+    mysqli_query(
+        $conn,
+        $active_gates_sql
+    );
+
+$active_gates_data =
+    mysqli_fetch_assoc(
+        $active_gates_result
+    );
+
+$active_gates =
+    $active_gates_data['total'];
+
+
+/* Total Gates */
+
+$total_gates_sql = "
+    SELECT COUNT(*) AS total
+    FROM gates
+";
+
+$total_gates_result =
+    mysqli_query(
+        $conn,
+        $total_gates_sql
+    );
+
+$total_gates_data =
+    mysqli_fetch_assoc(
+        $total_gates_result
+    );
+
+$total_gates =
+    $total_gates_data['total'];
+
 
 /* =========================
    FLIGHT DATA
 ========================= */
-$flights = [
-    [
-        'flight'     => 'BG-401',
-        'route'      => 'DAC → DXB',
-        'departure'  => '06:00',
-        'arrival'    => '08:45',
-        'gate'       => 'G14',
-        'status'     => 'Boarding'
-    ],
-    [
-        'flight'     => 'BG-219',
-        'route'      => 'CGP → DAC',
-        'departure'  => '07:30',
-        'arrival'    => '08:10',
-        'gate'       => 'D3',
-        'status'     => 'On Time'
-    ],
-    [
-        'flight'     => 'EK-583',
-        'route'      => 'DAC → DXB',
-        'departure'  => '09:30',
-        'arrival'    => '13:45',
-        'gate'       => 'B7',
-        'status'     => 'Delayed'
-    ],
-    [
-        'flight'     => 'SQ-447',
-        'route'      => 'SIN → DAC',
-        'departure'  => '11:00',
-        'arrival'    => '17:15',
-        'gate'       => 'G6',
-        'status'     => 'Arrived'
-    ],
-    [
-        'flight'     => 'QR-642',
-        'route'      => 'DAC → DOH',
-        'departure'  => '21:00',
-        'arrival'    => '23:45',
-        'gate'       => 'C12',
-        'status'     => 'Scheduled'
-    ]
-];
+
+$flights_sql = "
+    SELECT
+
+        f.id,
+
+        f.flight_number,
+
+        f.departure,
+
+        f.destination,
+
+        f.departure_time,
+
+        f.arrival_time,
+
+        f.status,
+
+        COALESCE(
+            a.airline_name,
+            'N/A'
+        ) AS airline,
+
+        COALESCE(
+            a.model,
+            'N/A'
+        ) AS aircraft,
+
+        (
+            SELECT g.gate_number
+
+            FROM gates g
+
+            WHERE g.flight_id = f.id
+
+            LIMIT 1
+
+        ) AS gate_number
+
+    FROM flights f
+
+    LEFT JOIN airplanes a
+        ON f.airplane_id = a.id
+
+    ORDER BY f.departure_time ASC
+
+    LIMIT 5
+";
+
+
+$flights_result =
+    mysqli_query(
+        $conn,
+        $flights_sql
+    );
+
+
+if (!$flights_result) {
+
+    die(
+        "Flight query error: "
+        . mysqli_error($conn)
+    );
+
+}
+
 
 /* =========================
    BAGGAGE DATA
 ========================= */
-$baggages = [
-    [
-        'tag'       => 'DAC–2091847',
-        'passenger' => 'Rahman Kabir',
-        'flight'    => 'BG-401',
-        'status'    => 'Loaded'
-    ],
-    [
-        'tag'       => 'DAC–2083145',
-        'passenger' => 'Ahmed Hossain',
-        'flight'    => 'EK-583',
-        'status'    => 'Checked-in'
-    ],
-    [
-        'tag'       => 'CGP–1045923',
-        'passenger' => 'Karim Molla',
-        'flight'    => 'BG-219',
-        'status'    => 'In Transit'
-    ]
-];
+
+/*
+   We are keeping baggage empty for now
+   because your baggage table structure
+   has not been provided yet.
+
+   Once you give me the baggage table,
+   I can connect this section too.
+*/
+
+$baggages = [];
+
 
 /* =========================
    GATE DATA
 ========================= */
-$gates = [
-    'G14',
-    'G10',
-    'B7',
-    'D3',
-    'C12',
-    'G6',
-    'A2',
-    'F5'
-];
+
+$gates_sql = "
+    SELECT
+        gate_number,
+        availability
+    FROM gates
+    ORDER BY gate_number ASC
+    LIMIT 8
+";
+
+$gates_result =
+    mysqli_query(
+        $conn,
+        $gates_sql
+    );
+
+
+if (!$gates_result) {
+
+    die(
+        "Gate query error: "
+        . mysqli_error($conn)
+    );
+
+}
+
 
 /* =========================
    HELPER FUNCTIONS
@@ -116,26 +290,39 @@ $gates = [
 
 function getFlightStatusClass($status)
 {
-    switch ($status) {
-        case 'Boarding':
+
+    switch (strtolower(trim($status))) {
+
+        case 'boarding':
             return 'status-boarding';
 
-        case 'Delayed':
+        case 'delayed':
             return 'status-delayed';
 
-        case 'Arrived':
+        case 'arrived':
             return 'status-arrived';
 
-        case 'On Time':
-        case 'Scheduled':
+        case 'departed':
+            return 'status-departed';
+
+        case 'cancelled':
+            return 'status-cancelled';
+
+        case 'on time':
+        case 'scheduled':
         default:
             return 'status-ontime';
+
     }
+
 }
+
 
 function getBaggageStatusClass($status)
 {
+
     switch ($status) {
+
         case 'Loaded':
             return 'status-loaded';
 
@@ -145,28 +332,38 @@ function getBaggageStatusClass($status)
         case 'Checked-in':
         default:
             return 'status-checked';
+
     }
+
 }
+
 ?>
 
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
 
-    <title>Staff Dashboard - AeroPort</title>
+    <title>
+        Staff Dashboard - AeroPort
+    </title>
 
-    <link rel="stylesheet"
-          href="../assets/css/dashboard.css">
+    <link
+        rel="stylesheet"
+        href="../assets/css/dashboard.css">
 
 </head>
 
+
 <body>
+
 
 <!-- ==================================================
      SIDEBAR
@@ -176,7 +373,9 @@ function getBaggageStatusClass($status)
 
     <div class="sidebar-top">
 
+
         <!-- Logo -->
+
         <div class="logo">
 
             <div class="logo-icon">
@@ -184,36 +383,62 @@ function getBaggageStatusClass($status)
             </div>
 
             <div>
-                <h2>AeroPort</h2>
-                <p>Management System</p>
+
+                <h2>
+                    AeroPort
+                </h2>
+
+                <p>
+                    Management System
+                </p>
+
             </div>
 
         </div>
 
 
         <!-- Staff Profile -->
+
         <div class="profile">
 
             <div class="avatar">
+
                 <?php
-                echo strtoupper(
-                    substr($staff_name, 0, 2)
+
+                echo htmlspecialchars(
+                    $staff_initials
                 );
+
                 ?>
+
             </div>
+
 
             <div>
 
                 <h3>
+
                     <?php
-                    echo htmlspecialchars($staff_name);
+
+                    echo htmlspecialchars(
+                        $staff_name
+                    );
+
                     ?>
+
                 </h3>
 
+
                 <span>
+
                     <?php
-                    echo htmlspecialchars($staff_role);
+
+                    echo htmlspecialchars(
+                        $staff_role
+                    );
+
                     ?>
+
                 </span>
 
             </div>
@@ -222,44 +447,52 @@ function getBaggageStatusClass($status)
 
 
         <!-- Navigation Title -->
+
         <div class="title">
             STAFF OPERATIONS
         </div>
 
 
         <!-- Navigation -->
+
         <nav>
 
-            <a href="dashboard.php"
-               class="menu active">
+
+            <a
+                href="dashboard.php"
+                class="menu active">
 
                 ▦ Dashboard
 
             </a>
 
 
-            <a href="flight_schedule.php"
-               class="menu">
+            <a
+                href="flight_schedule.php"
+                class="menu">
 
                 📅 Flight Schedules
 
             </a>
 
 
-            <a href="gate_assignment.php"
-               class="menu">
+            <a
+                href="gate_assignment.php"
+                class="menu">
 
                 🛫 Gate & Terminal
 
             </a>
 
 
-            <a href="baggage_status.php"
-               class="menu">
+            <a
+                href="baggage_status.php"
+                class="menu">
 
                 🧳 Baggage Handling
 
             </a>
+
 
         </nav>
 
@@ -267,7 +500,9 @@ function getBaggageStatusClass($status)
 
 
     <!-- Sidebar Bottom -->
+
     <div class="sidebar-bottom">
+
 
         <p id="themeToggle">
 
@@ -284,14 +519,16 @@ function getBaggageStatusClass($status)
 
         <p>
 
-            <a href="../logout.php"
-               class="sign-out">
+            <a
+                href="../logout.php"
+                class="sign-out">
 
                 ↪ Sign Out
 
             </a>
 
         </p>
+
 
     </div>
 
@@ -304,6 +541,7 @@ function getBaggageStatusClass($status)
 
 <main class="main">
 
+
     <!-- Page Heading -->
 
     <header class="page-header">
@@ -313,8 +551,13 @@ function getBaggageStatusClass($status)
         </h1>
 
         <p class="sub">
-            <?php echo date("M d, Y"); ?>
+
+            <?php
+            echo date("M d, Y");
+            ?>
+
             · Hazrat Shahjalal International Airport
+
         </p>
 
     </header>
@@ -328,24 +571,35 @@ function getBaggageStatusClass($status)
 
 
         <!-- Flights -->
+
         <div class="card">
 
             <h4>
                 FLIGHTS TODAY
             </h4>
 
+
             <h2>
+
                 <?php
-                echo $dashboard['total_flights'];
+
+                echo $total_flights;
+
                 ?>
+
             </h2>
+
 
             <span class="sub-alert danger">
 
                 ↓
+
                 <?php
-                echo $dashboard['delayed_flights'];
+
+                echo $delayed_flights;
+
                 ?>
+
                 delayed
 
             </span>
@@ -354,23 +608,51 @@ function getBaggageStatusClass($status)
 
 
         <!-- Passengers -->
+
         <div class="card">
 
             <h4>
                 PASSENGERS TODAY
             </h4>
 
-            <h2>
-                <?php
-                echo number_format(
-                    $dashboard['total_passengers']
-                );
-                ?>
-            </h2>
+
+           <h2>
+
+    <?php
+
+    $passenger_sql = "
+        SELECT COUNT(*) AS total
+        FROM users
+        WHERE role = 'passenger'
+    ";
+
+    $passenger_result =
+        mysqli_query(
+            $conn,
+            $passenger_sql
+        );
+
+    $passenger_data =
+        mysqli_fetch_assoc(
+            $passenger_result
+        );
+
+    echo $passenger_data['total'];
+
+    ?>
+
+</h2>
+
+<span class="sub-alert success">
+
+    Registered passengers
+
+</span>
+
 
             <span class="sub-alert success">
 
-                ↑ 8% vs yesterday
+                Live database
 
             </span>
 
@@ -378,20 +660,32 @@ function getBaggageStatusClass($status)
 
 
         <!-- Gates -->
+
         <div class="card">
 
             <h4>
                 ACTIVE GATES
             </h4>
 
+
             <h2>
 
                 <?php
-                echo $dashboard['active_gates'];
+
+                echo $active_gates;
+
                 ?>
-                / 24
+
+                /
+
+                <?php
+
+                echo $total_gates;
+
+                ?>
 
             </h2>
+
 
             <span class="sub-alert success">
 
@@ -400,6 +694,7 @@ function getBaggageStatusClass($status)
             </span>
 
         </div>
+
 
     </section>
 
@@ -426,8 +721,10 @@ function getBaggageStatusClass($status)
                     Today's Flight Operations
                 </h2>
 
-                <a href="flight_schedule.php"
-                   class="view-link">
+
+                <a
+                    href="flight_schedule.php"
+                    class="view-link">
 
                     View all →
 
@@ -438,15 +735,21 @@ function getBaggageStatusClass($status)
 
             <table>
 
+
                 <thead>
 
                     <tr>
 
                         <th>Flight</th>
+
                         <th>Route</th>
+
                         <th>Departure</th>
+
                         <th>Arrival</th>
+
                         <th>Gate</th>
+
                         <th>Status</th>
 
                     </tr>
@@ -456,56 +759,130 @@ function getBaggageStatusClass($status)
 
                 <tbody>
 
-                    <?php foreach ($flights as $flight): ?>
+
+                <?php
+
+                if (
+                    mysqli_num_rows(
+                        $flights_result
+                    ) > 0
+                ):
+
+                ?>
+
+
+                    <?php
+
+                    while (
+                        $flight =
+                        mysqli_fetch_assoc(
+                            $flights_result
+                        )
+                    ):
+
+                    ?>
+
 
                         <tr>
 
+
+                            <!-- Flight -->
+
                             <td>
+
                                 <strong>
+
                                     <?php
+
                                     echo htmlspecialchars(
-                                        $flight['flight']
+                                        $flight['flight_number']
                                     );
+
                                     ?>
+
                                 </strong>
+
                             </td>
 
 
-                            <td>
-                                <?php
-                                echo htmlspecialchars(
-                                    $flight['route']
-                                );
-                                ?>
-                            </td>
-
+                            <!-- Route -->
 
                             <td>
+
                                 <?php
+
                                 echo htmlspecialchars(
                                     $flight['departure']
                                 );
+
                                 ?>
+
+                                →
+
+                                <?php
+
+                                echo htmlspecialchars(
+                                    $flight['destination']
+                                );
+
+                                ?>
+
                             </td>
 
+
+                            <!-- Departure -->
 
                             <td>
+
                                 <?php
+
                                 echo htmlspecialchars(
-                                    $flight['arrival']
+                                    date(
+                                        'H:i',
+                                        strtotime(
+                                            $flight['departure_time']
+                                        )
+                                    )
                                 );
+
                                 ?>
+
                             </td>
 
+
+                            <!-- Arrival -->
+
+                            <td>
+
+                                <?php
+
+                                echo htmlspecialchars(
+                                    date(
+                                        'H:i',
+                                        strtotime(
+                                            $flight['arrival_time']
+                                        )
+                                    )
+                                );
+
+                                ?>
+
+                            </td>
+
+
+                            <!-- Gate -->
 
                             <td>
 
                                 <strong class="gate-text">
 
                                     <?php
+
                                     echo htmlspecialchars(
-                                        $flight['gate']
+                                        $flight['gate_number']
+                                        ?? 'TBD'
                                     );
+
                                     ?>
 
                                 </strong>
@@ -513,30 +890,63 @@ function getBaggageStatusClass($status)
                             </td>
 
 
+                            <!-- Status -->
+
                             <td>
 
-                                <span class="status
+                                <span
+                                    class="status
                                     <?php
+
                                     echo getFlightStatusClass(
                                         $flight['status']
                                     );
+
                                     ?>">
 
                                     •
 
                                     <?php
+
                                     echo htmlspecialchars(
                                         $flight['status']
                                     );
+
                                     ?>
 
                                 </span>
 
                             </td>
 
+
                         </tr>
 
-                    <?php endforeach; ?>
+
+                    <?php
+
+                    endwhile;
+
+                    ?>
+
+
+                <?php else: ?>
+
+
+                    <tr>
+
+                        <td
+                            colspan="6"
+                            style="text-align:center;">
+
+                            No flights available.
+
+                        </td>
+
+                    </tr>
+
+
+                <?php endif; ?>
+
 
                 </tbody>
 
@@ -547,31 +957,40 @@ function getBaggageStatusClass($status)
                  BAGGAGE
             ================================================== -->
 
-            <div class="section-header baggage-header">
+            <div
+                class="section-header baggage-header">
+
 
                 <h2>
                     Recent Baggage
                 </h2>
 
-                <a href="baggage_status.php"
-                   class="view-link">
+
+                <a
+                    href="baggage_status.php"
+                    class="view-link">
 
                     View all →
 
                 </a>
+
 
             </div>
 
 
             <table>
 
+
                 <thead>
 
                     <tr>
 
                         <th>Tag</th>
+
                         <th>Passenger</th>
+
                         <th>Flight</th>
+
                         <th>Status</th>
 
                     </tr>
@@ -581,69 +1000,116 @@ function getBaggageStatusClass($status)
 
                 <tbody>
 
-                    <?php foreach ($baggages as $bag): ?>
+
+                    <?php if (!empty($baggages)): ?>
+
+
+                        <?php foreach (
+                            $baggages as $bag
+                        ): ?>
+
+
+                            <tr>
+
+
+                                <td>
+
+                                    <?php
+
+                                    echo htmlspecialchars(
+                                        $bag['tag']
+                                    );
+
+                                    ?>
+
+                                </td>
+
+
+                                <td>
+
+                                    <?php
+
+                                    echo htmlspecialchars(
+                                        $bag['passenger']
+                                    );
+
+                                    ?>
+
+                                </td>
+
+
+                                <td>
+
+                                    <strong>
+
+                                        <?php
+
+                                        echo htmlspecialchars(
+                                            $bag['flight']
+                                        );
+
+                                        ?>
+
+                                    </strong>
+
+                                </td>
+
+
+                                <td>
+
+                                    <span class="status
+                                        <?php
+
+                                        echo getBaggageStatusClass(
+                                            $bag['status']
+                                        );
+
+                                        ?>">
+
+                                        •
+
+                                        <?php
+
+                                        echo htmlspecialchars(
+                                            $bag['status']
+                                        );
+
+                                        ?>
+
+                                    </span>
+
+                                </td>
+
+
+                            </tr>
+
+
+                        <?php endforeach; ?>
+
+
+                    <?php else: ?>
+
 
                         <tr>
 
-                            <td>
-                                <?php
-                                echo htmlspecialchars(
-                                    $bag['tag']
-                                );
-                                ?>
-                            </td>
+                            <td
+                                colspan="4"
+                                style="text-align:center;">
 
-
-                            <td>
-                                <?php
-                                echo htmlspecialchars(
-                                    $bag['passenger']
-                                );
-                                ?>
-                            </td>
-
-
-                            <td>
-
-                                <strong>
-                                    <?php
-                                    echo htmlspecialchars(
-                                        $bag['flight']
-                                    );
-                                    ?>
-                                </strong>
-
-                            </td>
-
-
-                            <td>
-
-                                <span class="status
-                                    <?php
-                                    echo getBaggageStatusClass(
-                                        $bag['status']
-                                    );
-                                    ?>">
-
-                                    •
-
-                                    <?php
-                                    echo htmlspecialchars(
-                                        $bag['status']
-                                    );
-                                    ?>
-
-                                </span>
+                                No baggage data available.
 
                             </td>
 
                         </tr>
 
-                    <?php endforeach; ?>
+
+                    <?php endif; ?>
+
 
                 </tbody>
 
             </table>
+
 
         </div>
 
@@ -654,6 +1120,7 @@ function getBaggageStatusClass($status)
 
         <aside class="right">
 
+
             <h2>
                 Gate Status
             </h2>
@@ -663,17 +1130,56 @@ function getBaggageStatusClass($status)
 
             <div class="gates">
 
-                <?php foreach ($gates as $gate): ?>
 
-                    <div class="gate-box">
+                <?php
 
-                        <?php
-                        echo htmlspecialchars($gate);
-                        ?>
+                if (
+                    mysqli_num_rows(
+                        $gates_result
+                    ) > 0
+                ):
 
-                    </div>
+                ?>
 
-                <?php endforeach; ?>
+
+                    <?php
+
+                    while (
+                        $gate =
+                        mysqli_fetch_assoc(
+                            $gates_result
+                        )
+                    ):
+
+                    ?>
+
+
+                        <div class="gate-box">
+
+                            <?php
+
+                            echo htmlspecialchars(
+                                $gate['gate_number']
+                            );
+
+                            ?>
+
+                        </div>
+
+
+                    <?php endwhile; ?>
+
+
+                <?php else: ?>
+
+
+                    <p>
+                        No gates available.
+                    </p>
+
+
+                <?php endif; ?>
+
 
             </div>
 
@@ -682,8 +1188,9 @@ function getBaggageStatusClass($status)
 
             <div class="manage-gates">
 
-                <a href="gate_assignment.php"
-                   class="view-link">
+                <a
+                    href="gate_assignment.php"
+                    class="view-link">
 
                     Manage Gates →
 
@@ -697,14 +1204,19 @@ function getBaggageStatusClass($status)
             <div class="terminal-banner">
 
                 <span>
+
                     ✈ Terminal Overview
+
                 </span>
 
             </div>
 
+
         </aside>
 
+
     </section>
+
 
 </main>
 
@@ -713,8 +1225,12 @@ function getBaggageStatusClass($status)
      JAVASCRIPT
 ================================================== -->
 
-<script src="../assets/js/dashboard.js"></script>
+<script
+    src="../assets/js/dashboard.js">
+</script>
+
 
 </body>
+
 </html>
 
