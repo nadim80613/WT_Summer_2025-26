@@ -5,7 +5,7 @@ ini_set('display_errors', 1);
 
 session_start();
 
-//session_start();
+
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../login.php");
@@ -1576,7 +1576,7 @@ function getScheduleBadgeClass($status)
     </div>
 
 </div>
-```
+
 
 </main>
 
