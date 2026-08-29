@@ -1,6 +1,11 @@
 <?php
 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
+
+//session_start();
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../login.php");
@@ -8,6 +13,186 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 include "../config/database.php";
+
+/* Add New Flight */
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $flight_number = mysqli_real_escape_string(
+        $conn,
+        trim($_POST['flight_number'])
+    );
+
+    $airline = mysqli_real_escape_string(
+        $conn,
+        trim($_POST['airline'])
+    );
+
+    $departure = mysqli_real_escape_string(
+        $conn,
+        trim($_POST['departure'])
+    );
+
+    $destination = mysqli_real_escape_string(
+        $conn,
+        trim($_POST['destination'])
+    );
+
+    $departure_time = mysqli_real_escape_string(
+        $conn,
+        trim($_POST['departure_time'])
+    );
+
+    $arrival_time = mysqli_real_escape_string(
+        $conn,
+        trim($_POST['arrival_time'])
+    );
+
+    $aircraft = mysqli_real_escape_string(
+        $conn,
+        trim($_POST['aircraft'])
+    );
+
+    $gate_number = mysqli_real_escape_string(
+        $conn,
+        trim($_POST['gate_number'])
+    );
+
+
+    /* Find Existing Airplane */
+
+    $airplane_sql = "
+        SELECT id
+        FROM airplanes
+        WHERE airline_name = '$airline'
+        AND model = '$aircraft'
+        LIMIT 1
+    ";
+
+    $airplane_result =
+        mysqli_query($conn, $airplane_sql);
+
+
+    if ($airplane_row =
+        mysqli_fetch_assoc($airplane_result)) {
+
+        $airplane_id =
+            $airplane_row['id'];
+
+    } else {
+
+        /* Create New Airplane */
+
+        $registration_number =
+            'REG-' . rand(100, 999);
+
+        $airplane_insert = "
+            INSERT INTO airplanes
+            (
+                airline_name,
+                model,
+                registration_number,
+                capacity,
+                status
+            )
+
+            VALUES
+            (
+                '$airline',
+                '$aircraft',
+                '$registration_number',
+                200,
+                'Active'
+            )
+        ";
+
+        mysqli_query(
+            $conn,
+            $airplane_insert
+        );
+
+        $airplane_id =
+            mysqli_insert_id($conn);
+    }
+
+
+    /* Insert Flight */
+
+    $flight_insert = "
+        INSERT INTO flights
+        (
+            flight_number,
+            airplane_id,
+            departure,
+            destination,
+            departure_time,
+            arrival_time,
+            status
+        )
+
+        VALUES
+        (
+            '$flight_number',
+            '$airplane_id',
+            '$departure',
+            '$destination',
+            '$departure_time',
+            '$arrival_time',
+            'On Time'
+        )
+    ";
+
+
+    if (mysqli_query($conn, $flight_insert)) {
+
+        $flight_id =
+            mysqli_insert_id($conn);
+
+
+        /* Add Gate */
+
+        if (!empty($gate_number)) {
+
+            $gate_insert = "
+                INSERT INTO gates
+                (
+                    gate_number,
+                    flight_id,
+                    availability
+                )
+
+                VALUES
+                (
+                    '$gate_number',
+                    '$flight_id',
+                    'Occupied'
+                )
+            ";
+
+            mysqli_query(
+                $conn,
+                $gate_insert
+            );
+
+        }
+
+
+        /* Refresh Page */
+
+        header(
+            "Location: flight_schedule.php"
+        );
+
+        exit();
+
+    } else {
+
+        echo "Error: " .
+            mysqli_error($conn);
+
+    }
+
+}
 
 
 $user_id = $_SESSION['user_id'];
@@ -286,7 +471,7 @@ function getScheduleBadgeClass($status)
 
 <main class="main">
 
-```
+
 <!-- PAGE HEADER -->
 
 <div class="page-top-bar">
@@ -347,7 +532,7 @@ function getScheduleBadgeClass($status)
 
     <form
         method="POST"
-        action="add_flight.php">
+        action="">
 
 
         <div class="form-grid">
