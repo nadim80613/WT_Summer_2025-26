@@ -2,9 +2,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
-// Redirect to login if not authenticated or not a passenger
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Passenger') {
+if (!isset($_SESSION['user_id'])) {
     header("Location: ../login.php");
     exit();
 }
@@ -14,7 +12,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Passenger') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Passenger Portal - Airport Management System</title>
+    <title>Passenger Portal</title>
     <link rel="stylesheet" href="passenger.css">
 </head>
 <body>
@@ -25,9 +23,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Passenger') {
             <li><a href="search_flights.php">Search & Book Flights</a></li>
             <li><a href="my_bookings.php">My Bookings</a></li>
             <li><a href="boarding_pass.php">Boarding Pass</a></li>
-            <li><a href="baggage.php">Baggage Tracker</a></li>
-            <li><a href="lost_found.php">Lost & Found</a></li>
-            <li><a href="notifications.php">Notifications</a></li>
             <li><a href="../logout.php">Logout</a></li>
         </ul>
     </div>

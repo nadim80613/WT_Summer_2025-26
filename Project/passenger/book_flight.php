@@ -11,49 +11,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $flight_id = (int)$_POST['flight_id'];
 
     if (!empty($seat_number) && $flight_id > 0) {
-        $insert = "INSERT INTO bookings (user_id, flight_id, seat_number, payment_status) 
-                   VALUES ($user_id, $flight_id, '$seat_number', 'Paid')";
-        if ($conn->query($insert)) {
-            $new_booking_id = $conn->insert_id;
-            header("Location: boarding_pass.php?booking_id=$new_booking_id");
-            exit();
+        $check = $conn->query("SELECT id FROM bookings WHERE flight_id = $flight_id AND seat_number = '$seat_number'");
+        if ($check && $check->num_rows > 0) {
+            $message = "<div style='color: red; margin-bottom: 15px;'>Seat $seat_number is already booked!</div>";
         } else {
-            $message = "<div style='color: red; margin-bottom: 15px;'>Booking failed: " . $conn->error . "</div>";
+            $conn->query("INSERT INTO bookings (user_id, flight_id, seat_number, payment_status) VALUES ($user_id, $flight_id, '$seat_number', 'Paid')");
+            $new_id = $conn->insert_id;
+            header("Location: boarding_pass.php?booking_id=$new_id");
+            exit();
         }
-    } else {
-        $message = "<div style='color: red; margin-bottom: 15px;'>Please provide a valid seat number.</div>";
     }
 }
 
-$flight = null;
-if ($flight_id > 0) {
-    $flight_res = $conn->query("SELECT * FROM flights WHERE id = $flight_id");
-    if ($flight_res && $flight_res->num_rows > 0) {
-        $flight = $flight_res->fetch_assoc();
+$flight = $conn->query("SELECT * FROM flights WHERE id = $flight_id")->fetch_assoc();
+
+$booked_seats = [];
+$b_res = $conn->query("SELECT seat_number FROM bookings WHERE flight_id = $flight_id");
+if ($b_res) {
+    while ($r = $b_res->fetch_assoc()) {
+        $booked_seats[] = $r['seat_number'];
     }
 }
 ?>
 
-<h2>Book Flight Ticket</h2>
+<style>
+.seat-plan { background: #fff; padding: 20px; border-radius: 8px; max-width: 500px; margin-top: 15px; }
+.cabin { display: flex; flex-direction: column; gap: 8px; align-items: center; margin: 15px 0; }
+.seat-row { display: flex; gap: 6px; }
+.seat-btn { width: 38px; height: 38px; border: 1.5px solid #0284c7; background: #e0f2fe; color: #0284c7; font-weight: bold; border-radius: 4px; cursor: pointer; }
+.seat-btn.selected { background: #0284c7 !important; color: #fff !important; }
+.seat-btn.disabled { background: #fee2e2; border-color: #ef4444; color: #ef4444; cursor: not-allowed; }
+</style>
+
+<h2>Choose Your Seat - <?php echo htmlspecialchars($flight['flight_number'] ?? ''); ?></h2>
 <?php echo $message; ?>
 
-<?php if ($flight): ?>
-    <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 6px; margin-bottom: 20px; max-width: 500px;">
-        <p><strong>Flight:</strong> <?php echo htmlspecialchars($flight['flight_number']); ?></p>
-        <p><strong>Route:</strong> <?php echo htmlspecialchars($flight['departure']); ?> → <?php echo htmlspecialchars($flight['destination']); ?></p>
-        <p><strong>Departure Time:</strong> <?php echo htmlspecialchars($flight['departure_time']); ?></p>
+<div class="seat-plan">
+    <p>Route: <strong><?php echo htmlspecialchars($flight['departure'] ?? ''); ?> → <?php echo htmlspecialchars($flight['destination'] ?? ''); ?></strong></p>
+    
+    <div class="cabin">
+        <?php foreach ([1,2,3,4,5] as $r): ?>
+            <div class="seat-row">
+                <?php foreach (['A','B','C','D'] as $c): 
+                    $s = $r.$c;
+                    $is_booked = in_array($s, $booked_seats);
+                ?>
+                    <button type="button" class="seat-btn <?php echo $is_booked ? 'disabled' : ''; ?>" 
+                            <?php echo $is_booked ? 'disabled' : ''; ?>
+                            onclick="selectSeat('<?php echo $s; ?>', this)"><?php echo $s; ?></button>
+                <?php endforeach; ?>
+            </div>
+        <?php endforeach; ?>
     </div>
 
-    <form method="POST" action="book_flight.php" style="max-width: 500px;">
-        <input type="hidden" name="flight_id" value="<?php echo $flight['id']; ?>">
-        <div class="form-group">
-            <label>Select Seat Number (e.g. 14A, 12B)</label>
-            <input type="text" name="seat_number" required placeholder="14A">
-        </div>
-        <button type="submit" class="btn">Confirm & Pay</button>
+    <form method="POST" action="book_flight.php?flight_id=<?php echo $flight_id; ?>">
+        <input type="hidden" name="flight_id" value="<?php echo $flight_id; ?>">
+        <input type="text" id="seat_box" name="seat_number" readonly placeholder="Click a seat" required style="width: 100%; padding: 10px; margin-bottom: 12px; text-align: center; font-weight: bold;">
+        <button type="submit" class="btn" style="width: 100%;">Confirm & Book</button>
     </form>
-<?php else: ?>
-    <p>Flight not found. <a href="search_flights.php">Browse flights</a>.</p>
-<?php endif; ?>
+</div>
+
+<script>
+function selectSeat(code, el) {
+    document.querySelectorAll('.seat-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('seat_box').value = code;
+}
+</script>
 
 <?php include 'footer.php'; ?>
