@@ -3,7 +3,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-if (!isset($_SESSION['user_id'])) {
+// Redirect to login if not authenticated or not a passenger
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Passenger') {
     header("Location: ../login.php");
     exit();
 }
@@ -13,20 +14,27 @@ if (!isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Passenger Portal</title>
+    <title>Passenger Portal - Airport Management System</title>
     <link rel="stylesheet" href="passenger.css">
 </head>
 <body>
-    <nav class="passenger-nav">
-        <div class="logo">✈ Airport Passenger Portal</div>
-        <ul>
+    <div class="sidebar">
+        <div class="sidebar-brand">✈ Passenger Portal</div>
+        <ul class="nav-links">
             <li><a href="dashboard.php">Dashboard</a></li>
-            <li><a href="search_flights.php">Search Flights</a></li>
+            <li><a href="search_flights.php">Search & Book Flights</a></li>
             <li><a href="my_bookings.php">My Bookings</a></li>
-            <li><a href="baggage.php">Track Baggage</a></li>
+            <li><a href="boarding_pass.php">Boarding Pass</a></li>
+            <li><a href="baggage.php">Baggage Tracker</a></li>
             <li><a href="lost_found.php">Lost & Found</a></li>
             <li><a href="notifications.php">Notifications</a></li>
-            <li><a href="../logout.php" style="color: #f87171;">Logout</a></li>
+            <li><a href="../logout.php">Logout</a></li>
         </ul>
-    </nav>
-    <div class="passenger-container">
+    </div>
+    <div class="main-content">
+        <div class="topbar">
+            <h2>Airport Management System</h2>
+            <div class="user-badge">
+                Logged in as: <strong><?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Passenger'); ?></strong>
+            </div>
+        </div>

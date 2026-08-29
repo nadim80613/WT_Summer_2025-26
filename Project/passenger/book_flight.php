@@ -6,71 +6,54 @@ $flight_id = isset($_GET['flight_id']) ? (int)$_GET['flight_id'] : 0;
 $user_id = (int)$_SESSION['user_id'];
 $message = "";
 
-$flight_res = $conn->query("SELECT * FROM flights WHERE id = $flight_id");
-$flight = $flight_res ? $flight_res->fetch_assoc() : null;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $seat_number = $conn->real_escape_string(trim($_POST['seat_number']));
+    $flight_id = (int)$_POST['flight_id'];
 
-if (!$flight) {
-    echo "<p>Flight not found. <a href='search_flights.php'>Return to Flight Search</a></p>";
-    include 'footer.php';
-    exit();
+    if (!empty($seat_number) && $flight_id > 0) {
+        $insert = "INSERT INTO bookings (user_id, flight_id, seat_number, payment_status) 
+                   VALUES ($user_id, $flight_id, '$seat_number', 'Paid')";
+        if ($conn->query($insert)) {
+            $new_booking_id = $conn->insert_id;
+            header("Location: boarding_pass.php?booking_id=$new_booking_id");
+            exit();
+        } else {
+            $message = "<div style='color: red; margin-bottom: 15px;'>Booking failed: " . $conn->error . "</div>";
+        }
+    } else {
+        $message = "<div style='color: red; margin-bottom: 15px;'>Please provide a valid seat number.</div>";
+    }
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $seat_number = $conn->real_escape_string(strtoupper(trim($_POST['seat_number'])));
-
-    if (!preg_match("/^[0-9]{1,2}[A-F]$/", $seat_number)) {
-        $message = "<div class='alert alert-danger'>Invalid seat format! Use format like 12A, 4B, 22F.</div>";
-    } else {
-        $seat_check = $conn->query("SELECT id FROM bookings WHERE flight_id = $flight_id AND seat_number = '$seat_number'");
-        
-        if ($seat_check && $seat_check->num_rows > 0) {
-            $message = "<div class='alert alert-danger'>Seat $seat_number is already booked. Please choose another seat.</div>";
-        } else {
-            $insert_booking = "INSERT INTO bookings (user_id, flight_id, seat_number, payment_status) 
-                              VALUES ($user_id, $flight_id, '$seat_number', 'Paid')";
-            
-            if ($conn->query($insert_booking)) {
-                $booking_id = $conn->insert_id;
-
-                // Automatic baggage creation
-                $conn->query("INSERT INTO baggage (user_id, booking_id, baggage_status, location) 
-                              VALUES ($user_id, $booking_id, 'Checked-in', 'Check-in Desk')");
-
-                header("Location: boarding_pass.php?booking_id=$booking_id");
-                exit();
-            } else {
-                $message = "<div class='alert alert-danger'>Booking failed: " . $conn->error . "</div>";
-            }
-        }
+$flight = null;
+if ($flight_id > 0) {
+    $flight_res = $conn->query("SELECT * FROM flights WHERE id = $flight_id");
+    if ($flight_res && $flight_res->num_rows > 0) {
+        $flight = $flight_res->fetch_assoc();
     }
 }
 ?>
 
-<h2>Book Flight Ticket & Online Check-in</h2>
+<h2>Book Flight Ticket</h2>
 <?php echo $message; ?>
 
-<div style="background: #f8fafc; padding: 15px; border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #2563eb;">
-    <p><strong>Flight:</strong> <?php echo htmlspecialchars($flight['flight_number']); ?></p>
-    <p><strong>Route:</strong> <?php echo htmlspecialchars($flight['departure']); ?> → <?php echo htmlspecialchars($flight['destination']); ?></p>
-    <p><strong>Departure Time:</strong> <?php echo htmlspecialchars($flight['departure_time']); ?></p>
-</div>
-
-<form id="bookingForm" method="POST" action="">
-    <div class="form-grid">
-        <div class="form-group">
-            <label>Select Seat (Format: 12A, 4B, 18C)</label>
-            <input type="text" name="seat_number" id="seat_number" required placeholder="e.g. 12A">
-        </div>
-        <div class="form-group">
-            <label>Payment Method</label>
-            <select required>
-                <option value="card">Credit / Debit Card</option>
-                <option value="bkash">bKash</option>
-                <option value="nagad">Nagad</option>
-            </select>
-        </div>
+<?php if ($flight): ?>
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 6px; margin-bottom: 20px; max-width: 500px;">
+        <p><strong>Flight:</strong> <?php echo htmlspecialchars($flight['flight_number']); ?></p>
+        <p><strong>Route:</strong> <?php echo htmlspecialchars($flight['departure']); ?> → <?php echo htmlspecialchars($flight['destination']); ?></p>
+        <p><strong>Departure Time:</strong> <?php echo htmlspecialchars($flight['departure_time']); ?></p>
     </div>
-    <button type="submit" class="btn">Pay & Complete Online Check-in</button>
-</form>
+
+    <form method="POST" action="book_flight.php" style="max-width: 500px;">
+        <input type="hidden" name="flight_id" value="<?php echo $flight['id']; ?>">
+        <div class="form-group">
+            <label>Select Seat Number (e.g. 14A, 12B)</label>
+            <input type="text" name="seat_number" required placeholder="14A">
+        </div>
+        <button type="submit" class="btn">Confirm & Pay</button>
+    </form>
+<?php else: ?>
+    <p>Flight not found. <a href="search_flights.php">Browse flights</a>.</p>
+<?php endif; ?>
 
 <?php include 'footer.php'; ?>
