@@ -14,7 +14,7 @@ if (!isset($_SESSION['user_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Passenger Portal</title>
-    <link rel="stylesheet" href="../assets/css/passenger.css">
+    <link rel="stylesheet" href="passenger.css">
 </head>
 <body>
     <nav class="passenger-nav">
