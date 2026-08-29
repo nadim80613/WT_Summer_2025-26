@@ -463,5 +463,80 @@ if (cancelEditFormBtn) {
 
 }
 
+/* ==================================================
+   GATE & TERMINAL
+================================================== */
+
+function checkGate(gateNumber, status)
+{
+    if (status === "Maintenance") {
+
+        alert(
+            "Gate " + gateNumber +
+            " is currently under maintenance."
+        );
+
+        return;
+    }
+
+    alert(
+        "Gate " + gateNumber +
+        " is " + status + "."
+    );
+}
+
+
+/* ==================================================
+   ASSIGN FLIGHT TO GATE
+================================================== */
+
+function assignFlight(flightId, flightNumber)
+{
+    let gateNumber = prompt(
+        "Enter available gate for " +
+        flightNumber +
+        " (Example: G1, G2, G3)"
+    );
+
+    if (gateNumber === null || gateNumber.trim() === "") {
+        return;
+    }
+
+
+    let form = document.createElement("form");
+
+    form.method = "POST";
+
+    form.action = "gate_assignment.php";
+
+
+    let flightInput = document.createElement("input");
+
+    flightInput.type = "hidden";
+
+    flightInput.name = "flight_id";
+
+    flightInput.value = flightId;
+
+
+    let gateInput = document.createElement("input");
+
+    gateInput.type = "hidden";
+
+    gateInput.name = "gate_number";
+
+    gateInput.value = gateNumber;
+
+
+    form.appendChild(flightInput);
+
+    form.appendChild(gateInput);
+
+
+    document.body.appendChild(form);
+
+    form.submit();
+}
+
 });
 
