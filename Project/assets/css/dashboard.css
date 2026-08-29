@@ -1077,5 +1077,392 @@ body.light-mode #themeToggle:hover {
     color: #008f70;
 }
 
+/* ==================================================
+   FLIGHT SCHEDULE PAGE REFINEMENTS
+================================================== */
 
+.page-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.btn-primary {
+    background-color: #009fe3;
+    color: #ffffff;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background-color: #0284c7;
+}
+
+/* ==================================================
+   NEW FLIGHT SCHEDULE FORM CARD
+================================================== */
+.form-card {
+    background: #06111e;
+    border: 1px solid #132742;
+    border-radius: 20px;
+    padding: 26px;
+    margin-bottom: 25px;
+}
+
+.form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.form-header h3 {
+    font-size: 18px;
+    color: #ffffff;
+}
+
+.close-x {
+    color: #718096;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 12px;
+    font-weight: bold;
+    color: #718096;
+}
+
+.form-group input {
+    background: #03080f;
+    border: 1px solid #132742;
+    padding: 12px 14px;
+    border-radius: 10px;
+    color: #ffffff;
+    font-size: 14px;
+    outline: none;
+}
+
+.form-group input:focus {
+    border-color: #009fe3;
+}
+
+/* Operating Days Selector */
+.days-selector {
+    display: flex;
+    gap: 6px;
+}
+
+.day-pill {
+    flex: 1;
+    height: 42px;
+    background: #03080f;
+    border: 1px solid #132742;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: bold;
+    color: #009fe3;
+    cursor: pointer;
+    user-select: none;
+}
+
+.day-pill.active {
+    background: #063c35;
+    color: #00d99b;
+    border-color: #00d99b;
+}
+
+.form-actions {
+    margin-top: 22px;
+    display: flex;
+    gap: 12px;
+}
+
+.btn-save {
+    background: #009fe3;
+    color: #ffffff;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-cancel {
+    background: #112846;
+    color: #ffffff;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+/* ==================================================
+   FILTER PILLS
+================================================== */
+.filter-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.filter-pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    background: #061220;
+    border: 1px solid #132742;
+    color: #718096;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.filter-btn:hover {
+    color: #ffffff;
+}
+
+.filter-btn.active {
+    background: #009fe3;
+    color: #ffffff;
+    border-color: #009fe3;
+}
+
+.flight-count-text {
+    font-size: 13px;
+    color: #718096;
+}
+
+/* ==================================================
+   TABLE CONTENT FORMATTING
+================================================== */
+.schedule-table-card {
+    background: #050e1a;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid #102238;
+}
+
+.schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.schedule-table th {
+    background: #081628;
+    padding: 14px 18px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #718096;
+    border-bottom: 1px solid #102238;
+    text-align: left;
+}
+
+.schedule-table td {
+    padding: 16px 18px;
+    border-bottom: 1px solid #102238;
+    vertical-align: middle;
+}
+
+.schedule-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Stacked Flight Codes */
+.flight-code-box {
+    display: flex;
+    flex-direction: column;
+    color: #009fe3;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1.2;
+}
+
+/* Route Display */
+.route-block {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.route-iata {
+    font-weight: bold;
+    font-size: 15px;
+    color: #ffffff;
+}
+
+.route-symbol {
+    color: #718096;
+    font-size: 12px;
+}
+
+/* Schedule Time Box */
+.schedule-time-box {
+    display: flex;
+    flex-direction: column;
+    font-size: 13px;
+    color: #ffffff;
+    line-height: 1.3;
+}
+
+.airline-text, .days-text, .aircraft-text {
+    color: #91a0b7;
+    font-size: 14px;
+}
+
+.gate-bold-cyan {
+    color: #009fe3;
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.btn-edit-action {
+    background: transparent;
+    border: 1px solid #132742;
+    color: #009fe3;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.btn-edit-action:hover {
+    background: #112846;
+}
+
+/* ==================================================
+   STATUS BADGES
+================================================== */
+.status-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.clickable-badge {
+    cursor: pointer;
+    user-select: none;
+}
+
+.status-boarding { background: #072a3e; color: #00a6e8; border: 1px solid #00567e; }
+.status-delayed { background: #371c08; color: #ff9436; border: 1px solid #7c3b00; }
+.status-scheduled { background: #0c1827; color: #8292a4; border: 1px solid #19314e; }
+.status-departed { background: #052a21; color: #00d99b; border: 1px solid #006044; }
+.status-arrived { background: #052a21; color: #00d99b; border: 1px solid #006044; }
+.status-cancelled { background: #390d12; color: #ff5252; border: 1px solid #73131e; }
+
+/* Status Legend & Help */
+.status-legend-bar {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-size: 13px;
+    color: #718096;
+}
+
+.legend-pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.help-btn {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 36px;
+    height: 36px;
+    background: #112237;
+    border: 1px solid #1f395b;
+    border-radius: 50%;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* ==================================================
+   LIGHT MODE OVERRIDES
+================================================== */
+body.light-mode .form-card {
+    background: #ffffff;
+    border-color: #dce6f0;
+}
+
+body.light-mode .form-header h3,
+body.light-mode .route-iata,
+body.light-mode .schedule-time-box {
+    color: #17213a;
+}
+
+body.light-mode .form-group input,
+body.light-mode .day-pill {
+    background: #f8fafc;
+    border-color: #dce6f0;
+    color: #17213a;
+}
+
+body.light-mode .filter-btn {
+    background: #ffffff;
+    border-color: #dce6f0;
+    color: #718096;
+}
+
+body.light-mode .filter-btn.active {
+    background: #009fe3;
+    color: #ffffff;
+}
+
+body.light-mode .schedule-table-card {
+    background: #ffffff;
+    border-color: #dce6f0;
+}
+
+body.light-mode .schedule-table th {
+    background: #f1f5f9;
+    color: #718096;
+    border-color: #dce6f0;
+}
+
+body.light-mode .schedule-table td {
+    border-color: #e2e8f0;
+}
+
+body.light-mode .airline-text,
+body.light-mode .days-text,
+body.light-mode .aircraft-text {
+    color: #475569;
+}
 
