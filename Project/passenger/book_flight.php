@@ -6,7 +6,7 @@ $flight_id = isset($_GET['flight_id']) ? (int)$_GET['flight_id'] : 0;
 $user_id = (int)$_SESSION['user_id'];
 $message = "";
 
-// Handle Booking & Payment Submission
+// Handle Single Combined Booking Record for Multiple Seats
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $selected_seats_str = trim($_POST['selected_seats'] ?? '');
     $flight_id = (int)$_POST['flight_id'];
@@ -18,35 +18,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!empty($seats_array)) {
             $already_taken = [];
 
-            // Duplicate Seat Check
-            foreach ($seats_array as $st) {
-                $st_safe = $conn->real_escape_string($st);
-                $check = $conn->query("SELECT id FROM bookings WHERE flight_id = $flight_id AND seat_number = '$st_safe'");
-                if ($check && $check->num_rows > 0) {
-                    $already_taken[] = $st;
+            // Duplicate Seat Check against existing bookings
+            $existing_res = $conn->query("SELECT seat_number FROM bookings WHERE flight_id = $flight_id");
+            if ($existing_res) {
+                while ($r = $existing_res->fetch_assoc()) {
+                    $booked_in_db = array_map('trim', explode(',', $r['seat_number']));
+                    foreach ($seats_array as $st) {
+                        if (in_array($st, $booked_in_db)) {
+                            $already_taken[] = $st;
+                        }
+                    }
                 }
             }
 
             if (!empty($already_taken)) {
-                $taken_seats_str = implode(', ', $already_taken);
+                $taken_seats_str = implode(', ', array_unique($already_taken));
                 $message = "<div style='color: #dc2626; background: #fee2e2; padding: 12px; border-radius: 6px; margin-bottom: 15px;'>Seat(s) <strong>$taken_seats_str</strong> already booked! Please select other seats.</div>";
             } else {
-                $booked_count = 0;
-                foreach ($seats_array as $st) {
-                    $st_safe = $conn->real_escape_string($st);
-                    $ins = "INSERT INTO bookings (user_id, flight_id, seat_number, booking_date, payment_status) 
-                            VALUES ($user_id, $flight_id, '$st_safe', NOW(), 'Paid')";
-                    if ($conn->query($ins)) {
-                        $booked_count++;
-                    }
-                }
-
-                if ($booked_count > 0) {
-                    // Notification entry
+                // Insert 1 Single Booking Record with all selected seats
+                $clean_seats_str = $conn->real_escape_string(implode(', ', $seats_array));
+                $ins = "INSERT INTO bookings (user_id, flight_id, seat_number, booking_date, payment_status) 
+                        VALUES ($user_id, $flight_id, '$clean_seats_str', NOW(), 'Paid')";
+                
+                if ($conn->query($ins)) {
+                    $count_seats = count($seats_array);
                     $conn->query("INSERT INTO notifications (user_id, message, type, status, created_at) 
-                                 VALUES ($user_id, 'Payment Successful! Booked $booked_count seat(s): $selected_seats_str. Boarding pass opens 1 hr before departure.', 'Payment', 'Unread', NOW())");
+                                 VALUES ($user_id, 'Payment Successful! Ticket confirmed for $count_seats seat(s): $clean_seats_str.', 'Payment', 'Unread', NOW())");
 
-                    // Show success popup via JS
                     echo "<script>
                         window.onload = function() {
                             document.getElementById('successModal').style.display = 'flex';
@@ -70,7 +68,10 @@ if ($flight_id > 0) {
         $b_res = $conn->query("SELECT seat_number FROM bookings WHERE flight_id = $flight_id");
         if ($b_res) {
             while ($r = $b_res->fetch_assoc()) {
-                $booked_seats[] = $r['seat_number'];
+                $seats_split = explode(',', $r['seat_number']);
+                foreach ($seats_split as $s_item) {
+                    $booked_seats[] = trim($s_item);
+                }
             }
         }
     }
@@ -202,7 +203,6 @@ if ($flight_id > 0) {
 .input-grp input { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none; background: #f8fafc; }
 .input-grp input:focus { border-color: #0284c7; background: #fff; }
 
-/* Success Popup */
 .success-card-box {
     background: #ffffff;
     border-radius: 16px;
@@ -340,7 +340,7 @@ if ($flight_id > 0) {
 
     </div>
 
-    <!-- 1. PAYMENT MODAL POPUP -->
+    <!-- PAYMENT MODAL -->
     <div id="paymentModal" class="modal-overlay">
         <div class="payment-card-box">
             <div class="modal-header">
@@ -348,7 +348,6 @@ if ($flight_id > 0) {
                 <button type="button" class="close-btn" onclick="closePaymentModal()">&times;</button>
             </div>
 
-            <!-- Card UI Graphic -->
             <div class="card-ui-preview">
                 <div class="chip"></div>
                 <div class="card-num" id="card_preview_num">•••• •••• •••• ••••</div>
@@ -396,13 +395,13 @@ if ($flight_id > 0) {
         </div>
     </div>
 
-    <!-- 2. SUCCESS POPUP MODAL -->
+    <!-- SUCCESS POPUP MODAL -->
     <div id="successModal" class="modal-overlay">
         <div class="success-card-box">
             <div class="success-icon">✓</div>
             <h3 style="font-size: 20px; color: #0f172a; margin-bottom: 8px;">Payment Successful!</h3>
             <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">
-                Your flight ticket(s) have been confirmed. You can view your bookings or print your boarding pass (1 hr prior to departure).
+                Your flight ticket has been confirmed with your selected seats. You can view your bookings or print your boarding pass (1 hr prior to departure).
             </p>
             <a href="my_bookings.php" class="btn" style="width: 100%; display: block; padding: 12px; box-sizing: border-box; text-decoration: none;">
                 Go to My Bookings
@@ -434,7 +433,7 @@ if ($flight_id > 0) {
         const openPayBtn = document.getElementById('open_pay_btn');
         if (seatsArray.length > 0) {
             document.getElementById('display_seat').innerText = seatsArray.join(', ');
-            document.getElementById('display_count').innerText = seatsArray.length + ' Ticket(s)';
+            document.getElementById('display_count').innerText = seatsArray.length + ' Seat(s)';
             document.getElementById('display_price').innerText = '$' + totalPrice + '.00';
 
             openPayBtn.disabled = false;
@@ -460,7 +459,6 @@ if ($flight_id > 0) {
         document.getElementById('paymentModal').style.display = 'none';
     }
 
-    // Format Card Number (Spacing every 4 digits)
     function formatCardNumber(input) {
         let val = input.value.replace(/\D/g, '').substring(0, 16);
         let formatted = val.match(/.{1,4}/g)?.join(' ') || val;
@@ -468,16 +466,11 @@ if ($flight_id > 0) {
         document.getElementById('card_preview_num').innerText = formatted || '•••• •••• •••• ••••';
     }
 
-    // Live Format & Strict Month Restriction (01 - 12)
     function formatExp(input) {
         let val = input.value.replace(/\D/g, '').substring(0, 4);
-        
-        // Auto prefix 0 if first digit > 1 (e.g. typing 3 becomes 03)
         if (val.length === 1 && val > '1') {
             val = '0' + val;
         }
-        
-        // Month boundary validation (01 - 12)
         if (val.length >= 2) {
             let month = parseInt(val.substring(0, 2), 10);
             if (month > 12) {
@@ -487,12 +480,10 @@ if ($flight_id > 0) {
             }
             val = val.substring(0, 2) + '/' + val.substring(2);
         }
-        
         input.value = val;
         document.getElementById('card_preview_exp').innerText = val || 'MM/YY';
     }
 
-    // Payment Form Validation on Submit
     function validatePaymentForm() {
         const cardNum = document.getElementById('card_number').value.replace(/\s+/g, '');
         const expVal = document.getElementById('card_exp').value;
@@ -502,12 +493,10 @@ if ($flight_id > 0) {
             alert('Please enter a valid 16-digit card number.');
             return false;
         }
-
         if (expVal.length < 5) {
             alert('Please enter a complete expiry date (MM/YY).');
             return false;
         }
-
         const parts = expVal.split('/');
         const month = parseInt(parts[0], 10);
         const year = parseInt('20' + parts[1], 10);
@@ -516,8 +505,6 @@ if ($flight_id > 0) {
             alert('Invalid month! Expiry month must be between 01 and 12.');
             return false;
         }
-
-        // Check if card is expired
         const now = new Date();
         const currentYear = now.getFullYear();
         const currentMonth = now.getMonth() + 1;
@@ -526,12 +513,10 @@ if ($flight_id > 0) {
             alert('This card is expired! Please use a valid card.');
             return false;
         }
-
         if (cvv.length < 3) {
             alert('Please enter a 3-digit CVV.');
             return false;
         }
-
         return true;
     }
     </script>
