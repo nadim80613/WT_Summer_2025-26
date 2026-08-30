@@ -1,5 +1,8 @@
-
 document.addEventListener("DOMContentLoaded", function () {
+
+    /* =========================================================
+       THEME TOGGLE
+    ========================================================= */
 
     const themeToggle = document.getElementById("themeToggle");
     const themeIcon = document.getElementById("themeIcon");
@@ -28,7 +31,6 @@ document.addEventListener("DOMContentLoaded", function () {
             updateThemeButton();
 
         });
-
     }
 
 
@@ -49,9 +51,12 @@ document.addEventListener("DOMContentLoaded", function () {
             themeText.textContent = "Day Mode";
 
         }
-
     }
 
+
+    /* =========================================================
+       ADD SCHEDULE FORM
+    ========================================================= */
 
     const toggleFormBtn =
         document.getElementById("toggleFormBtn");
@@ -70,8 +75,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         toggleFormBtn.addEventListener("click", function () {
 
-            if (addScheduleCard.style.display === "none" ||
-                addScheduleCard.style.display === "") {
+            if (
+                addScheduleCard.style.display === "none" ||
+                addScheduleCard.style.display === ""
+            ) {
 
                 addScheduleCard.style.display = "block";
 
@@ -82,7 +89,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
         });
-
     }
 
 
@@ -93,7 +99,6 @@ document.addEventListener("DOMContentLoaded", function () {
             addScheduleCard.style.display = "none";
 
         });
-
     }
 
 
@@ -104,9 +109,12 @@ document.addEventListener("DOMContentLoaded", function () {
             addScheduleCard.style.display = "none";
 
         });
-
     }
 
+
+    /* =========================================================
+       FLIGHT FILTER
+    ========================================================= */
 
     const filterButtons =
         document.querySelectorAll(".filter-btn");
@@ -130,8 +138,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
             this.classList.add("active");
 
+
             const selectedStatus =
                 this.getAttribute("data-status");
+
 
             let count = 0;
 
@@ -171,6 +181,10 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 
+    /* =========================================================
+       DAY PILLS
+    ========================================================= */
+
     const dayPills =
         document.querySelectorAll(".day-pill");
 
@@ -186,51 +200,53 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 
+    /* =========================================================
+       FLIGHT STATUS
+    ========================================================= */
+
     const statusBadges =
         document.querySelectorAll(".clickable-badge");
 
 
     const statuses = [
 
-    {
-        name: "on time",
-        text: "On Time",
-        className: "status-scheduled"
-    },
+        {
+            name: "on time",
+            text: "On Time",
+            className: "status-scheduled"
+        },
 
-    {
-        name: "boarding",
-        text: "Boarding",
-        className: "status-boarding"
-    },
+        {
+            name: "boarding",
+            text: "Boarding",
+            className: "status-boarding"
+        },
 
-    {
-        name: "delayed",
-        text: "Delayed",
-        className: "status-delayed"
-    },
+        {
+            name: "delayed",
+            text: "Delayed",
+            className: "status-delayed"
+        },
 
-    {
-        name: "departed",
-        text: "Departed",
-        className: "status-departed"
-    },
+        {
+            name: "departed",
+            text: "Departed",
+            className: "status-departed"
+        },
 
-    {
-        name: "arrived",
-        text: "Arrived",
-        className: "status-arrived"
-    },
+        {
+            name: "arrived",
+            text: "Arrived",
+            className: "status-arrived"
+        },
 
-    {
-        name: "cancelled",
-        text: "Cancelled",
-        className: "status-cancelled"
-    }
+        {
+            name: "cancelled",
+            text: "Cancelled",
+            className: "status-cancelled"
+        }
 
-];
-
-
+    ];
 
 
     statusBadges.forEach(function (badge) {
@@ -298,250 +314,451 @@ document.addEventListener("DOMContentLoaded", function () {
 
     });
 
-    /* =========================================
-   EDIT FLIGHT
-   ========================================= */
 
-const editButtons =
-    document.querySelectorAll(".edit-flight-btn");
+    /* =========================================================
+       EDIT FLIGHT
+    ========================================================= */
 
-const editScheduleCard =
-    document.getElementById("editScheduleCard");
+    const editButtons =
+        document.querySelectorAll(".edit-flight-btn");
 
-const closeEditFormBtn =
-    document.getElementById("closeEditFormBtn");
+    const editScheduleCard =
+        document.getElementById("editScheduleCard");
 
-const cancelEditFormBtn =
-    document.getElementById("cancelEditFormBtn");
+    const closeEditFormBtn =
+        document.getElementById("closeEditFormBtn");
 
-
-editButtons.forEach(function (button) {
-
-    button.addEventListener("click", function () {
-
-        const row =
-            this.closest(".flight-row");
-
-        if (!row) {
-            return;
-        }
+    const cancelEditFormBtn =
+        document.getElementById("cancelEditFormBtn");
 
 
-        /* Get values from table */
+    editButtons.forEach(function (button) {
 
-        const flightNumber =
-            row.querySelector(".flight-no-link").textContent.trim();
+        button.addEventListener("click", function () {
 
-        const airline =
-            row.querySelector(".airline-text").textContent.trim();
-
-        const route =
-            row.querySelectorAll(".route-iata");
-
-        const departure =
-            route[0].textContent.trim();
-
-        const destination =
-            route[1].textContent.trim();
-
-        const times =
-            row.querySelectorAll(".schedule-time-box span");
-
-        const departureTime =
-            times[0].textContent.trim();
-
-        const arrivalTime =
-            times[1].textContent.trim();
-
-        const aircraft =
-            row.querySelector(".aircraft-text").textContent.trim();
-
-        const gate =
-            row.querySelector(".gate-bold-cyan").textContent.trim();
+            const row =
+                this.closest(".flight-row");
 
 
-        /* Put values into edit form */
-
-        document.getElementById(
-            "edit_flight_id"
-        ).value =
-            this.getAttribute("data-id");
+            if (!row) {
+                return;
+            }
 
 
-        document.getElementById(
-            "edit_flight_number"
-        ).value =
-            flightNumber;
+            const flightNumberElement =
+                row.querySelector(".flight-no-link");
+
+            const airlineElement =
+                row.querySelector(".airline-text");
+
+            const route =
+                row.querySelectorAll(".route-iata");
+
+            const times =
+                row.querySelectorAll(".schedule-time-box span");
+
+            const aircraftElement =
+                row.querySelector(".aircraft-text");
+
+            const gateElement =
+                row.querySelector(".gate-bold-cyan");
 
 
-        document.getElementById(
-            "edit_airline"
-        ).value =
-            airline;
+            if (
+                !flightNumberElement ||
+                !airlineElement ||
+                route.length < 2 ||
+                times.length < 2 ||
+                !aircraftElement ||
+                !gateElement
+            ) {
+                return;
+            }
 
 
-        document.getElementById(
-            "edit_departure"
-        ).value =
-            departure;
+            const flightNumber =
+                flightNumberElement.textContent.trim();
+
+            const airline =
+                airlineElement.textContent.trim();
+
+            const departure =
+                route[0].textContent.trim();
+
+            const destination =
+                route[1].textContent.trim();
+
+            const departureTime =
+                times[0].textContent.trim();
+
+            const arrivalTime =
+                times[1].textContent.trim();
+
+            const aircraft =
+                aircraftElement.textContent.trim();
+
+            const gate =
+                gateElement.textContent.trim();
 
 
-        document.getElementById(
-            "edit_destination"
-        ).value =
-            destination;
+            const editFlightId =
+                document.getElementById("edit_flight_id");
+
+            const editFlightNumber =
+                document.getElementById("edit_flight_number");
+
+            const editAirline =
+                document.getElementById("edit_airline");
+
+            const editDeparture =
+                document.getElementById("edit_departure");
+
+            const editDestination =
+                document.getElementById("edit_destination");
+
+            const editDepartureTime =
+                document.getElementById("edit_departure_time");
+
+            const editArrivalTime =
+                document.getElementById("edit_arrival_time");
+
+            const editAircraft =
+                document.getElementById("edit_aircraft");
+
+            const editGateNumber =
+                document.getElementById("edit_gate_number");
 
 
-        document.getElementById(
-            "edit_departure_time"
-        ).value =
-            departureTime;
+            if (editFlightId) {
+                editFlightId.value =
+                    this.getAttribute("data-id");
+            }
+
+            if (editFlightNumber) {
+                editFlightNumber.value =
+                    flightNumber;
+            }
+
+            if (editAirline) {
+                editAirline.value =
+                    airline;
+            }
+
+            if (editDeparture) {
+                editDeparture.value =
+                    departure;
+            }
+
+            if (editDestination) {
+                editDestination.value =
+                    destination;
+            }
+
+            if (editDepartureTime) {
+                editDepartureTime.value =
+                    departureTime;
+            }
+
+            if (editArrivalTime) {
+                editArrivalTime.value =
+                    arrivalTime;
+            }
+
+            if (editAircraft) {
+                editAircraft.value =
+                    aircraft;
+            }
+
+            if (editGateNumber) {
+                editGateNumber.value =
+                    gate === "TBD" ? "" : gate;
+            }
 
 
-        document.getElementById(
-            "edit_arrival_time"
-        ).value =
-            arrivalTime;
+            if (editScheduleCard) {
 
+                editScheduleCard.style.display =
+                    "block";
 
-        document.getElementById(
-            "edit_aircraft"
-        ).value =
-            aircraft;
+                editScheduleCard.scrollIntoView({
+                    behavior: "smooth"
+                });
 
+            }
 
-        document.getElementById(
-            "edit_gate_number"
-        ).value =
-            gate === "TBD" ? "" : gate;
-
-
-        /* Show edit form */
-
-        editScheduleCard.style.display =
-            "block";
-
-        editScheduleCard.scrollIntoView({
-            behavior: "smooth"
         });
 
     });
 
-});
+
+    /* =========================================================
+       CLOSE EDIT FLIGHT FORM
+    ========================================================= */
+
+    if (closeEditFormBtn) {
+
+        closeEditFormBtn.addEventListener(
+            "click",
+            function () {
+
+                if (editScheduleCard) {
+
+                    editScheduleCard.style.display =
+                        "none";
+
+                }
+
+            }
+        );
+
+    }
 
 
-/* Close Edit Form */
+    if (cancelEditFormBtn) {
 
-if (closeEditFormBtn) {
+        cancelEditFormBtn.addEventListener(
+            "click",
+            function () {
 
-    closeEditFormBtn.addEventListener(
-        "click",
+                if (editScheduleCard) {
+
+                    editScheduleCard.style.display =
+                        "none";
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       GATE & TERMINAL MODAL
+    ========================================================= */
+
+    /*
+     * IMPORTANT:
+     *
+     * Your PHP HTML uses:
+     *
+     * onclick="openGateModal(...)"
+     *
+     * Therefore these functions MUST be available
+     * globally.
+     *
+     * We attach them to window.
+     */
+
+
+    window.openGateModal =
+        function (
+            gateId,
+            gateNumber,
+            status,
+            terminal
+        ) {
+
+            const gateModal =
+                document.getElementById("gateModal");
+
+            const modalGateId =
+                document.getElementById("modalGateId");
+
+            const modalGateNumber =
+                document.getElementById("modalGateNumber");
+
+            const modalStatus =
+                document.getElementById("modalStatus");
+
+            const modalTerminal =
+                document.getElementById("modalTerminal");
+
+
+            if (!gateModal) {
+                console.error(
+                    "gateModal not found"
+                );
+                return;
+            }
+
+
+            if (modalGateId) {
+
+                modalGateId.value =
+                    gateId;
+
+            }
+
+
+            if (modalGateNumber) {
+
+                modalGateNumber.textContent =
+                    gateNumber;
+
+            }
+
+
+            if (modalStatus) {
+
+                modalStatus.value =
+                    status;
+
+            }
+
+
+            if (modalTerminal) {
+
+                modalTerminal.value =
+                    terminal;
+
+            }
+
+
+            gateModal.classList.add("show");
+
+        };
+
+
+    window.closeGateModal =
         function () {
 
-            editScheduleCard.style.display =
-                "none";
+            const gateModal =
+                document.getElementById("gateModal");
+
+
+            if (gateModal) {
+
+                gateModal.classList.remove(
+                    "show"
+                );
+
+            }
+
+        };
+
+
+    /* =========================================================
+       ASSIGN FLIGHT MODAL
+    ========================================================= */
+
+
+    window.openAssignFlightModal =
+        function (
+            flightId,
+            flightNumber
+        ) {
+
+            const assignFlightModal =
+                document.getElementById(
+                    "assignFlightModal"
+                );
+
+            const assignFlightId =
+                document.getElementById(
+                    "assignFlightId"
+                );
+
+            const assignFlightNumber =
+                document.getElementById(
+                    "assignFlightNumber"
+                );
+
+
+            if (!assignFlightModal) {
+
+                console.error(
+                    "assignFlightModal not found"
+                );
+
+                return;
+
+            }
+
+
+            if (assignFlightId) {
+
+                assignFlightId.value =
+                    flightId;
+
+            }
+
+
+            if (assignFlightNumber) {
+
+                assignFlightNumber.textContent =
+                    flightNumber;
+
+            }
+
+
+            assignFlightModal.classList.add(
+                "show"
+            );
+
+        };
+
+
+    window.closeAssignFlightModal =
+        function () {
+
+            const assignFlightModal =
+                document.getElementById(
+                    "assignFlightModal"
+                );
+
+
+            if (assignFlightModal) {
+
+                assignFlightModal.classList.remove(
+                    "show"
+                );
+
+            }
+
+        };
+
+
+    /* =========================================================
+       CLOSE MODALS BY CLICKING OUTSIDE
+    ========================================================= */
+
+    document.addEventListener(
+        "click",
+        function (event) {
+
+            const gateModal =
+                document.getElementById(
+                    "gateModal"
+                );
+
+            const assignModal =
+                document.getElementById(
+                    "assignFlightModal"
+                );
+
+
+            if (
+                gateModal &&
+                event.target === gateModal
+            ) {
+
+                window.closeGateModal();
+
+            }
+
+
+            if (
+                assignModal &&
+                event.target === assignModal
+            ) {
+
+                window.closeAssignFlightModal();
+
+            }
 
         }
     );
 
-}
-
-
-/* Cancel Edit */
-
-if (cancelEditFormBtn) {
-
-    cancelEditFormBtn.addEventListener(
-        "click",
-        function () {
-
-            editScheduleCard.style.display =
-                "none";
-
-        }
-    );
-
-}
-
-/* =========================================================
-   GATE & TERMINAL MODAL
-========================================================= */
-
-function openGateModal(gateId, gateNumber, status, terminal) {
-
-    document.getElementById("modalGateId").value = gateId;
-
-    document.getElementById("modalGateNumber").textContent =
-        gateNumber;
-
-    document.getElementById("modalStatus").value =
-        status;
-
-    document.getElementById("modalTerminal").value =
-        terminal;
-
-    document.getElementById("gateModal").classList.add("show");
-}
-
-
-function closeGateModal() {
-
-    document.getElementById("gateModal").classList.remove("show");
-}
-
-
-/* =========================================================
-   ASSIGN FLIGHT MODAL
-========================================================= */
-
-function openAssignFlightModal(flightId, flightNumber) {
-
-    document.getElementById("assignFlightId").value =
-        flightId;
-
-    document.getElementById("assignFlightNumber").textContent =
-        flightNumber;
-
-    document.getElementById("assignFlightModal").classList.add("show");
-}
-
-
-function closeAssignFlightModal() {
-
-    document
-        .getElementById("assignFlightModal")
-        .classList.remove("show");
-}
-
-
-/* =========================================================
-   CLOSE MODAL WHEN CLICKING OUTSIDE
-========================================================= */
-
-document.addEventListener("click", function (event) {
-
-    const gateModal =
-        document.getElementById("gateModal");
-
-    const assignModal =
-        document.getElementById("assignFlightModal");
-
-
-    if (
-        event.target === gateModal
-    ) {
-        closeGateModal();
-    }
-
-
-    if (
-        event.target === assignModal
-    ) {
-        closeAssignFlightModal();
-    }
 
 });
-
-
-});
-
