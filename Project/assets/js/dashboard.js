@@ -463,80 +463,85 @@ if (cancelEditFormBtn) {
 
 }
 
-/* ==================================================
-   GATE & TERMINAL
-================================================== */
+/* =========================================================
+   GATE & TERMINAL MODAL
+========================================================= */
 
-function checkGate(gateNumber, status)
-{
-    if (status === "Maintenance") {
+function openGateModal(gateId, gateNumber, status, terminal) {
 
-        alert(
-            "Gate " + gateNumber +
-            " is currently under maintenance."
-        );
+    document.getElementById("modalGateId").value = gateId;
 
-        return;
-    }
+    document.getElementById("modalGateNumber").textContent =
+        gateNumber;
 
-    alert(
-        "Gate " + gateNumber +
-        " is " + status + "."
-    );
+    document.getElementById("modalStatus").value =
+        status;
+
+    document.getElementById("modalTerminal").value =
+        terminal;
+
+    document.getElementById("gateModal").classList.add("show");
 }
 
 
-/* ==================================================
-   ASSIGN FLIGHT TO GATE
-================================================== */
+function closeGateModal() {
 
-function assignFlight(flightId, flightNumber)
-{
-    let gateNumber = prompt(
-        "Enter available gate for " +
-        flightNumber +
-        " (Example: G1, G2, G3)"
-    );
+    document.getElementById("gateModal").classList.remove("show");
+}
 
-    if (gateNumber === null || gateNumber.trim() === "") {
-        return;
+
+/* =========================================================
+   ASSIGN FLIGHT MODAL
+========================================================= */
+
+function openAssignFlightModal(flightId, flightNumber) {
+
+    document.getElementById("assignFlightId").value =
+        flightId;
+
+    document.getElementById("assignFlightNumber").textContent =
+        flightNumber;
+
+    document.getElementById("assignFlightModal").classList.add("show");
+}
+
+
+function closeAssignFlightModal() {
+
+    document
+        .getElementById("assignFlightModal")
+        .classList.remove("show");
+}
+
+
+/* =========================================================
+   CLOSE MODAL WHEN CLICKING OUTSIDE
+========================================================= */
+
+document.addEventListener("click", function (event) {
+
+    const gateModal =
+        document.getElementById("gateModal");
+
+    const assignModal =
+        document.getElementById("assignFlightModal");
+
+
+    if (
+        event.target === gateModal
+    ) {
+        closeGateModal();
     }
 
 
-    let form = document.createElement("form");
+    if (
+        event.target === assignModal
+    ) {
+        closeAssignFlightModal();
+    }
 
-    form.method = "POST";
+});
 
-    form.action = "gate_assignment.php";
-
-
-    let flightInput = document.createElement("input");
-
-    flightInput.type = "hidden";
-
-    flightInput.name = "flight_id";
-
-    flightInput.value = flightId;
-
-
-    let gateInput = document.createElement("input");
-
-    gateInput.type = "hidden";
-
-    gateInput.name = "gate_number";
-
-    gateInput.value = gateNumber;
-
-
-    form.appendChild(flightInput);
-
-    form.appendChild(gateInput);
-
-
-    document.body.appendChild(form);
-
-    form.submit();
-}
 
 });
 

@@ -1523,21 +1523,24 @@ body.light-mode .aircraft-text {
 }
 
 .page-header h1 {
-    font-size: 40px;
+    font-size: 38px;
     color: #17213a;
 }
 
 .page-header .sub {
     margin-top: 8px;
-    color: #718096;
 }
 
 
+/* ==================================================
+   STAT CARDS
+================================================== */
 
 .gate-stat-cards {
     display: grid;
 
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns:
+        repeat(4, 1fr);
 
     gap: 20px;
 
@@ -1551,56 +1554,39 @@ body.light-mode .aircraft-text {
 
     border-radius: 16px;
 
-    padding: 25px;
+    padding: 24px;
 
-    min-height: 125px;
-
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+    box-shadow:
+        0 4px 15px
+        rgba(0, 0, 0, 0.06);
 }
 
 .stat-card h4 {
-    margin: 0;
+    color: #718096;
 
     font-size: 14px;
 
-    color: #718096;
+    margin-bottom: 15px;
 }
 
 .stat-card h2 {
-    margin-top: 12px;
-
-    font-size: 38px;
+    font-size: 36px;
 }
 
-.stat-card.total h2 {
+.text-blue {
     color: #009fe3;
 }
 
-.stat-card.available h2 {
+.text-green {
     color: #16a34a;
 }
 
-.stat-card.occupied h2 {
-    color: #d97706;
-}
-
-.stat-card.maintenance h2 {
+.text-red {
     color: #dc2626;
 }
 
-
-/* ==================================================
-   GATE OPERATIONS
-================================================== */
-
-.gate-operations {
-    display: grid;
-
-    grid-template-columns: 2fr 1fr;
-
-    gap: 25px;
-
-    align-items: start;
+.text-amber {
+    color: #ea580c;
 }
 
 
@@ -1615,48 +1601,56 @@ body.light-mode .aircraft-text {
 
     border-radius: 20px;
 
-    padding: 25px;
+    padding: 28px;
 
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+    margin-bottom: 30px;
+
+    box-shadow:
+        0 4px 15px
+        rgba(0, 0, 0, 0.06);
 }
 
-.section-title {
+.section-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
     margin-bottom: 25px;
 }
 
-.section-title h2 {
-    font-size: 21px;
-
+.section-header h2 {
     color: #17213a;
 
-    margin: 0;
+    font-size: 22px;
 }
 
-.section-title p {
+.section-sub {
     margin-top: 5px;
 
-    font-size: 13px;
-
     color: #718096;
+
+    font-size: 13px;
 }
 
 
 /* TERMINAL */
 
 .terminal-group {
-    margin-bottom: 28px;
+    margin-bottom: 30px;
 }
 
-.terminal-group:last-child {
-    margin-bottom: 0;
+.terminal-group:last-of-type {
+    margin-bottom: 10px;
 }
 
 .terminal-group h3 {
-    font-size: 15px;
+    color: #17213a;
 
-    color: #526176;
+    font-size: 16px;
 
-    margin-bottom: 14px;
+    margin-bottom: 15px;
 }
 
 
@@ -1667,20 +1661,24 @@ body.light-mode .aircraft-text {
 
     flex-wrap: wrap;
 
-    gap: 12px;
+    gap: 15px;
 }
 
 
-/* GATE BOX */
+/* ==================================================
+   GATE ITEM
+================================================== */
 
-.gate-node {
-    width: 68px;
+.gate-item {
+    cursor: pointer;
+}
 
-    height: 58px;
+.gate-box {
+    width: 75px;
+
+    height: 60px;
 
     border-radius: 12px;
-
-    border: 2px solid;
 
     display: flex;
 
@@ -1692,13 +1690,17 @@ body.light-mode .aircraft-text {
 
     font-weight: bold;
 
-    cursor: pointer;
-
     transition: 0.2s ease;
+
+    border: 2px solid;
 }
 
-.gate-node:hover {
+.gate-box:hover {
     transform: translateY(-3px);
+
+    box-shadow:
+        0 6px 12px
+        rgba(0, 0, 0, 0.12);
 }
 
 
@@ -1716,22 +1718,22 @@ body.light-mode .aircraft-text {
 /* OCCUPIED */
 
 .gate-occupied {
-    background: #ffedd5;
+    background: #fee2e2;
 
-    color: #d97706;
+    color: #dc2626;
 
-    border-color: #d97706;
+    border-color: #dc2626;
 }
 
 
 /* MAINTENANCE */
 
 .gate-maintenance {
-    background: #fee2e2;
+    background: #ffedd5;
 
-    color: #dc2626;
+    color: #ea580c;
 
-    border-color: #dc2626;
+    border-color: #ea580c;
 }
 
 
@@ -1744,7 +1746,7 @@ body.light-mode .aircraft-text {
 
     flex-wrap: wrap;
 
-    gap: 20px;
+    gap: 25px;
 
     margin-top: 25px;
 
@@ -1752,7 +1754,7 @@ body.light-mode .aircraft-text {
 
     border-top: 1px solid #e2e8f0;
 
-    color: #718096;
+    color: #526176;
 
     font-size: 13px;
 }
@@ -1762,29 +1764,29 @@ body.light-mode .aircraft-text {
 
     align-items: center;
 
-    gap: 7px;
+    gap: 8px;
 }
 
-.legend-dot {
-    width: 11px;
+.legend-circle {
+    width: 13px;
 
-    height: 11px;
+    height: 13px;
 
     border-radius: 50%;
 
     display: inline-block;
 }
 
-.available-dot {
+.legend-circle.available {
     background: #16a34a;
 }
 
-.occupied-dot {
-    background: #d97706;
+.legend-circle.occupied {
+    background: #dc2626;
 }
 
-.maintenance-dot {
-    background: #dc2626;
+.legend-circle.maintenance {
+    background: #ea580c;
 }
 
 
@@ -1792,55 +1794,33 @@ body.light-mode .aircraft-text {
    UNASSIGNED FLIGHTS
 ================================================== */
 
-.unassigned-card {
+.unassigned-section {
     background: #ffffff;
 
     border: 1px solid #dce6f0;
 
     border-radius: 20px;
 
-    overflow: hidden;
+    padding: 28px;
 
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
-}
+    margin-bottom: 30px;
 
-.unassigned-header {
-    padding: 22px;
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-    border-bottom: 1px solid #e2e8f0;
-}
-
-.unassigned-header h2 {
-    font-size: 19px;
-
-    color: #17213a;
-}
-
-.unassigned-header p {
-    margin-top: 5px;
-
-    font-size: 12px;
-
-    color: #718096;
+    box-shadow:
+        0 4px 15px
+        rgba(0, 0, 0, 0.06);
 }
 
 .unassigned-count {
+    background: #fee2e2;
+
+    color: #dc2626;
+
     width: 32px;
 
     height: 32px;
 
     border-radius: 50%;
 
-    background: #fee2e2;
-
-    color: #dc2626;
-
     display: flex;
 
     align-items: center;
@@ -1848,275 +1828,238 @@ body.light-mode .aircraft-text {
     justify-content: center;
 
     font-weight: bold;
+}
+
+.unassigned-list {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 12px;
+}
+
+.unassigned-item {
+    border: 1px solid #e2e8f0;
+
+    border-radius: 14px;
+
+    padding: 18px;
+
+    background: #f8fafc;
+}
+
+.flight-info {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+}
+
+.flight-info strong {
+    font-size: 16px;
+
+    color: #009fe3;
+}
+
+.flight-info p {
+    margin-top: 4px;
+
+    color: #718096;
 
     font-size: 13px;
 }
 
+.flight-status {
+    font-size: 12px;
 
-/* FLIGHT ITEM */
+    font-weight: bold;
 
-.unassigned-item {
-    padding: 20px;
+    padding: 5px 10px;
 
-    border-bottom: 1px solid #e2e8f0;
+    border-radius: 15px;
 }
 
-.unassigned-item:last-child {
-    border-bottom: none;
+.flight-status.arriving {
+    background: #e0f2fe;
+
+    color: #0284c7;
 }
 
-.flight-top {
+.flight-status.departing {
+    background: #dcfce7;
+
+    color: #16a34a;
+}
+
+.flight-route {
     display: flex;
 
     justify-content: space-between;
 
-    align-items: center;
+    margin: 12px 0;
 
-    gap: 10px;
-}
-
-.flight-top strong {
-    color: #009fe3;
-
-    font-size: 16px;
-}
-
-.flight-top span {
-    font-size: 11px;
-
-    font-weight: bold;
-}
-
-.arriving {
-    color: #009fe3;
-}
-
-.departing {
-    color: #d97706;
-}
-
-.airline {
-    margin-top: 7px;
-
-    color: #526176;
-
-    font-size: 13px;
-}
-
-.route {
-    margin-top: 8px;
-
-    color: #718096;
-
-    font-size: 13px;
-}
-
-.route strong {
     color: #17213a;
+
+    font-size: 14px;
 }
 
+.flight-route span {
+    color: #718096;
+}
 
-/* ASSIGN BUTTON */
-
-.assign-button {
-    width: 100%;
-
-    margin-top: 15px;
-
-    padding: 10px;
-
+.btn-primary {
     background: #009fe3;
-
-    border: none;
-
-    border-radius: 9px;
 
     color: white;
 
-    font-size: 13px;
+    border: none;
+
+    padding: 9px 18px;
+
+    border-radius: 9px;
 
     font-weight: bold;
 
     cursor: pointer;
 }
 
-.assign-button:hover {
+.btn-primary:hover {
     background: #0284c7;
 }
 
+
+/* EMPTY */
+
 .empty-message {
-    padding: 30px 20px;
+    padding: 30px;
 
     text-align: center;
 
     color: #718096;
-
-    font-size: 13px;
 }
 
 
 /* ==================================================
-   TERMINAL TABS
+   GATE OVERVIEW
 ================================================== */
 
-.terminal-tabs {
-    display: flex;
-
-    gap: 8px;
-
-    margin-top: 30px;
-
-    margin-bottom: 18px;
-
-    flex-wrap: wrap;
-}
-
-.terminal-tab {
-    padding: 9px 18px;
-
-    border-radius: 20px;
-
-    border: 1px solid #dce6f0;
-
-    background: #ffffff;
-
-    color: #718096;
-
-    font-size: 13px;
-
-    font-weight: bold;
-
-    cursor: pointer;
-}
-
-.terminal-tab:hover {
-    color: #009fe3;
-}
-
-.terminal-tab.active {
-    background: #009fe3;
-
-    border-color: #009fe3;
-
-    color: #ffffff;
-}
-
-
-/* ==================================================
-   GATE TABLE
-================================================== */
-
-.gate-table-card {
+.gate-overview {
     background: #ffffff;
 
     border: 1px solid #dce6f0;
 
     border-radius: 20px;
 
-    overflow: hidden;
+    padding: 28px;
 
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+    margin-bottom: 30px;
+
+    box-shadow:
+        0 4px 15px
+        rgba(0, 0, 0, 0.06);
 }
 
-.gate-table {
+.table-container {
+    overflow-x: auto;
+}
+
+.gate-overview table {
     width: 100%;
 
     border-collapse: collapse;
 }
 
-.gate-table th {
+.gate-overview th {
     background: #f1f5f9;
 
     color: #526176;
 
-    font-size: 12px;
-
-    padding: 15px 18px;
+    padding: 15px;
 
     text-align: left;
 
-    border-bottom: 1px solid #dce6f0;
+    font-size: 12px;
 }
 
-.gate-table td {
-    padding: 16px 18px;
+.gate-overview td {
+    padding: 16px 15px;
 
-    color: #526176;
+    border-bottom: 1px solid #e2e8f0;
 
-    font-size: 13px;
+    color: #475569;
 
-    border-bottom: 1px solid #e5e7eb;
+    font-size: 14px;
 }
 
-.gate-table tr:last-child td {
+.gate-overview tr:last-child td {
     border-bottom: none;
 }
 
 .gate-code {
     color: #009fe3;
-
-    font-size: 15px;
-}
-
-.available-text {
-    color: #16a34a;
-
-    font-weight: bold;
-}
-
-.maintenance-text {
-    color: #dc2626;
-
-    font-weight: bold;
 }
 
 
-/* RELEASE BUTTON */
+/* TABLE STATUS */
 
-.release-button {
-    background: transparent;
-
-    border: 1px solid #dc2626;
-
-    color: #dc2626;
-
+.table-status {
     padding: 6px 12px;
 
-    border-radius: 7px;
+    border-radius: 15px;
 
     font-size: 12px;
 
-    cursor: pointer;
+    font-weight: bold;
 }
 
-.release-button:hover {
+.table-status.gate-available {
+    background: #dcfce7;
+
+    color: #16a34a;
+}
+
+.table-status.gate-occupied {
     background: #fee2e2;
+
+    color: #dc2626;
+}
+
+.table-status.gate-maintenance {
+    background: #ffedd5;
+
+    color: #ea580c;
 }
 
 
 /* ==================================================
-   MODALS
+   MODAL
 ================================================== */
 
-.modal-overlay {
+.modal-backdrop {
     display: none;
 
     position: fixed;
 
     inset: 0;
 
-    background: rgba(0, 0, 0, 0.55);
+    background:
+        rgba(0, 0, 0, 0.55);
 
     align-items: center;
 
     justify-content: center;
 
-    z-index: 9999;
+    z-index: 1000;
 
     padding: 20px;
 }
 
-.modal-box {
+.modal-backdrop.show {
+    display: flex;
+}
+
+.modal-card {
     width: 100%;
 
     max-width: 450px;
@@ -2127,23 +2070,33 @@ body.light-mode .aircraft-text {
 
     padding: 25px;
 
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    box-shadow:
+        0 20px 50px
+        rgba(0, 0, 0, 0.25);
 }
 
 .modal-header {
     display: flex;
 
+    align-items: flex-start;
+
     justify-content: space-between;
 
-    align-items: center;
-
-    margin-bottom: 18px;
+    margin-bottom: 25px;
 }
 
 .modal-header h2 {
     color: #17213a;
 
-    font-size: 20px;
+    font-size: 21px;
+}
+
+.modal-header p {
+    margin-top: 5px;
+
+    color: #718096;
+
+    font-size: 13px;
 }
 
 .modal-close {
@@ -2151,122 +2104,49 @@ body.light-mode .aircraft-text {
 
     background: transparent;
 
-    font-size: 27px;
-
     color: #718096;
+
+    font-size: 26px;
 
     cursor: pointer;
 }
 
-.modal-current-status {
-    color: #718096;
-
-    font-size: 14px;
+.modal-group {
+    margin-bottom: 18px;
 }
 
-.modal-current-status strong {
-    color: #17213a;
-}
-
-.occupied-message {
-    display: none;
-
-    margin-top: 18px;
-
-    padding: 14px;
-
-    background: #fff7ed;
-
-    border: 1px solid #fed7aa;
-
-    border-radius: 10px;
-
-    color: #9a3412;
-
-    font-size: 13px;
-
-    line-height: 1.5;
-}
-
-.status-buttons {
-    display: flex;
-
-    gap: 10px;
-
-    margin-top: 20px;
-}
-
-.status-buttons form {
-    flex: 1;
-}
-
-.status-change {
-    width: 100%;
-
-    padding: 11px;
-
-    border-radius: 9px;
-
-    font-weight: bold;
-
-    cursor: pointer;
-}
-
-.available-status {
-    background: #dcfce7;
-
-    color: #16a34a;
-
-    border: 1px solid #16a34a;
-}
-
-.maintenance-status {
-    background: #fee2e2;
-
-    color: #dc2626;
-
-    border: 1px solid #dc2626;
-}
-
-
-/* ASSIGN MODAL */
-
-.assign-flight-name {
-    color: #718096;
-
-    margin-bottom: 20px;
-}
-
-.assign-flight-name strong {
-    color: #009fe3;
-}
-
-.modal-box label {
+.modal-group label {
     display: block;
 
     margin-bottom: 7px;
 
+    color: #526176;
+
     font-size: 13px;
 
     font-weight: bold;
-
-    color: #526176;
 }
 
-.gate-select {
+.modal-group select {
     width: 100%;
 
     padding: 12px;
 
-    border: 1px solid #dce6f0;
-
     border-radius: 9px;
+
+    border: 1px solid #dce6f0;
 
     background: #f8fafc;
 
     color: #17213a;
 
     outline: none;
+
+    font-size: 14px;
+}
+
+.modal-group select:focus {
+    border-color: #009fe3;
 }
 
 .modal-actions {
@@ -2274,14 +2154,17 @@ body.light-mode .aircraft-text {
 
     gap: 10px;
 
-    margin-top: 22px;
+    margin-top: 25px;
 }
 
-.modal-save,
-.modal-cancel {
-    flex: 1;
+.btn-save {
+    background: #009fe3;
 
-    padding: 11px;
+    color: white;
+
+    border: none;
+
+    padding: 11px 20px;
 
     border-radius: 9px;
 
@@ -2290,182 +2173,119 @@ body.light-mode .aircraft-text {
     cursor: pointer;
 }
 
-.modal-save {
-    background: #009fe3;
-
-    color: white;
-
-    border: none;
+.btn-save:hover {
+    background: #0284c7;
 }
 
-.modal-cancel {
-    background: #f1f5f9;
+.btn-cancel {
+    background: #e2e8f0;
 
-    color: #526176;
+    color: #334155;
 
-    border: 1px solid #dce6f0;
+    border: none;
+
+    padding: 11px 20px;
+
+    border-radius: 9px;
+
+    cursor: pointer;
 }
 
 
 /* ==================================================
-   DARK / NIGHT MODE
+   DARK MODE
 ================================================== */
 
 body:not(.light-mode) {
-    background: #070b12;
+    background: #070707;
 
-    color: #e5e7eb;
+    color: #ffffff;
 }
-
-
-/* MAIN */
 
 body:not(.light-mode) .page-header h1 {
-    color: #f1f5f9;
+    color: #e6e7ea;
 }
 
-body:not(.light-mode) .page-header .sub {
-    color: #7d8aa1;
-}
+body:not(.light-mode) .stat-card,
+body:not(.light-mode) .terminal-map-card,
+body:not(.light-mode) .unassigned-section,
+body:not(.light-mode) .gate-overview {
+    background: #071a30;
 
-
-/* STAT CARDS */
-
-body:not(.light-mode) .stat-card {
-    background: #0d1726;
-
-    border-color: #172a43;
+    border-color: #18304d;
 
     box-shadow: none;
 }
 
 body:not(.light-mode) .stat-card h4 {
-    color: #8b9ab0;
+    color: #91a0b7;
 }
 
-
-/* MAP */
-
-body:not(.light-mode) .terminal-map-card,
-body:not(.light-mode) .unassigned-card,
-body:not(.light-mode) .gate-table-card {
-    background: #0d1726;
-
-    border-color: #172a43;
-
-    box-shadow: none;
-}
-
-body:not(.light-mode) .section-title h2,
-body:not(.light-mode) .unassigned-header h2 {
-    color: #f1f5f9;
-}
-
-body:not(.light-mode) .section-title p,
-body:not(.light-mode) .unassigned-header p {
-    color: #7d8aa1;
-}
-
+body:not(.light-mode) .section-header h2,
 body:not(.light-mode) .terminal-group h3 {
-    color: #a7b4c8;
+    color: #d7dbe4;
 }
 
-
-/* LEGEND */
+body:not(.light-mode) .section-sub {
+    color: #718096;
+}
 
 body:not(.light-mode) .gate-legend {
-    border-color: #172a43;
+    border-color: #18304d;
 
-    color: #8b9ab0;
-}
-
-
-/* UNASSIGNED */
-
-body:not(.light-mode) .unassigned-header {
-    border-color: #172a43;
+    color: #91a0b7;
 }
 
 body:not(.light-mode) .unassigned-item {
-    border-color: #172a43;
+    background: #061220;
+
+    border-color: #18304d;
 }
 
-body:not(.light-mode) .airline {
-    color: #8b9ab0;
+body:not(.light-mode) .flight-info p {
+    color: #91a0b7;
 }
 
-body:not(.light-mode) .route {
-    color: #7d8aa1;
-}
-
-body:not(.light-mode) .route strong {
-    color: #e5e7eb;
-}
-
-
-/* TABS */
-
-body:not(.light-mode) .terminal-tab {
-    background: #0d1726;
-
-    border-color: #172a43;
-
-    color: #8b9ab0;
-}
-
-
-/* TABLE */
-
-body:not(.light-mode) .gate-table th {
-    background: #111e31;
-
-    color: #8b9ab0;
-
-    border-color: #172a43;
-}
-
-body:not(.light-mode) .gate-table td {
-    color: #a7b4c8;
-
-    border-color: #172a43;
-}
-
-
-/* MODAL */
-
-body:not(.light-mode) .modal-box {
-    background: #0d1726;
-
-    border: 1px solid #203653;
-}
-
-body:not(.light-mode) .modal-header h2 {
-    color: #f1f5f9;
-}
-
-body:not(.light-mode) .modal-current-status,
-body:not(.light-mode) .assign-flight-name {
-    color: #8b9ab0;
-}
-
-body:not(.light-mode) .modal-current-status strong {
-    color: #f1f5f9;
-}
-
-body:not(.light-mode) .gate-select {
-    background: #08111e;
-
-    border-color: #203653;
-
+body:not(.light-mode) .flight-route {
     color: #ffffff;
 }
 
-body:not(.light-mode) .modal-cancel {
-    background: #172a43;
+body:not(.light-mode) .gate-overview th {
+    background: #112846;
 
-    border-color: #203653;
+    color: #91a0b7;
+}
 
-    color: #d5dce7;
+body:not(.light-mode) .gate-overview td {
+    color: #d8e2f0;
+
+    border-color: #18304d;
+}
+
+body:not(.light-mode) .modal-card {
+    background: #071a30;
+}
+
+body:not(.light-mode) .modal-header h2 {
+    color: #ffffff;
+}
+
+body:not(.light-mode) .modal-group label {
+    color: #91a0b7;
+}
+
+body:not(.light-mode) .modal-group select {
+    background: #03080f;
+
+    color: #ffffff;
+
+    border-color: #18304d;
+}
+
+body:not(.light-mode) .btn-cancel {
+    background: #112846;
+
+    color: #ffffff;
 }
 
 
@@ -2473,14 +2293,11 @@ body:not(.light-mode) .modal-cancel {
    RESPONSIVE
 ================================================== */
 
-@media (max-width: 1100px) {
+@media (max-width: 1000px) {
 
     .gate-stat-cards {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .gate-operations {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            repeat(2, 1fr);
     }
 
 }
@@ -2492,17 +2309,20 @@ body:not(.light-mode) .modal-cancel {
         grid-template-columns: 1fr;
     }
 
-    .gate-table-card {
-        overflow-x: auto;
+    .terminal-map-card,
+    .unassigned-section,
+    .gate-overview {
+        padding: 20px;
     }
 
-    .gate-table {
-        min-width: 850px;
+    .page-header h1 {
+        font-size: 30px;
     }
 
-    .status-buttons {
+    .flight-route {
         flex-direction: column;
+
+        gap: 5px;
     }
 
 }
-

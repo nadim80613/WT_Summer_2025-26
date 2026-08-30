@@ -1,5 +1,5 @@
-```php
 <?php
+
 session_start();
 
 if (!isset($_SESSION['user_id'])) {
@@ -9,13 +9,19 @@ if (!isset($_SESSION['user_id'])) {
 
 include "../config/database.php";
 
-/* ==================================================
+
+/* =========================================================
    STAFF INFORMATION
-================================================== */
+========================================================= */
 
 $user_id = $_SESSION['user_id'];
 
-$user_sql = "SELECT name, role FROM users WHERE id = '$user_id'";
+$user_sql = "
+    SELECT name, role
+    FROM users
+    WHERE id = '$user_id'
+";
+
 $user_result = mysqli_query($conn, $user_sql);
 $user_data = mysqli_fetch_assoc($user_result);
 
@@ -25,142 +31,169 @@ $staff_role = $user_data['role'] ?? $_SESSION['role'] ?? 'Staff';
 $staff_initials = strtoupper(substr($staff_name, 0, 2));
 
 
-/* ==================================================
-   ASSIGN / CHANGE GATE
-================================================== */
+/* =========================================================
+   CHANGE GATE STATUS / TERMINAL
+========================================================= */
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['assign_gate'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_gate'])) {
 
-    $flight_id = (int)$_POST['flight_id'];
-    $gate_number = mysqli_real_escape_string(
+    $gate_id = (int) $_POST['gate_id'];
+
+    $status = mysqli_real_escape_string(
         $conn,
-        trim($_POST['gate_number'])
+        $_POST['status']
     );
 
-    if ($flight_id > 0 && !empty($gate_number)) {
-
-        /* Check gate */
-        $gate_check_sql = "
-            SELECT availability
-            FROM gates
-            WHERE gate_number = '$gate_number'
-            LIMIT 1
-        ";
-
-        $gate_check_result = mysqli_query($conn, $gate_check_sql);
-        $gate_data = mysqli_fetch_assoc($gate_check_result);
-
-        if ($gate_data && $gate_data['availability'] === 'Available') {
-
-            /* Remove previous gate from this flight */
-            mysqli_query(
-                $conn,
-                "UPDATE gates
-                 SET flight_id = NULL,
-                     availability = 'Available'
-                 WHERE flight_id = '$flight_id'"
-            );
-
-            /* Assign new gate */
-            mysqli_query(
-                $conn,
-                "UPDATE gates
-                 SET flight_id = '$flight_id',
-                     availability = 'Occupied'
-                 WHERE gate_number = '$gate_number'"
-            );
-        }
-
-        header("Location: gate_assignment.php");
-        exit();
-    }
-}
-
-
-/* ==================================================
-   CHANGE GATE STATUS
-================================================== */
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_status'])) {
-
-    $gate_number = mysqli_real_escape_string(
+    $terminal = mysqli_real_escape_string(
         $conn,
-        trim($_POST['gate_number'])
+        $_POST['terminal']
     );
 
-    $new_status = mysqli_real_escape_string(
-        $conn,
-        trim($_POST['new_status'])
-    );
 
-    /* Only these statuses are allowed */
-    $allowed_statuses = ['Available', 'Maintenance'];
-
-    if (
-        !empty($gate_number) &&
-        in_array($new_status, $allowed_statuses)
-    ) {
+    if ($gate_id > 0) {
 
         /*
-         * Do not allow changing an occupied gate
-         * directly to maintenance/available.
+         * If the gate becomes Available
+         * or Maintenance, remove its flight.
+         *
+         * The removed flight will automatically
+         * appear in Unassigned Flights.
          */
-        $check_sql = "
-            SELECT flight_id
-            FROM gates
-            WHERE gate_number = '$gate_number'
-            LIMIT 1
-        ";
 
-        $check_result = mysqli_query($conn, $check_sql);
-        $check_data = mysqli_fetch_assoc($check_result);
+        if (
+            $status === 'Available' ||
+            $status === 'Maintenance'
+        ) {
 
-        if ($check_data && empty($check_data['flight_id'])) {
+            $update_sql = "
+                UPDATE gates
+                SET
+                    availability = '$status',
+                    terminal = '$terminal',
+                    flight_id = NULL
+                WHERE id = '$gate_id'
+            ";
 
-            mysqli_query(
-                $conn,
-                "UPDATE gates
-                 SET availability = '$new_status'
-                 WHERE gate_number = '$gate_number'"
-            );
+        } else {
+
+            /*
+             * If status is Occupied,
+             * keep the existing flight_id.
+             */
+
+            $update_sql = "
+                UPDATE gates
+                SET
+                    availability = '$status',
+                    terminal = '$terminal'
+                WHERE id = '$gate_id'
+            ";
         }
 
-        header("Location: gate_assignment.php");
-        exit();
+        mysqli_query($conn, $update_sql);
     }
-}
 
-
-/* ==================================================
-   RELEASE GATE / UNASSIGN FLIGHT
-================================================== */
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['release_gate'])) {
-
-    $gate_number = mysqli_real_escape_string(
-        $conn,
-        trim($_POST['gate_number'])
-    );
-
-    if (!empty($gate_number)) {
-
-        mysqli_query(
-            $conn,
-            "UPDATE gates
-             SET flight_id = NULL,
-                 availability = 'Available'
-             WHERE gate_number = '$gate_number'"
-        );
-    }
 
     header("Location: gate_assignment.php");
     exit();
 }
 
 
-/* ==================================================
+/* =========================================================
+   ASSIGN UNASSIGNED FLIGHT TO GATE
+========================================================= */
+
+if (
+    $_SERVER['REQUEST_METHOD'] === 'POST'
+    && isset($_POST['assign_flight'])
+) {
+
+    $flight_id = (int) $_POST['flight_id'];
+    $gate_id = (int) $_POST['gate_id'];
+
+
+    if (
+        $flight_id > 0 &&
+        $gate_id > 0
+    ) {
+
+        /*
+         * Check whether selected gate
+         * is actually available.
+         */
+
+        $check_gate_sql = "
+            SELECT id
+            FROM gates
+            WHERE id = '$gate_id'
+            AND availability = 'Available'
+            LIMIT 1
+        ";
+
+        $check_gate_result = mysqli_query(
+            $conn,
+            $check_gate_sql
+        );
+
+
+        if (
+            $check_gate_result &&
+            mysqli_num_rows($check_gate_result) > 0
+        ) {
+
+            /*
+             * Make sure this flight does not
+             * already have another gate.
+             */
+
+            $check_flight_sql = "
+                SELECT id
+                FROM gates
+                WHERE flight_id = '$flight_id'
+                LIMIT 1
+            ";
+
+            $check_flight_result = mysqli_query(
+                $conn,
+                $check_flight_sql
+            );
+
+
+            /*
+             * Only assign if the flight
+             * does not already have a gate.
+             */
+
+            if (
+                !$check_flight_result ||
+                mysqli_num_rows($check_flight_result) === 0
+            ) {
+
+                $assign_sql = "
+                    UPDATE gates
+                    SET
+                        flight_id = '$flight_id',
+                        availability = 'Occupied'
+                    WHERE id = '$gate_id'
+                ";
+
+                mysqli_query(
+                    $conn,
+                    $assign_sql
+                );
+            }
+        }
+    }
+
+
+    header("Location: gate_assignment.php");
+    exit();
+}
+
+
+/* =========================================================
    GATE STATISTICS
-================================================== */
+========================================================= */
 
 $stats_sql = "
     SELECT
@@ -170,58 +203,86 @@ $stats_sql = "
         SUM(
             CASE
                 WHEN availability = 'Available'
-                THEN 1 ELSE 0
+                THEN 1
+                ELSE 0
             END
         ) AS available_gates,
 
         SUM(
             CASE
                 WHEN availability = 'Occupied'
-                THEN 1 ELSE 0
+                THEN 1
+                ELSE 0
             END
         ) AS occupied_gates,
 
         SUM(
             CASE
                 WHEN availability = 'Maintenance'
-                THEN 1 ELSE 0
+                THEN 1
+                ELSE 0
             END
         ) AS maintenance_gates
 
     FROM gates
 ";
 
-$stats_result = mysqli_query($conn, $stats_sql);
-$stats = mysqli_fetch_assoc($stats_result);
+$stats_result = mysqli_query(
+    $conn,
+    $stats_sql
+);
+
+$stats = mysqli_fetch_assoc(
+    $stats_result
+);
+
 
 $total_gates = $stats['total_gates'] ?? 0;
-$available_gates = $stats['available_gates'] ?? 0;
-$occupied_gates = $stats['occupied_gates'] ?? 0;
-$maintenance_gates = $stats['maintenance_gates'] ?? 0;
+
+$available_gates =
+    $stats['available_gates'] ?? 0;
+
+$occupied_gates =
+    $stats['occupied_gates'] ?? 0;
+
+$maintenance_gates =
+    $stats['maintenance_gates'] ?? 0;
 
 
-/* ==================================================
+/* =========================================================
    GET ALL GATES
-================================================== */
+========================================================= */
 
 $gates_sql = "
+
     SELECT
 
         g.id,
+
         g.gate_number,
-        COALESCE(g.terminal, 'Terminal 1') AS terminal,
-        g.availability,
+
+        COALESCE(
+            g.terminal,
+            'Terminal 1'
+        ) AS terminal,
+
+        COALESCE(
+            g.availability,
+            'Available'
+        ) AS availability,
+
         g.flight_id,
 
         f.flight_number,
 
+        f.departure,
+
+        f.destination,
+
         COALESCE(
             a.airline_name,
-            'Airline'
+            ''
         ) AS airline,
-
-        f.departure,
-        f.destination,
 
         DATE_FORMAT(
             f.departure_time,
@@ -241,30 +302,39 @@ $gates_sql = "
         g.id ASC
 ";
 
-$gates_result = mysqli_query($conn, $gates_sql);
 
-$gates_by_terminal = [];
-$all_gates = [];
+$gates_result = mysqli_query(
+    $conn,
+    $gates_sql
+);
+
+
+$gates = [];
+
 
 if ($gates_result) {
 
-    while ($gate = mysqli_fetch_assoc($gates_result)) {
+    while (
+        $row = mysqli_fetch_assoc(
+            $gates_result
+        )
+    ) {
 
-        $gates_by_terminal[$gate['terminal']][] = $gate;
-
-        $all_gates[] = $gate;
+        $gates[] = $row;
     }
 }
 
 
-/* ==================================================
+/* =========================================================
    GET UNASSIGNED FLIGHTS
-================================================== */
+========================================================= */
 
 $unassigned_sql = "
+
     SELECT
 
         f.id,
+
         f.flight_number,
 
         COALESCE(
@@ -273,6 +343,7 @@ $unassigned_sql = "
         ) AS airline,
 
         f.departure,
+
         f.destination,
 
         DATE_FORMAT(
@@ -290,46 +361,107 @@ $unassigned_sql = "
     LEFT JOIN gates g
         ON f.id = g.flight_id
 
-    WHERE g.flight_id IS NULL
+    WHERE g.id IS NULL
 
-    ORDER BY f.departure_time ASC
+    ORDER BY
+        f.departure_time ASC
 ";
 
-$unassigned_result = mysqli_query($conn, $unassigned_sql);
+
+$unassigned_result = mysqli_query(
+    $conn,
+    $unassigned_sql
+);
+
 
 $unassigned_flights = [];
 
+
 if ($unassigned_result) {
 
-    while ($flight = mysqli_fetch_assoc($unassigned_result)) {
-        $unassigned_flights[] = $flight;
+    while (
+        $row = mysqli_fetch_assoc(
+            $unassigned_result
+        )
+    ) {
+
+        $unassigned_flights[] = $row;
     }
 }
 
-$unassigned_count = count($unassigned_flights);
+
+$unassigned_count =
+    count($unassigned_flights);
 
 
-/* ==================================================
-   HELPER FUNCTION
-================================================== */
+/* =========================================================
+   GET AVAILABLE GATES
+========================================================= */
 
-function getGateClass($availability)
-{
-    switch (strtolower($availability)) {
+$available_gate_sql = "
 
-        case 'occupied':
-            return 'gate-occupied';
+    SELECT
 
-        case 'maintenance':
-            return 'gate-maintenance';
+        id,
 
-        default:
-            return 'gate-available';
+        gate_number,
+
+        terminal
+
+    FROM gates
+
+    WHERE availability = 'Available'
+
+    ORDER BY
+        terminal ASC,
+        id ASC
+";
+
+
+$available_gate_result = mysqli_query(
+    $conn,
+    $available_gate_sql
+);
+
+
+$available_gate_list = [];
+
+
+if ($available_gate_result) {
+
+    while (
+        $row = mysqli_fetch_assoc(
+            $available_gate_result
+        )
+    ) {
+
+        $available_gate_list[] = $row;
     }
+}
+
+
+/* =========================================================
+   GATE STATUS CLASS
+========================================================= */
+
+function getGateClass($status)
+{
+
+    if ($status === 'Occupied') {
+        return 'gate-occupied';
+    }
+
+    if ($status === 'Maintenance') {
+        return 'gate-maintenance';
+    }
+
+    return 'gate-available';
 }
 
 ?>
+
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
@@ -341,7 +473,9 @@ function getGateClass($availability)
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Gate & Terminal - AeroPort</title>
+    <title>
+        Gate & Terminal - AeroPort
+    </title>
 
     <link
         rel="stylesheet"
@@ -350,18 +484,23 @@ function getGateClass($availability)
 
 </head>
 
+
 <body>
+
 
 <div class="app-layout">
 
 
-    <!-- ==================================================
+    <!-- =====================================================
          SIDEBAR
-    ================================================== -->
+    ====================================================== -->
 
     <aside class="sidebar">
 
         <div class="sidebar-top">
+
+
+            <!-- LOGO -->
 
             <div class="logo">
 
@@ -370,27 +509,44 @@ function getGateClass($availability)
                 </div>
 
                 <div>
-                    <h2>AeroPort</h2>
-                    <p>Management System</p>
+
+                    <h2>
+                        AeroPort
+                    </h2>
+
+                    <p>
+                        Management System
+                    </p>
+
                 </div>
 
             </div>
 
 
+            <!-- PROFILE -->
+
             <div class="profile">
 
                 <div class="avatar">
-                    <?= htmlspecialchars($staff_initials); ?>
+
+                    <?= htmlspecialchars(
+                        $staff_initials
+                    ); ?>
+
                 </div>
 
                 <div>
 
                     <h3>
-                        <?= htmlspecialchars($staff_name); ?>
+                        <?= htmlspecialchars(
+                            $staff_name
+                        ); ?>
                     </h3>
 
                     <span>
-                        <?= htmlspecialchars($staff_role); ?>
+                        <?= htmlspecialchars(
+                            $staff_role
+                        ); ?>
                     </span>
 
                 </div>
@@ -398,10 +554,14 @@ function getGateClass($availability)
             </div>
 
 
+            <!-- MENU TITLE -->
+
             <div class="title">
                 STAFF OPERATIONS
             </div>
 
+
+            <!-- MENU -->
 
             <nav>
 
@@ -412,6 +572,7 @@ function getGateClass($availability)
                     ▦ Dashboard
                 </a>
 
+
                 <a
                     href="flight_schedule.php"
                     class="menu"
@@ -419,12 +580,14 @@ function getGateClass($availability)
                     📅 Flight Schedules
                 </a>
 
+
                 <a
                     href="gate_assignment.php"
                     class="menu active"
                 >
                     🛫 Gate & Terminal
                 </a>
+
 
                 <a
                     href="baggage_status.php"
@@ -438,20 +601,35 @@ function getGateClass($availability)
         </div>
 
 
+        <!-- SIDEBAR BOTTOM -->
+
         <div class="sidebar-bottom">
 
-            <p id="themeToggle">
-                <span id="themeIcon">🌙</span>
-                <span id="themeText">Dark Mode</span>
+            <p
+                id="themeToggle"
+                class="theme-toggle"
+            >
+
+                <span id="themeIcon">
+                    🌙
+                </span>
+
+                <span id="themeText">
+                    Night Mode
+                </span>
+
             </p>
 
+
             <p>
+
                 <a
                     href="../logout.php"
                     class="sign-out"
                 >
                     ↪ Sign Out
                 </a>
+
             </p>
 
         </div>
@@ -460,82 +638,82 @@ function getGateClass($availability)
 
 
 
-    <!-- ==================================================
-         MAIN
-    ================================================== -->
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
 
     <main class="main">
 
 
         <!-- PAGE HEADER -->
 
-        <header class="page-header">
+        <div class="page-header">
 
             <h1>
                 Gate & Terminal Assignment
             </h1>
 
             <p class="sub">
-                Manage gates, assign flights, and track terminal availability
+                Manage gate status, terminals and flight assignments
             </p>
 
-        </header>
+        </div>
 
 
 
-        <!-- ==================================================
+        <!-- =====================================================
              STATISTICS
-        ================================================== -->
+        ====================================================== -->
 
         <section class="gate-stat-cards">
 
 
-            <div class="stat-card total">
+            <div class="stat-card">
 
                 <h4>
                     Total Gates
                 </h4>
 
-                <h2>
+                <h2 class="text-blue">
                     <?= $total_gates; ?>
                 </h2>
 
             </div>
 
 
-            <div class="stat-card available">
+            <div class="stat-card">
 
                 <h4>
                     Available
                 </h4>
 
-                <h2>
+                <h2 class="text-green">
                     <?= $available_gates; ?>
                 </h2>
 
             </div>
 
 
-            <div class="stat-card occupied">
+            <div class="stat-card">
 
                 <h4>
                     Occupied
                 </h4>
 
-                <h2>
+                <h2 class="text-red">
                     <?= $occupied_gates; ?>
                 </h2>
 
             </div>
 
 
-            <div class="stat-card maintenance">
+            <div class="stat-card">
 
                 <h4>
                     Maintenance
                 </h4>
 
-                <h2>
+                <h2 class="text-amber">
                     <?= $maintenance_gates; ?>
                 </h2>
 
@@ -546,446 +724,593 @@ function getGateClass($availability)
 
 
 
-        <!-- ==================================================
-             GATE MAP + UNASSIGNED FLIGHTS
-        ================================================== -->
+        <!-- =====================================================
+             TERMINAL GATE MAP
+        ====================================================== -->
 
-        <section class="gate-operations">
-
-
-            <!-- GATE MAP -->
-
-            <div class="terminal-map-card">
-
-                <div class="section-title">
-
-                    <div>
-                        <h2>Terminal Gate Map</h2>
-
-                        <p>
-                            Click a gate to manage its status
-                        </p>
-                    </div>
-
-                </div>
+        <section class="terminal-map-card">
 
 
-                <?php
+            <div class="section-header">
 
-                $terminals = [
-                    'Terminal 1',
-                    'Terminal 2',
-                    'Terminal 3'
-                ];
+                <div>
 
-                foreach ($terminals as $terminal):
+                    <h2>
+                        Terminal Gate Map
+                    </h2>
 
-                    $terminal_gates =
-                        $gates_by_terminal[$terminal] ?? [];
-
-                ?>
-
-                <div
-                    class="terminal-group"
-                    data-terminal="<?= htmlspecialchars($terminal); ?>"
-                >
-
-                    <h3>
-                        <?= htmlspecialchars($terminal); ?>
-                    </h3>
-
-
-                    <div class="terminal-grid">
-
-                        <?php foreach ($terminal_gates as $gate): ?>
-
-                            <button
-                                type="button"
-                                class="gate-node <?= getGateClass($gate['availability']); ?>"
-                                onclick="openGateModal(
-                                    '<?= htmlspecialchars($gate['gate_number'], ENT_QUOTES); ?>',
-                                    '<?= htmlspecialchars($gate['availability'], ENT_QUOTES); ?>',
-                                    '<?= htmlspecialchars($gate['flight_number'] ?? '', ENT_QUOTES); ?>'
-                                )"
-                            >
-
-                                <?= htmlspecialchars($gate['gate_number']); ?>
-
-                            </button>
-
-                        <?php endforeach; ?>
-
-                    </div>
-
-                </div>
-
-                <?php endforeach; ?>
-
-
-                <!-- LEGEND -->
-
-                <div class="gate-legend">
-
-                    <div class="legend-item">
-                        <span class="legend-dot available-dot"></span>
-                        Available
-                    </div>
-
-                    <div class="legend-item">
-                        <span class="legend-dot occupied-dot"></span>
-                        Occupied
-                    </div>
-
-                    <div class="legend-item">
-                        <span class="legend-dot maintenance-dot"></span>
-                        Maintenance
-                    </div>
+                    <p class="section-sub">
+                        Click a gate to change its status or terminal
+                    </p>
 
                 </div>
 
             </div>
 
 
+            <?php
 
-            <!-- UNASSIGNED FLIGHTS -->
+            $terminals = [
+                'Terminal 1',
+                'Terminal 2',
+                'Terminal 3'
+            ];
 
-            <aside class="unassigned-card">
+            foreach (
+                $terminals
+                as $terminal
+            ):
 
-                <div class="unassigned-header">
+            ?>
 
-                    <div>
-                        <h2>
-                            Unassigned Flights
-                        </h2>
-
-                        <p>
-                            Flights waiting for a gate
-                        </p>
-                    </div>
-
-                    <span class="unassigned-count">
-                        <?= $unassigned_count; ?>
-                    </span>
-
-                </div>
+            <div class="terminal-group">
 
 
-                <div class="unassigned-list">
-
-                    <?php if ($unassigned_count > 0): ?>
-
-                        <?php foreach ($unassigned_flights as $flight): ?>
-
-                            <div class="unassigned-item">
-
-                                <div class="flight-top">
-
-                                    <strong>
-                                        <?= htmlspecialchars(
-                                            $flight['flight_number']
-                                        ); ?>
-                                    </strong>
-
-                                    <span
-                                        class="<?= strtolower($flight['status']) === 'departing'
-                                            ? 'departing'
-                                            : 'arriving'; ?>"
-                                    >
-                                        •
-                                        <?= htmlspecialchars(
-                                            $flight['status']
-                                        ); ?>
-                                    </span>
-
-                                </div>
+                <h3>
+                    <?= htmlspecialchars(
+                        $terminal
+                    ); ?>
+                </h3>
 
 
-                                <p class="airline">
-                                    <?= htmlspecialchars(
-                                        $flight['airline']
-                                    ); ?>
-                                </p>
+                <div class="terminal-grid">
 
 
-                                <p class="route">
-
-                                    <strong>
-                                        <?= htmlspecialchars(
-                                            $flight['departure']
-                                        ); ?>
-
-                                        →
-
-                                        <?= htmlspecialchars(
-                                            $flight['destination']
-                                        ); ?>
-                                    </strong>
-
-                                    ·
-
-                                    <?= htmlspecialchars(
-                                        $flight['flight_time']
-                                    ); ?>
-
-                                </p>
+                    <?php foreach (
+                        $gates
+                        as $gate
+                    ): ?>
 
 
-                                <button
-                                    type="button"
-                                    class="assign-button"
-                                    onclick="openAssignFlight(
-                                        '<?= $flight['id']; ?>',
-                                        '<?= htmlspecialchars(
-                                            $flight['flight_number'],
-                                            ENT_QUOTES
-                                        ); ?>'
-                                    )"
-                                >
-                                    + Assign Gate
-                                </button>
+                        <?php
+
+                        if (
+                            $gate['terminal']
+                            !==
+                            $terminal
+                        ) {
+
+                            continue;
+                        }
+
+
+                        $gate_class =
+                            getGateClass(
+                                $gate['availability']
+                            );
+
+                        ?>
+
+
+                        <div
+                            class="gate-item"
+                            onclick='openGateModal(
+                                <?= (int)$gate["id"]; ?>,
+                                <?= json_encode($gate["gate_number"]); ?>,
+                                <?= json_encode($gate["availability"]); ?>,
+                                <?= json_encode($gate["terminal"]); ?>
+                            )'
+                        >
+
+                            <div
+                                class="gate-box
+                                <?= $gate_class; ?>"
+                            >
+
+                                <?= htmlspecialchars(
+                                    $gate['gate_number']
+                                ); ?>
 
                             </div>
 
-                        <?php endforeach; ?>
-
-                    <?php else: ?>
-
-                        <div class="empty-message">
-                            All flights have been assigned.
                         </div>
 
-                    <?php endif; ?>
+
+                    <?php endforeach; ?>
+
 
                 </div>
 
-            </aside>
+            </div>
+
+
+            <?php endforeach; ?>
+
+
+
+            <!-- LEGEND -->
+
+            <div class="gate-legend">
+
+
+                <div class="legend-item">
+
+                    <span
+                        class="legend-circle available"
+                    ></span>
+
+                    Available
+
+                </div>
+
+
+                <div class="legend-item">
+
+                    <span
+                        class="legend-circle occupied"
+                    ></span>
+
+                    Occupied
+
+                </div>
+
+
+                <div class="legend-item">
+
+                    <span
+                        class="legend-circle maintenance"
+                    ></span>
+
+                    Maintenance
+
+                </div>
+
+
+            </div>
+
 
         </section>
 
 
 
-        <!-- ==================================================
-             TERMINAL FILTER
-        ================================================== -->
+        <!-- =====================================================
+             UNASSIGNED FLIGHTS
+        ====================================================== -->
 
-        <div class="terminal-tabs">
+        <section class="unassigned-section">
 
-            <button
-                class="terminal-tab active"
-                data-terminal="all"
-            >
-                All Terminals
-            </button>
 
-            <button
-                class="terminal-tab"
-                data-terminal="Terminal 1"
-            >
-                Terminal 1
-            </button>
+            <div class="section-header">
 
-            <button
-                class="terminal-tab"
-                data-terminal="Terminal 2"
-            >
-                Terminal 2
-            </button>
+                <div>
 
-            <button
-                class="terminal-tab"
-                data-terminal="Terminal 3"
-            >
-                Terminal 3
-            </button>
+                    <h2>
+                        Unassigned Flights
+                    </h2>
 
-        </div>
+                    <p class="section-sub">
+                        Flights that do not currently have a gate
+                    </p>
+
+                </div>
+
+
+                <span class="unassigned-count">
+
+                    <?= $unassigned_count; ?>
+
+                </span>
+
+            </div>
 
 
 
-        <!-- ==================================================
-             GATE TABLE
-        ================================================== -->
-
-        <div class="gate-table-card">
-
-            <table class="gate-table">
-
-                <thead>
-
-                    <tr>
-
-                        <th>GATE</th>
-                        <th>TERMINAL</th>
-                        <th>FLIGHT</th>
-                        <th>AIRLINE</th>
-                        <th>ROUTE</th>
-                        <th>DEP</th>
-                        <th>ACTION</th>
-
-                    </tr>
-
-                </thead>
+            <div class="unassigned-list">
 
 
-                <tbody>
-
-                <?php foreach ($all_gates as $gate): ?>
-
-                    <tr
-                        class="gate-row"
-                        data-terminal="<?= htmlspecialchars(
-                            $gate['terminal']
-                        ); ?>"
-                    >
-
-                        <td>
-
-                            <strong class="gate-code">
-                                <?= htmlspecialchars(
-                                    $gate['gate_number']
-                                ); ?>
-                            </strong>
-
-                        </td>
+                <?php if (
+                    $unassigned_count === 0
+                ): ?>
 
 
-                        <td>
-                            <?= htmlspecialchars(
-                                $gate['terminal']
-                            ); ?>
-                        </td>
+                    <div class="empty-message">
+
+                        No unassigned flights.
+
+                    </div>
 
 
-                        <td>
-
-                            <?php if (!empty($gate['flight_number'])): ?>
-
-                                <strong>
-                                    <?= htmlspecialchars(
-                                        $gate['flight_number']
-                                    ); ?>
-                                </strong>
-
-                            <?php else: ?>
-
-                                —
-
-                            <?php endif; ?>
-
-                        </td>
+                <?php else: ?>
 
 
-                        <td>
-
-                            <?php
-
-                            if (
-                                !empty($gate['flight_number']) &&
-                                !empty($gate['airline'])
-                            ) {
-                                echo htmlspecialchars(
-                                    $gate['airline']
-                                );
-                            } else {
-                                echo '—';
-                            }
-
-                            ?>
-
-                        </td>
+                    <?php foreach (
+                        $unassigned_flights
+                        as $flight
+                    ): ?>
 
 
-                        <td>
-
-                            <?php if (
-                                !empty($gate['departure']) &&
-                                !empty($gate['destination'])
-                            ): ?>
-
-                                <?= htmlspecialchars(
-                                    $gate['departure']
-                                ); ?>
-
-                                →
-
-                                <?= htmlspecialchars(
-                                    $gate['destination']
-                                ); ?>
-
-                            <?php else: ?>
-
-                                —
-
-                            <?php endif; ?>
-
-                        </td>
+                        <div
+                            class="unassigned-item"
+                        >
 
 
-                        <td>
-
-                            <?= !empty($gate['dep_time'])
-                                ? htmlspecialchars($gate['dep_time'])
-                                : '—'; ?>
-
-                        </td>
+                            <div class="flight-info">
 
 
-                        <td>
+                                <div>
 
-                            <?php if (!empty($gate['flight_id'])): ?>
+                                    <strong>
 
-                                <form
-                                    method="POST"
-                                    onsubmit="return confirm(
-                                        'Release this flight from the gate?'
-                                    );"
+                                        <?= htmlspecialchars(
+                                            $flight[
+                                                'flight_number'
+                                            ]
+                                        ); ?>
+
+                                    </strong>
+
+
+                                    <p>
+
+                                        <?= htmlspecialchars(
+                                            $flight[
+                                                'airline'
+                                            ]
+                                        ); ?>
+
+                                    </p>
+
+                                </div>
+
+
+                                <span
+                                    class="flight-status"
                                 >
 
-                                    <input
-                                        type="hidden"
-                                        name="gate_number"
-                                        value="<?= htmlspecialchars(
-                                            $gate['gate_number']
-                                        ); ?>"
-                                    >
+                                    <?= htmlspecialchars(
+                                        $flight[
+                                            'status'
+                                        ]
+                                    ); ?>
 
-                                    <button
-                                        type="submit"
-                                        name="release_gate"
-                                        class="release-button"
-                                    >
-                                        Release
-                                    </button>
-
-                                </form>
-
-                            <?php elseif (
-                                $gate['availability'] === 'Maintenance'
-                            ): ?>
-
-                                <span class="maintenance-text">
-                                    Maintenance
                                 </span>
 
-                            <?php else: ?>
 
-                                <span class="available-text">
-                                    Available
+                            </div>
+
+
+                            <div
+                                class="flight-route"
+                            >
+
+                                <strong>
+
+                                    <?= htmlspecialchars(
+                                        $flight[
+                                            'departure'
+                                        ]
+                                    ); ?>
+
+                                    →
+
+                                    <?= htmlspecialchars(
+                                        $flight[
+                                            'destination'
+                                        ]
+                                    ); ?>
+
+                                </strong>
+
+
+                                <span>
+
+                                    <?= htmlspecialchars(
+                                        $flight[
+                                            'flight_time'
+                                        ]
+                                    ); ?>
+
                                 </span>
 
-                            <?php endif; ?>
+                            </div>
 
-                        </td>
 
-                    </tr>
+                            <button
+                                type="button"
+                                class="btn-primary"
+                                onclick='openAssignFlightModal(
+                                    <?= (int)$flight["id"]; ?>,
+                                    <?= json_encode($flight["flight_number"]); ?>
+                                )'
+                            >
 
-                <?php endforeach; ?>
+                                + Assign Gate
 
-                </tbody>
+                            </button>
 
-            </table>
 
-        </div>
+                        </div>
+
+
+                    <?php endforeach; ?>
+
+
+                <?php endif; ?>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =====================================================
+             GATE OVERVIEW
+        ====================================================== -->
+
+        <section class="gate-overview">
+
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2>
+                        Gate Overview
+                    </h2>
+
+                    <p class="section-sub">
+                        Current gate and terminal information
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="table-container">
+
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                GATE
+                            </th>
+
+                            <th>
+                                TERMINAL
+                            </th>
+
+                            <th>
+                                STATUS
+                            </th>
+
+                            <th>
+                                FLIGHT
+                            </th>
+
+                            <th>
+                                AIRLINE
+                            </th>
+
+                            <th>
+                                ROUTE
+                            </th>
+
+                            <th>
+                                DEP
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+
+                    <?php foreach (
+                        $gates
+                        as $gate
+                    ): ?>
+
+
+                        <tr>
+
+
+                            <td>
+
+                                <strong class="gate-code">
+
+                                    <?= htmlspecialchars(
+                                        $gate[
+                                            'gate_number'
+                                        ]
+                                    ); ?>
+
+                                </strong>
+
+                            </td>
+
+
+                            <td>
+
+                                <?= htmlspecialchars(
+                                    $gate[
+                                        'terminal'
+                                    ]
+                                ); ?>
+
+                            </td>
+
+
+                            <td>
+
+                                <span
+                                    class="table-status
+                                    <?= getGateClass(
+                                        $gate[
+                                            'availability'
+                                        ]
+                                    ); ?>"
+                                >
+
+                                    <?= htmlspecialchars(
+                                        $gate[
+                                            'availability'
+                                        ]
+                                    ); ?>
+
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <?php if (
+                                    !empty(
+                                        $gate[
+                                            'flight_number'
+                                        ]
+                                    )
+                                ): ?>
+
+                                    <?= htmlspecialchars(
+                                        $gate[
+                                            'flight_number'
+                                        ]
+                                    ); ?>
+
+                                <?php else: ?>
+
+                                    —
+
+                                <?php endif; ?>
+
+                            </td>
+
+
+                            <td>
+
+                                <?php if (
+                                    !empty(
+                                        $gate[
+                                            'airline'
+                                        ]
+                                    )
+                                ): ?>
+
+                                    <?= htmlspecialchars(
+                                        $gate[
+                                            'airline'
+                                        ]
+                                    ); ?>
+
+                                <?php else: ?>
+
+                                    —
+
+                                <?php endif; ?>
+
+                            </td>
+
+
+                            <td>
+
+                                <?php if (
+                                    !empty(
+                                        $gate[
+                                            'departure'
+                                        ]
+                                    )
+                                    &&
+                                    !empty(
+                                        $gate[
+                                            'destination'
+                                        ]
+                                    )
+                                ): ?>
+
+                                    <?= htmlspecialchars(
+                                        $gate[
+                                            'departure'
+                                        ]
+                                    ); ?>
+
+                                    →
+
+                                    <?= htmlspecialchars(
+                                        $gate[
+                                            'destination'
+                                        ]
+                                    ); ?>
+
+                                <?php else: ?>
+
+                                    —
+
+                                <?php endif; ?>
+
+                            </td>
+
+
+                            <td>
+
+                                <?php if (
+                                    !empty(
+                                        $gate[
+                                            'dep_time'
+                                        ]
+                                    )
+                                ): ?>
+
+                                    <?= htmlspecialchars(
+                                        $gate[
+                                            'dep_time'
+                                        ]
+                                    ); ?>
+
+                                <?php else: ?>
+
+                                    —
+
+                                <?php endif; ?>
+
+                            </td>
+
+
+                        </tr>
+
+
+                    <?php endforeach; ?>
+
+
+                    </tbody>
+
+                </table>
+
+
+            </div>
+
+
+        </section>
+
 
     </main>
 
@@ -993,110 +1318,165 @@ function getGateClass($availability)
 
 
 
-<!-- ==================================================
-     GATE STATUS MODAL
-================================================== -->
+<!-- =====================================================
+     CHANGE GATE MODAL
+====================================================== -->
 
 <div
     id="gateModal"
-    class="modal-overlay"
+    class="modal-backdrop"
 >
 
-    <div class="modal-box">
+
+    <div class="modal-card">
+
 
         <div class="modal-header">
 
-            <h2>
-                Gate <span id="modalGateNumber"></span>
-            </h2>
+            <div>
+
+                <h2>
+                    Change Gate
+                </h2>
+
+                <p>
+
+                    Gate
+
+                    <strong
+                        id="modalGateNumber"
+                    ></strong>
+
+                </p>
+
+            </div>
+
 
             <button
                 type="button"
                 class="modal-close"
-                onclick="closeModal('gateModal')"
+                onclick="closeGateModal()"
             >
+
                 ×
+
             </button>
 
         </div>
 
 
-        <p class="modal-current-status">
 
-            Current Status:
-            <strong id="modalGateStatus"></strong>
-
-        </p>
-
-
-        <div
-            id="occupiedMessage"
-            class="occupied-message"
-        >
-            This gate is currently assigned to
-            <strong id="assignedFlight"></strong>.
-            <br><br>
-            Release the flight from the table below before changing the gate status.
-        </div>
-
-
-        <div
-            id="statusButtons"
-            class="status-buttons"
+        <form
+            method="POST"
+            action=""
         >
 
-            <form method="POST">
 
-                <input
-                    type="hidden"
-                    name="gate_number"
-                    id="statusGateNumber"
+            <input
+                type="hidden"
+                name="gate_id"
+                id="modalGateId"
+            >
+
+
+            <!-- STATUS -->
+
+            <div class="modal-group">
+
+                <label>
+                    Gate Status
+                </label>
+
+
+                <select
+                    name="status"
+                    id="modalStatus"
+                    required
                 >
+
+                    <option value="Available">
+                        Available
+                    </option>
+
+                    <option value="Occupied">
+                        Occupied
+                    </option>
+
+                    <option value="Maintenance">
+                        Maintenance
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <!-- TERMINAL -->
+
+            <div class="modal-group">
+
+                <label>
+                    Terminal
+                </label>
+
+
+                <select
+                    name="terminal"
+                    id="modalTerminal"
+                    required
+                >
+
+                    <option value="Terminal 1">
+                        Terminal 1
+                    </option>
+
+                    <option value="Terminal 2">
+                        Terminal 2
+                    </option>
+
+                    <option value="Terminal 3">
+                        Terminal 3
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <!-- BUTTONS -->
+
+            <div class="modal-actions">
+
 
                 <button
                     type="submit"
-                    name="change_status"
-                    value="1"
-                    class="status-change available-status"
-                    onclick="setStatus('Available')"
+                    name="update_gate"
+                    class="btn-save"
                 >
-                    ● Available
+
+                    Save Changes
+
                 </button>
 
-                <input
-                    type="hidden"
-                    name="new_status"
-                    id="newStatus"
-                >
-
-            </form>
-
-
-            <form method="POST">
-
-                <input
-                    type="hidden"
-                    name="gate_number"
-                    id="maintenanceGateNumber"
-                >
-
-                <input
-                    type="hidden"
-                    name="new_status"
-                    value="Maintenance"
-                >
 
                 <button
-                    type="submit"
-                    name="change_status"
-                    class="status-change maintenance-status"
+                    type="button"
+                    class="btn-cancel"
+                    onclick="closeGateModal()"
                 >
-                    ● Maintenance
+
+                    Cancel
+
                 </button>
 
-            </form>
 
-        </div>
+            </div>
+
+
+        </form>
+
 
     </div>
 
@@ -1104,41 +1484,61 @@ function getGateClass($availability)
 
 
 
-<!-- ==================================================
+<!-- =====================================================
      ASSIGN FLIGHT MODAL
-================================================== -->
+====================================================== -->
 
 <div
-    id="assignModal"
-    class="modal-overlay"
+    id="assignFlightModal"
+    class="modal-backdrop"
 >
 
-    <div class="modal-box">
+
+    <div class="modal-card">
+
 
         <div class="modal-header">
 
-            <h2>
-                Assign Gate
-            </h2>
+
+            <div>
+
+                <h2>
+                    Assign Gate
+                </h2>
+
+                <p>
+
+                    Flight:
+
+                    <strong
+                        id="assignFlightNumber"
+                    ></strong>
+
+                </p>
+
+            </div>
+
 
             <button
                 type="button"
                 class="modal-close"
-                onclick="closeModal('assignModal')"
+                onclick="closeAssignFlightModal()"
             >
+
                 ×
+
             </button>
+
 
         </div>
 
 
-        <p class="assign-flight-name">
-            Flight:
-            <strong id="assignFlightNumber"></strong>
-        </p>
 
+        <form
+            method="POST"
+            action=""
+        >
 
-        <form method="POST">
 
             <input
                 type="hidden"
@@ -1147,72 +1547,91 @@ function getGateClass($availability)
             >
 
 
-            <label>
-                Select Available Gate
-            </label>
+            <div class="modal-group">
 
 
-            <select
-                name="gate_number"
-                class="gate-select"
-                required
-            >
+                <label>
+                    Select Available Gate
+                </label>
 
-                <option value="">
-                    -- Select Gate --
-                </option>
 
-                <?php foreach ($all_gates as $gate): ?>
+                <select
+                    name="gate_id"
+                    required
+                >
 
-                    <?php if (
-                        $gate['availability'] === 'Available'
+                    <option value="">
+                        -- Select Gate --
+                    </option>
+
+
+                    <?php foreach (
+                        $available_gate_list
+                        as $available_gate
                     ): ?>
 
+
                         <option
-                            value="<?= htmlspecialchars(
-                                $gate['gate_number']
-                            ); ?>"
+                            value="<?= (int)$available_gate['id']; ?>"
                         >
 
                             <?= htmlspecialchars(
-                                $gate['gate_number']
+                                $available_gate[
+                                    'gate_number'
+                                ]
                             ); ?>
 
                             -
+
                             <?= htmlspecialchars(
-                                $gate['terminal']
+                                $available_gate[
+                                    'terminal'
+                                ]
                             ); ?>
 
                         </option>
 
-                    <?php endif; ?>
 
-                <?php endforeach; ?>
+                    <?php endforeach; ?>
 
-            </select>
+
+                </select>
+
+
+            </div>
+
 
 
             <div class="modal-actions">
 
+
                 <button
                     type="submit"
-                    name="assign_gate"
-                    class="modal-save"
+                    name="assign_flight"
+                    class="btn-save"
                 >
+
                     Assign Gate
+
                 </button>
+
 
                 <button
                     type="button"
-                    class="modal-cancel"
-                    onclick="closeModal('assignModal')"
+                    class="btn-cancel"
+                    onclick="closeAssignFlightModal()"
                 >
+
                     Cancel
+
                 </button>
+
 
             </div>
 
+
         </form>
+
 
     </div>
 
@@ -1220,13 +1639,21 @@ function getGateClass($availability)
 
 
 
+<!-- HELP BUTTON -->
+
 <div class="help-btn">
     ?
 </div>
 
 
+
+<!-- =====================================================
+     JAVASCRIPT
+====================================================== -->
+
 <script src="../assets/js/dashboard.js"></script>
 
-</body>
-</html>
 
+</body>
+
+</html>
