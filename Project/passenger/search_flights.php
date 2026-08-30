@@ -2,34 +2,43 @@
 require_once '../config/database.php';
 include 'header.php';
 
-$where = "WHERE 1=1";
-if (!empty($_GET['from'])) {
-    $from = $conn->real_escape_string($_GET['from']);
-    $where .= " AND departure LIKE '%$from%'";
+$from = isset($_GET['from']) ? trim($_GET['from']) : '';
+$to   = isset($_GET['to']) ? trim($_GET['to']) : '';
+
+// Only show upcoming/available flights where departure_time is strictly in the future
+$sql = "SELECT * FROM flights 
+        WHERE departure_time > NOW() 
+        AND status NOT IN ('Departed', 'Cancelled')";
+
+if (!empty($from)) {
+    $from_safe = $conn->real_escape_string($from);
+    $sql .= " AND departure LIKE '%$from_safe%'";
 }
-if (!empty($_GET['to'])) {
-    $to = $conn->real_escape_string($_GET['to']);
-    $where .= " AND destination LIKE '%$to%'";
+if (!empty($to)) {
+    $to_safe = $conn->real_escape_string($to);
+    $sql .= " AND destination LIKE '%$to_safe%'";
 }
 
-$sql = "SELECT * FROM flights $where ORDER BY departure_time ASC";
+$sql .= " ORDER BY departure_time ASC";
+
 $result = $conn->query($sql);
 ?>
 
 <h2>Search Available Flights</h2>
 
-<form method="GET" action="search_flights.php" class="form-grid">
-    <div class="form-group">
-        <label>From (Departure)</label>
-        <input type="text" name="from" placeholder="e.g. DAC" value="<?php echo htmlspecialchars($_GET['from'] ?? ''); ?>">
+<form method="GET" action="search_flights.php" style="display: flex; gap: 15px; margin: 20px 0; align-items: flex-end;">
+    <div style="flex: 1;">
+        <label style="display: block; margin-bottom: 5px; font-size: 13px; font-weight: 600;">From (Departure)</label>
+        <input type="text" name="from" value="<?php echo htmlspecialchars($from); ?>" placeholder="e.g. DAC" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
     </div>
-    <div class="form-group">
-        <label>To (Destination)</label>
-        <input type="text" name="to" placeholder="e.g. JFK" value="<?php echo htmlspecialchars($_GET['to'] ?? ''); ?>">
+    <div style="flex: 1;">
+        <label style="display: block; margin-bottom: 5px; font-size: 13px; font-weight: 600;">To (Destination)</label>
+        <input type="text" name="to" value="<?php echo htmlspecialchars($to); ?>" placeholder="e.g. JFK / Raj" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
     </div>
-    <div class="form-group" style="align-self: flex-end;">
-        <button type="submit" class="btn">Filter Flights</button>
-    </div>
+    <button type="submit" class="btn" style="padding: 10px 20px;">Filter Flights</button>
+    <?php if (!empty($from) || !empty($to)): ?>
+        <a href="search_flights.php" class="btn" style="background: #64748b; padding: 10px 15px;">Clear</a>
+    <?php endif; ?>
 </form>
 
 <table>
@@ -55,13 +64,15 @@ $result = $conn->query($sql);
                     <td><?php echo htmlspecialchars($row['arrival_time']); ?></td>
                     <td><span class="badge badge-scheduled"><?php echo htmlspecialchars($row['status']); ?></span></td>
                     <td>
-                        <a href="book_flight.php?flight_id=<?php echo $row['id']; ?>" class="btn">Book Now</a>
+                        <a href="book_flight.php?flight_id=<?php echo $row['id']; ?>" class="btn">Select & Book</a>
                     </td>
                 </tr>
             <?php endwhile; ?>
         <?php else: ?>
             <tr>
-                <td colspan="7" style="text-align: center; color: #64748b;">No flights available matching your criteria.</td>
+                <td colspan="7" style="text-align: center; color: #64748b; padding: 20px;">
+                    No active upcoming flights available at this moment.
+                </td>
             </tr>
         <?php endif; ?>
     </tbody>
