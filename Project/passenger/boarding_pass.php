@@ -5,12 +5,12 @@ include 'header.php';
 $user_id = (int)$_SESSION['user_id'];
 $requested_booking_id = isset($_GET['booking_id']) ? (int)$_GET['booking_id'] : 0;
 
-// Fetch all bookings for this user to build a ticket switcher
+// Fetch ONLY active upcoming bookings (Matches My Bookings)
 $all_bookings_res = $conn->query("SELECT b.id AS booking_id, b.seat_number, f.flight_number, f.departure, f.destination, f.departure_time 
                                   FROM bookings b
                                   JOIN flights f ON b.flight_id = f.id
-                                  WHERE b.user_id = $user_id 
-                                  ORDER BY b.id DESC");
+                                  WHERE b.user_id = $user_id AND f.departure_time > NOW()
+                                  ORDER BY f.departure_time ASC");
 
 $bookings_list = [];
 if ($all_bookings_res) {
@@ -22,18 +22,16 @@ if ($all_bookings_res) {
 // Select active booking
 $active_booking_id = $requested_booking_id;
 if ($active_booking_id === 0 && !empty($bookings_list)) {
-    // If none specified in URL, pick the first available or unlocked one
     $active_booking_id = (int)$bookings_list[0]['booking_id'];
 }
 
-// Fetch details for the selected booking
 $pass = null;
 if ($active_booking_id > 0) {
     $sql = "SELECT b.*, f.flight_number, f.departure, f.destination, f.departure_time, f.arrival_time, u.name AS passenger_name 
             FROM bookings b
             JOIN flights f ON b.flight_id = f.id
             JOIN users u ON b.user_id = u.id
-            WHERE b.user_id = $user_id AND b.id = $active_booking_id 
+            WHERE b.user_id = $user_id AND b.id = $active_booking_id AND f.departure_time > NOW()
             LIMIT 1";
     $res = $conn->query($sql);
     if ($res && $res->num_rows > 0) {
@@ -41,16 +39,28 @@ if ($active_booking_id > 0) {
     }
 }
 
-// Check 1-hour unlock condition
+// 1 Hour unlock condition check
 $is_unlocked = false;
 $unlock_time_str = "";
 if ($pass) {
     $current_timestamp = time();
     $departure_timestamp = strtotime($pass['departure_time']);
-    $unlock_timestamp = $departure_timestamp - 3600; // 1 hour prior
+    $unlock_timestamp = $departure_timestamp - 3600; // 1 hr before flight
     
     $is_unlocked = ($current_timestamp >= $unlock_timestamp);
     $unlock_time_str = date('Y-m-d H:i:s', $unlock_timestamp);
+
+    // Baggage auto-tagging when unlocked
+    if ($is_unlocked) {
+        $chk_bag = $conn->query("SELECT id FROM baggage WHERE booking_id = {$pass['id']}");
+        if ($chk_bag && $chk_bag->num_rows === 0) {
+            $conn->query("INSERT INTO baggage (user_id, booking_id, baggage_status, location, updated_at) 
+                         VALUES ($user_id, {$pass['id']}, 'Checked In', 'Terminal 1 Counter (Tag Issued)', NOW())");
+            
+            $conn->query("INSERT INTO notifications (user_id, message, type, status, created_at) 
+                         VALUES ($user_id, 'Luggage tag issued for flight {$pass['flight_number']}. Baggage is now checked in.', 'Baggage', 'Unread', NOW())");
+        }
+    }
 }
 ?>
 
@@ -58,9 +68,9 @@ if ($pass) {
 .ticket-selector-bar {
     background: #ffffff;
     border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 15px 20px;
-    margin: 20px 0;
+    border-radius: 12px;
+    padding: 16px 22px;
+    margin: 15px 0 25px 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -68,7 +78,15 @@ if ($pass) {
     gap: 15px;
 }
 .ticket-wrapper { margin-top: 20px; max-width: 820px; }
-.ticket-card { background: #ffffff; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08); display: flex; overflow: hidden; border: 1px solid #e2e8f0; position: relative; }
+.ticket-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    display: flex;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    position: relative;
+}
 .ticket-main { flex: 2.3; padding: 24px 28px; border-right: 2px dashed #cbd5e1; }
 .ticket-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 18px; }
 .airline-title { font-size: 18px; font-weight: 800; color: #0284c7; }
@@ -83,23 +101,24 @@ if ($pass) {
 .barcode { height: 40px; background: repeating-linear-gradient(90deg, #1e293b, #1e293b 2px, transparent 2px, transparent 4px, #1e293b 4px, #1e293b 7px, transparent 7px, transparent 9px); border-radius: 4px; }
 .locked-box { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 35px 25px; text-align: center; max-width: 820px; margin-top: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); }
 .btn-print { margin-top: 18px; background: #0284c7; color: #ffffff; border: none; padding: 10px 20px; font-weight: 600; border-radius: 6px; cursor: pointer; }
+.luggage-alert { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 12px 16px; border-radius: 8px; margin-top: 15px; font-size: 13px; display: flex; align-items: center; gap: 10px; }
 @media print {
-    .sidebar, .topbar, .ticket-selector-bar, .btn-print, h2 { display: none !important; }
-    .main-content { margin: 0 !important; padding: 0 !important; }
+    .sidebar, .topbar, .ticket-selector-bar, .btn-print, .luggage-alert, h2 { display: none !important; }
+    .main-wrapper { margin: 0 !important; }
+    .page-content { padding: 0 !important; }
 }
 </style>
 
 <h2>Digital Boarding Pass</h2>
 
 <?php if (!empty($bookings_list)): ?>
-    <!-- Switcher to pick which booked flight pass to view -->
     <div class="ticket-selector-bar">
         <div>
-            <strong style="font-size: 14px; color: #0f172a;">Select Booked Ticket:</strong>
-            <small style="display: block; color: #64748b;">Switch between your active bookings</small>
+            <strong style="font-size: 14px; color: #0f172a;">Select Booked Flight:</strong>
+            <small style="display: block; color: #64748b;">Showing active upcoming tickets only</small>
         </div>
         <form method="GET" action="boarding_pass.php" style="display: flex; gap: 10px; align-items: center;">
-            <select name="booking_id" onchange="this.form.submit()" style="padding: 8px 14px; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 600; font-size: 13px; outline: none; background: #f8fafc;">
+            <select name="booking_id" onchange="this.form.submit()" style="padding: 9px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 600; font-size: 13px; background: #f8fafc;">
                 <?php foreach ($bookings_list as $b): 
                     $dep_ts = strtotime($b['departure_time']);
                     $unlocked = (time() >= ($dep_ts - 3600));
@@ -114,13 +133,12 @@ if ($pass) {
     </div>
 
     <?php if ($pass && $is_unlocked): ?>
-        <!-- UNLOCKED PASS -->
         <div class="ticket-wrapper">
             <div class="ticket-card">
                 <div class="ticket-main">
                     <div class="ticket-header">
                         <span class="airline-title">✈ AIRPORT BOARDING PASS</span>
-                        <span class="badge badge-scheduled"><?php echo htmlspecialchars($pass['payment_status']); ?></span>
+                        <span class="badge" style="background: #dcfce7; color: #15803d;">Paid & Confirmed</span>
                     </div>
 
                     <div class="route-display">
@@ -153,8 +171,8 @@ if ($pass) {
                             <div class="info-val"><?php echo htmlspecialchars($pass['departure_time']); ?></div>
                         </div>
                         <div>
-                            <div class="info-label">Class</div>
-                            <div class="info-val">Economy</div>
+                            <div class="info-label">Luggage Tag</div>
+                            <div class="info-val" style="color: #059669;">Issued (1 Checked-in)</div>
                         </div>
                         <div>
                             <div class="info-label">Booking Ref</div>
@@ -181,31 +199,36 @@ if ($pass) {
                 </div>
             </div>
 
+            <div class="luggage-alert">
+                <span>🧳</span>
+                <div>
+                    <strong>Luggage Checked In:</strong> Your baggage tag has been generated. Track status under <a href="baggage.php" style="color: #047857; text-decoration: underline; font-weight: bold;">Baggage Tracker</a>.
+                </div>
+            </div>
+
             <button onclick="window.print()" class="btn-print">🖨 Print Boarding Pass</button>
         </div>
 
     <?php elseif ($pass && !$is_unlocked): ?>
-        <!-- LOCKED PASS NOTICE -->
         <div class="locked-box">
             <div style="font-size: 44px; margin-bottom: 12px;">🔒</div>
-            <h3 style="color: #0f172a; margin-bottom: 8px;">Boarding Pass Not Available Yet for Flight <?php echo htmlspecialchars($pass['flight_number']); ?></h3>
+            <h3 style="color: #0f172a; margin-bottom: 8px;">Boarding Pass Opens 1 Hour Before Departure</h3>
             <p style="color: #64748b; font-size: 14px; margin-bottom: 15px;">
-                As per airport policy, your digital boarding pass for Seat <strong><?php echo htmlspecialchars($pass['seat_number']); ?></strong> will unlock <strong>1 hour prior to departure</strong>.
+                Check-in for Flight <strong><?php echo htmlspecialchars($pass['flight_number']); ?></strong> will unlock at <strong><?php echo htmlspecialchars($unlock_time_str); ?></strong>.
             </p>
             <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px 20px; border-radius: 8px; display: inline-block; font-size: 13px; text-align: left;">
-                <strong>Booking Ref:</strong> #BK-<?php echo $pass['id']; ?><br>
                 <strong>Departure Time:</strong> <?php echo htmlspecialchars($pass['departure_time']); ?><br>
-                <strong>Boarding Pass Unlocks At:</strong> <span style="color: #0284c7; font-weight: bold;"><?php echo htmlspecialchars($unlock_time_str); ?></span>
+                <strong>Seat Number:</strong> <?php echo htmlspecialchars($pass['seat_number']); ?>
             </div>
             <p style="margin-top: 20px;">
-                <a href="my_bookings.php" class="btn" style="background: #64748b;">View All Bookings</a>
+                <a href="my_bookings.php" class="btn" style="background: #64748b;">View My Bookings</a>
             </p>
         </div>
     <?php endif; ?>
 
 <?php else: ?>
-    <div style="background: #ffffff; padding: 25px; border-radius: 8px; margin-top: 20px; border: 1px solid #e2e8f0;">
-        <p style="color: #64748b;">No flight tickets booked yet. <a href="search_flights.php" style="color: #0284c7; font-weight: bold;">Search & Book Flights here</a>.</p>
+    <div style="background: #ffffff; padding: 25px; border-radius: 12px; margin-top: 20px; border: 1px solid #e2e8f0; text-align: center;">
+        <p style="color: #64748b;">No active upcoming bookings available. <a href="search_flights.php" style="color: #0284c7; font-weight: bold;">Book a flight here</a>.</p>
     </div>
 <?php endif; ?>
 
