@@ -1,46 +1,132 @@
 <?php
-require_once 'config/database.php';
+
+include 'config/database.php';
+
 session_start();
 
 $error = "";
 
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+
     $email = trim($_POST['email'] ?? '');
+
     $password = trim($_POST['password'] ?? '');
 
+
+
     if (!empty($email) && !empty($password)) {
+
+
         $email_safe = $conn->real_escape_string($email);
-        $res = $conn->query("SELECT * FROM users WHERE email = '$email_safe' LIMIT 1");
+
+
+        $res = $conn->query(
+            "SELECT * FROM users WHERE email = '$email_safe' LIMIT 1"
+        );
+
+
 
         if ($res && $res->num_rows > 0) {
             $user = $res->fetch_assoc();
-
             $db_pass = $user['password'];
             $pass_valid = false;
 
-            // Check various password formats (Plain text, MD5, or Password Hash)
-            if ($password === $db_pass || md5($password) === $db_pass || password_verify($password, $db_pass)) {
+
+
+           
+            if (
+                $password === $db_pass ||
+                md5($password) === $db_pass ||
+                password_verify($password, $db_pass)
+            ) {
+
                 $pass_valid = true;
+
             }
 
-            if ($pass_valid) {
-                $_SESSION['user_id']   = (int)$user['id'];
+
+
+            if ($pass_valid) 
+                {
+                $_SESSION['user_id'] = (int)$user['id'];
+
                 $_SESSION['user_name'] = $user['name'];
-                $_SESSION['role']      = strtolower(trim($user['role'] ?? 'passenger'));
 
-                // Force redirect to passenger dashboard
-                header("Location: passenger/dashboard.php");
+                $_SESSION['role'] = strtolower(
+                    trim($user['role'] ?? 'passenger')
+                );
+
+
+
+                // Role based 
+
+                if ($_SESSION['role'] == "admin") {
+
+
+                    header("Location: admin/dashboard.php");
+
+
+                } 
+                elseif ($_SESSION['role'] == "staff") {
+
+
+                    header("Location: staff/dashboard.php");
+
+
+                } 
+                elseif ($_SESSION['role'] == "airline") {
+
+
+                    header("Location: airline/dashboard.php");
+
+
+                } 
+                else {
+
+
+                    header("Location: passenger/dashboard.php");
+
+
+                }
+
+
                 exit();
+
+
+
             } else {
+
+
                 $error = "Incorrect password! Please try again.";
+
+
             }
+
+
+
         } else {
+
+
             $error = "No user found with this email address.";
+
+
         }
+
+
+
     } else {
+
+
         $error = "Please fill in both email and password.";
+
+
     }
+
 }
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
