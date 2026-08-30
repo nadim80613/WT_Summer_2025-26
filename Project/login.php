@@ -128,59 +128,120 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
 ?>
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Airport Management System - Login</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f1f5f9; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-        .login-card { display: flex; background: #ffffff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); width: 800px; min-height: 440px; overflow: hidden; }
-        .login-form-side { flex: 1.2; padding: 45px; display: flex; flex-direction: column; justify-content: center; }
-        .login-form-side h2 { font-size: 26px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
-        .login-form-side p { font-size: 13px; color: #64748b; margin-bottom: 24px; }
-        .form-group { margin-bottom: 16px; }
-        .form-group input { width: 100%; padding: 12px 14px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; background: #f8fafc; }
-        .form-group input:focus { border-color: #0284c7; background: #ffffff; }
-        .btn-signin { background: #0284c7; color: #ffffff; border: none; padding: 12px 24px; font-size: 14px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: 0.2s; margin-top: 8px; width: 100%; }
-        .btn-signin:hover { background: #0369a1; }
-        .login-banner-side { flex: 1; background: #0284c7; border-top-left-radius: 120px; border-bottom-left-radius: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #ffffff; text-align: center; padding: 30px; }
-        .login-banner-side h3 { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
-        .login-banner-side p { font-size: 13px; color: #e0f2fe; }
-        .error-box { background: #fee2e2; color: #dc2626; padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-bottom: 16px; border: 1px solid #fca5a5; }
-    </style>
+
+    <link rel="stylesheet" href="assets/css/auth.css">
+
 </head>
+
+
 <body>
 
-<div class="login-card">
-    <div class="login-form-side">
-        <h2>Sign in</h2>
-        <p>Sign in with your email and password</p>
 
-        <?php if (!empty($error)): ?>
-            <div class="error-box"><?php echo htmlspecialchars($error); ?></div>
+<div class="container">
+
+
+    <div class="form-box">
+
+
+        <h2>Sign In</h2>
+
+
+        <p class="subtitle">
+            Sign in with your email and password
+        </p>
+
+
+
+        <?php if(!empty($error)): ?>
+
+            <p style="color:red; margin-bottom:15px;">
+                <?php echo $error; ?>
+            </p>
+
         <?php endif; ?>
 
-        <form method="POST" action="login.php">
-            <div class="form-group">
-                <input type="email" name="email" placeholder="name@example.com" value="<?php echo htmlspecialchars($_POST['email'] ?? 'esmamahmed00@gmail.com'); ?>" required>
-            </div>
-            <div class="form-group">
-                <input type="password" name="password" placeholder="Password" value="123456" required>
-            </div>
-            <div>
-                <button type="submit" class="btn-signin">Sign in</button>
-            </div>
+
+
+        <form method="post" action="login.php">
+
+
+            <input 
+                type="email" 
+                name="email" 
+                placeholder="Enter E-mail"
+                required
+            >
+
+
+
+            <input 
+                type="password" 
+                name="password" 
+                placeholder="Enter Password"
+                required
+            >
+
+
+
+            <button type="submit">
+                Sign In
+            </button>
+
+
         </form>
+
+
+
+        
+
+
+
     </div>
 
-    <div class="login-banner-side">
-        <h3>Welcome Back!</h3>
-        <p>Airport Management System</p>
+
+
+
+
+    <div class="welcome-box login-welcome">
+
+
+        <h1>
+            Welcome Back!
+        </h1>
+
+
+        <p>
+            Airport Management System
+        </p>
+
+        <p>
+            Don't Have any Account?
+        </p>
+
+        <a href="register.php">
+        <button class="register-btn">
+            Sign Up
+        </button>
+    </a>
+
+
+
+
     </div>
+
+
+
 </div>
 
+
+
 </body>
+
 </html>
