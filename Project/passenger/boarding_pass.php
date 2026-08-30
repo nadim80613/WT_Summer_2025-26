@@ -1,11 +1,18 @@
 <?php
+// 1. Set PHP timezone to Bangladesh
+date_default_timezone_set('Asia/Dhaka');
+
 require_once '../config/database.php';
+
+// 2. Set MySQL Session Timezone to Bangladesh (+06:00)
+$conn->query("SET time_zone = '+06:00'");
+
 include 'header.php';
 
 $user_id = (int)$_SESSION['user_id'];
 $requested_booking_id = isset($_GET['booking_id']) ? (int)$_GET['booking_id'] : 0;
 
-// Fetch ONLY active upcoming bookings (Matches My Bookings)
+// Fetch active upcoming bookings
 $all_bookings_res = $conn->query("SELECT b.id AS booking_id, b.seat_number, f.flight_number, f.departure, f.destination, f.departure_time 
                                   FROM bookings b
                                   JOIN flights f ON b.flight_id = f.id
@@ -31,7 +38,7 @@ if ($active_booking_id > 0) {
             FROM bookings b
             JOIN flights f ON b.flight_id = f.id
             JOIN users u ON b.user_id = u.id
-            WHERE b.user_id = $user_id AND b.id = $active_booking_id AND f.departure_time > NOW()
+            WHERE b.user_id = $user_id AND b.id = $active_booking_id
             LIMIT 1";
     $res = $conn->query($sql);
     if ($res && $res->num_rows > 0) {
@@ -45,12 +52,13 @@ $unlock_time_str = "";
 if ($pass) {
     $current_timestamp = time();
     $departure_timestamp = strtotime($pass['departure_time']);
-    $unlock_timestamp = $departure_timestamp - 3600; // 1 hr before flight
+    $unlock_timestamp = $departure_timestamp - 3600; // 1 hour before departure
     
+    // Check if current time is greater than or equal to unlock time
     $is_unlocked = ($current_timestamp >= $unlock_timestamp);
     $unlock_time_str = date('Y-m-d H:i:s', $unlock_timestamp);
 
-    // Baggage auto-tagging when unlocked
+    // Auto luggage tagging when boarding pass is unlocked
     if ($is_unlocked) {
         $chk_bag = $conn->query("SELECT id FROM baggage WHERE booking_id = {$pass['id']}");
         if ($chk_bag && $chk_bag->num_rows === 0) {
@@ -97,7 +105,7 @@ if ($pass) {
 .info-val { font-size: 14px; font-weight: 700; color: #1e293b; }
 .ticket-stub { flex: 1; background: #f8fafc; padding: 24px 20px; display: flex; flex-direction: column; justify-content: space-between; text-align: center; }
 .seat-highlight { background: #0284c7; color: #ffffff; padding: 12px; border-radius: 10px; margin: 15px 0; }
-.seat-highlight strong { font-size: 26px; font-weight: 900; }
+.seat-highlight strong { font-size: 20px; font-weight: 900; }
 .barcode { height: 40px; background: repeating-linear-gradient(90deg, #1e293b, #1e293b 2px, transparent 2px, transparent 4px, #1e293b 4px, #1e293b 7px, transparent 7px, transparent 9px); border-radius: 4px; }
 .locked-box { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 35px 25px; text-align: center; max-width: 820px; margin-top: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); }
 .btn-print { margin-top: 18px; background: #0284c7; color: #ffffff; border: none; padding: 10px 20px; font-weight: 600; border-radius: 6px; cursor: pointer; }
@@ -172,7 +180,7 @@ if ($pass) {
                         </div>
                         <div>
                             <div class="info-label">Luggage Tag</div>
-                            <div class="info-val" style="color: #059669;">Issued (1 Checked-in)</div>
+                            <div class="info-val" style="color: #059669;">Issued (Checked-in)</div>
                         </div>
                         <div>
                             <div class="info-label">Booking Ref</div>
@@ -188,13 +196,13 @@ if ($pass) {
                     </div>
 
                     <div class="seat-highlight">
-                        <span style="display:block; font-size: 11px;">SEAT</span>
+                        <span style="display:block; font-size: 11px;">SEAT(S)</span>
                         <strong><?php echo htmlspecialchars($pass['seat_number']); ?></strong>
                     </div>
 
                     <div>
                         <div class="barcode"></div>
-                        <small style="font-size: 10px; color: #94a3b8; letter-spacing: 2px;">*BK<?php echo $pass['id']; ?>-<?php echo $pass['seat_number']; ?>*</small>
+                        <small style="font-size: 10px; color: #94a3b8; letter-spacing: 2px;">*BK<?php echo $pass['id']; ?>*</small>
                     </div>
                 </div>
             </div>
@@ -218,7 +226,7 @@ if ($pass) {
             </p>
             <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px 20px; border-radius: 8px; display: inline-block; font-size: 13px; text-align: left;">
                 <strong>Departure Time:</strong> <?php echo htmlspecialchars($pass['departure_time']); ?><br>
-                <strong>Seat Number:</strong> <?php echo htmlspecialchars($pass['seat_number']); ?>
+                <strong>Seat(s):</strong> <?php echo htmlspecialchars($pass['seat_number']); ?>
             </div>
             <p style="margin-top: 20px;">
                 <a href="my_bookings.php" class="btn" style="background: #64748b;">View My Bookings</a>
