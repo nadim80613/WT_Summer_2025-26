@@ -1,7 +1,13 @@
 <?php
+session_start();
 
-include "../config/database.php";
+    if(!isset($_SESSION['user_id']) || $_SESSION['role']!="admin"){
+    header("Location: ../login.php");
 
+    exit();
+    }
+
+    include "../config/database.php";
 
 if(isset($_POST['submit'])){
 
@@ -12,10 +18,31 @@ if(isset($_POST['submit'])){
 
 
     $sql = "INSERT INTO users(name,email,password,role)
-            VALUES('$name','$email','$password','$role')";
+        VALUES('$name','$email','$password','$role')";
 
 
-    mysqli_query($conn,$sql);
+    if(mysqli_query($conn,$sql)){
+
+    $log_sql = "INSERT INTO activity_logs (user_id, action)
+     VALUES ('".$_SESSION['user_id']."','Added new user: ".$name."')";
+
+    mysqli_query($conn,$log_sql);
+
+    header("Location: users.php");
+    exit();
+      }
+    
+    else{
+
+    echo "Error: " . mysqli_error($conn);
+
+    } 
+
+    $log_sql = "INSERT INTO activity_logs (user_id, action)
+      VALUES ('".$_SESSION['user_id']."','Added new user')";
+
+     mysqli_query($conn,$log_sql);
+
 
 
     header("Location: users.php");

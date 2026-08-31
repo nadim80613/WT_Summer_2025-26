@@ -1,5 +1,16 @@
 <?php
 
+session_start();
+
+if(!isset($_SESSION['user_id']) || $_SESSION['role']!="admin")
+{
+    header("Location:../login.php");
+    exit();
+}
+
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 include "../config/database.php";
 
 
@@ -30,6 +41,11 @@ if(isset($_POST['update'])){
 
 
     mysqli_query($conn,$sql);
+
+    $log_sql = "INSERT INTO activity_logs (user_id, action)
+    VALUES ('".$_SESSION['user_id']."','Updated user: ".$name."')";
+
+    mysqli_query($conn,$log_sql);
 
 
     header("Location: users.php");
