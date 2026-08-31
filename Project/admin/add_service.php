@@ -11,13 +11,14 @@ if(isset($_POST['submit'])){
     $type = $_POST['service_type'];
     $name = $_POST['service_name'];
     $description = $_POST['description'];
+    $location = $_POST['location'];
     $status = $_POST['status'];
 
 
     $sql = "INSERT INTO airport_services
-    (service_type, service_name, description, status)
+    (service_type, service_name, description, location, status)
     VALUES
-    ('$type','$name','$description','$status')";
+    ('$type','$name','$description','$location','$status')";
 
 
     mysqli_query($conn,$sql);
@@ -100,6 +101,11 @@ if(isset($_POST['submit'])){
 <label>Description</label>
 
 <textarea name="description"></textarea>
+
+
+<label>Location</label>
+
+<input type="text" name="location" required>
 
 
 
