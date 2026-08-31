@@ -13,7 +13,20 @@ if(!isset($_SESSION["user_id"]) || $_SESSION["role"]!="admin")
 
 
 
-$sql = "SELECT * FROM activity_logs ORDER BY id DESC";
+$sql = "
+SELECT 
+activity_logs.id,
+users.name,
+users.email,
+activity_logs.action,
+activity_logs.created_at
+
+FROM activity_logs
+
+JOIN users 
+ON activity_logs.user_id = users.id
+
+ORDER BY activity_logs.id DESC ";
 
 
 $result = mysqli_query($conn,$sql);
@@ -55,11 +68,9 @@ $result = mysqli_query($conn,$sql);
 <tr>
 
 <th>ID</th>
-
-<th>User ID</th>
-
+<th>User Name</th>
+<th>Email</th>
 <th>Activity</th>
-
 <th>Date</th>
 
 </tr>
@@ -76,7 +87,12 @@ $result = mysqli_query($conn,$sql);
 
 
 <td>
-<?php echo $row['user_id']; ?>
+<?php echo $row['name']; ?>
+</td>
+
+
+<td>
+<?php echo $row['email']; ?>
 </td>
 
 

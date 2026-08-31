@@ -7,6 +7,8 @@ session_start();
 $error = "";
 
 
+
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
@@ -54,11 +56,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $_SESSION['user_name'] = $user['name'];
 
-                $_SESSION['role'] = strtolower(
-                    trim($user['role'] ?? 'passenger')
-                );
+                $_SESSION['role'] = strtolower(trim($user['role'] ?? 'passenger'));
 
 
+
+                // Activity Log
+
+                $log_sql = "INSERT INTO activity_logs (user_id, action)
+                 VALUES ('".$user['id']."','User logged in')";
+
+                 mysqli_query($conn,$log_sql);
 
                 // Role based 
 

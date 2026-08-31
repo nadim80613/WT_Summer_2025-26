@@ -1,5 +1,14 @@
 <?php
 
+session_start();
+
+if(!isset($_SESSION['user_id']) || $_SESSION['role']!="admin")
+{
+    header("Location:../login.php");
+    exit();
+}
+
+
 include "../config/database.php";
 
 
@@ -7,13 +16,24 @@ $id = $_GET['id'];
 
 
 
-if(isset($_POST['delete'])){
+   if(isset($_POST['delete'])){
+
+   // get user name before delete
+    $user_query = mysqli_query($conn,"SELECT name FROM users WHERE id='$id'");
+    $user_data = mysqli_fetch_assoc($user_query);
+
+    $user_name = $user_data['name'];
 
 
     $sql = "DELETE FROM users WHERE id=$id";
 
-
     mysqli_query($conn,$sql);
+
+    //activity log
+     $log_sql = "INSERT INTO activity_logs (user_id, action)
+    VALUES ('".$_SESSION['user_id']."','Deleted user: ".$user_name."')";
+
+     mysqli_query($conn,$log_sql);
 
 
     header("Location: users.php");

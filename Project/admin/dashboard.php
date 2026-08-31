@@ -21,8 +21,6 @@ $total_staff = mysqli_fetch_assoc($total_staff)['total'];
 $total_airlines = mysqli_query($conn,"SELECT COUNT(*) AS total FROM users WHERE role='airline'");
 $total_airlines = mysqli_fetch_assoc($total_airlines)['total'];
 
-
-
 ?>
 
 
