@@ -125,3 +125,245 @@ body{
     color:#2563eb;
 
 }
+
+/* manage user */
+
+.user-table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+
+.user-table th,
+.user-table td{
+    padding:12px;
+    border-bottom:1px solid #ddd;
+    text-align:left;
+}
+
+
+.user-table th{
+    background:#2563eb;
+    color:white;
+}
+
+
+.add-btn{
+    background:#2563eb;
+    color:white;
+    padding:10px 20px;
+    text-decoration:none;
+    border-radius:6px;
+}
+
+/*manage user end*/
+
+/* add user */
+.user-form{
+    width:400px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+
+.user-form input{
+    padding:10px;
+    border:1px solid #ddd;
+    border-radius:6px;
+}
+
+
+.user-form button{
+    margin-top:10px;
+    padding:12px;
+    background:#2563eb;
+    color:white;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+/* back button */
+.back-btn{
+    display:inline-block;
+    margin-bottom:15px;
+    padding:8px 16px;
+    background:#64748b;
+    color:white;
+    text-decoration:none;
+    border-radius:6px;
+    font-size:14px;
+}
+
+.back-btn:hover{
+    background:#475569;
+}
+
+/* edit and delete button */
+.edit-btn,
+.delete-btn{
+
+    padding: 6px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    margin-right: 8px;
+    display: inline-block;
+
+}
+
+
+.edit-btn{
+
+    background: #0b1f3a;
+    color: white;
+
+}
+
+
+.edit-btn:hover{
+
+    background: #16345c;
+
+}
+
+
+
+.delete-btn{
+
+    background: #dc3545;
+    color: white;
+
+}
+
+
+.delete-btn:hover{
+
+    background: #b02a37;
+
+}
+
+/* add user */
+.form-card{
+
+    background:white;
+    padding:30px;
+    border-radius:15px;
+    width:500px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.08);
+
+}
+
+
+.form-card label{
+
+    display:block;
+    margin-bottom:8px;
+    font-weight:600;
+
+}
+
+
+.form-card input,
+.form-card select{
+
+    width:100%;
+    padding:12px;
+    margin-bottom:20px;
+    border:1px solid #ddd;
+    border-radius:8px;
+    font-size:15px;
+
+}
+
+
+
+.form-buttons{
+
+    display:flex;
+    gap:15px;
+
+}
+
+
+.save-btn{
+
+    background:#2563eb;
+    color:white;
+    border:none;
+    padding:12px 25px;
+    border-radius:8px;
+    cursor:pointer;
+
+}
+
+
+.back-btn{
+
+    background:#64748b;
+    color:white;
+    padding:12px 25px;
+    border-radius:8px;
+    text-decoration:none;
+
+}
+
+/* delete confirm button*/
+.delete-confirm-btn{
+
+    background:#dc3545;
+    color:white;
+    border:none;
+    padding:12px 25px;
+    border-radius:8px;
+    cursor:pointer;
+
+}
+
+
+.delete-confirm-btn:hover{
+
+    background:#b02a37;
+
+}
+
+/* dashboard card */
+.cards{
+
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:25px;
+    margin-top:40px;
+
+}
+
+
+.card{
+
+    background:white;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.08);
+
+}
+
+
+.card h3{
+
+    color:#555;
+    font-size:18px;
+    margin-bottom:20px;
+
+}
+
+
+.number{
+
+    font-size:40px;
+    font-weight:bold;
+    color:#2563eb;
+
+}
+
+
