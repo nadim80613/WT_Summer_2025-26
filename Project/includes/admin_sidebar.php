@@ -12,10 +12,13 @@
             Manage Users
          </li>
 
-        <li>
-            System Monitor
-        </li>
+        
+         <li onclick="window.location.href='system_monitor.php'">
 
+           System Monitor
+         </li> 
+
+         
         <li>
             Reports
         </li>

@@ -184,6 +184,7 @@ body{
     border-radius:6px;
     cursor:pointer;
 }
+
 /* back button */
 .back-btn{
     display:inline-block;
@@ -365,5 +366,45 @@ body{
     color:#2563eb;
 
 }
+
+/* system monitor ( Data Table ) */
+
+.data-table{
+
+    width:100%;
+    border-collapse:collapse;
+    margin-top:30px;
+    background:white;
+    border-radius:12px;
+    overflow:hidden;
+
+}
+
+
+.data-table th{
+
+    background:#2563eb;
+    color:white;
+    padding:15px;
+    text-align:left;
+
+}
+
+
+.data-table td{
+
+    padding:15px;
+    border-bottom:1px solid #ddd;
+
+}
+
+
+.data-table tr:hover{
+
+    background:#f1f5f9;
+
+}
+
+
 
 
