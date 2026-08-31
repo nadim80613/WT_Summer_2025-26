@@ -45,7 +45,7 @@ $result = mysqli_query($conn,$sql);
 
 <h1>Airline Management</h1>
 
-
+<br> <br>
 <a class="save-btn" href="add_airline.php">
 Add Airline
 </a>
