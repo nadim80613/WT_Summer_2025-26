@@ -44,6 +44,8 @@ $result = mysqli_query($conn,$sql);
 
 <h1>Manage Users</h1>
 
+<br>
+
 <a href="dashboard.php" class="back-btn">
  Back to Dashboard
 </a>
@@ -54,7 +56,7 @@ Add User
 </a>
 
 
-<br><br>
+<br>
 
 
 <table class="user-table">

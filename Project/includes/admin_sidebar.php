@@ -23,12 +23,12 @@
             Reports
         </li>
 
-        <li>
-            <a href="airlines.php">Airline Management</a>
+        <li onclick="window.location.href='airlines.php'">
+          Airline Management
         </li>
 
-        <li>
-            Airport Services
+        <li onclick="window.location.href='airport_services.php'">
+         Airport Services
         </li>
 
         <li onclick="window.location.href='../logout.php'">
