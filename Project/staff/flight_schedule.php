@@ -6,7 +6,6 @@ ini_set('display_errors', 1);
 session_start();
 
 
-
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../login.php");
     exit();
@@ -14,51 +13,10 @@ if (!isset($_SESSION['user_id'])) {
 
 include "../config/database.php";
 
-/* Add New Flight */
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-    $flight_number = mysqli_real_escape_string(
-        $conn,
-        trim($_POST['flight_number'])
-    );
-
-    $airline = mysqli_real_escape_string(
-        $conn,
-        trim($_POST['airline'])
-    );
-
-    $departure = mysqli_real_escape_string(
-        $conn,
-        trim($_POST['departure'])
-    );
-
-    $destination = mysqli_real_escape_string(
-        $conn,
-        trim($_POST['destination'])
-    );
-
-    $departure_time = mysqli_real_escape_string(
-    $conn,
-    date('Y-m-d') . ' ' . $_POST['departure_time'] . ':00'
-);
-
-$arrival_time = mysqli_real_escape_string(
-    $conn,
-    date('Y-m-d') . ' ' . $_POST['arrival_time'] . ':00'
-);
-
-    $aircraft = mysqli_real_escape_string(
-        $conn,
-        trim($_POST['aircraft'])
-    );
-
-    $gate_number = mysqli_real_escape_string(
-        $conn,
-        trim($_POST['gate_number'])
-    );
-
-/* Update Flight */
+/* =====================================================
+   UPDATE FLIGHT
+===================================================== */
 
 if (
     $_SERVER['REQUEST_METHOD'] === 'POST'
@@ -87,17 +45,32 @@ if (
         trim($_POST['edit_destination'])
     );
 
+
+    /* =================================================
+       DEPARTURE DATE + TIME
+    ================================================= */
+
     $departure_time = mysqli_real_escape_string(
         $conn,
-        date('Y-m-d') . ' ' .
-        $_POST['edit_departure_time'] . ':00'
+        $_POST['edit_departure_date']
+        . ' '
+        . $_POST['edit_departure_time']
+        . ':00'
     );
+
+
+    /* =================================================
+       ARRIVAL DATE + TIME
+    ================================================= */
 
     $arrival_time = mysqli_real_escape_string(
         $conn,
-        date('Y-m-d') . ' ' .
-        $_POST['edit_arrival_time'] . ':00'
+        $_POST['edit_arrival_date']
+        . ' '
+        . $_POST['edit_arrival_time']
+        . ':00'
     );
+
 
     $aircraft = mysqli_real_escape_string(
         $conn,
@@ -110,7 +83,9 @@ if (
     );
 
 
-    /* Find Airplane */
+    /* =================================================
+       FIND AIRPLANE
+    ================================================= */
 
     $airplane_sql = "
         SELECT id
@@ -187,7 +162,9 @@ if (
     }
 
 
-    /* Update Flight */
+    /* =================================================
+       UPDATE FLIGHT
+    ================================================= */
 
     $update_flight = "
         UPDATE flights
@@ -216,7 +193,9 @@ if (
     }
 
 
-    /* Update Gate */
+    /* =================================================
+       UPDATE GATE
+    ================================================= */
 
     $gate_check = "
         SELECT id
@@ -294,7 +273,9 @@ if (
     }
 
 
-    /* Refresh Page */
+    /* =================================================
+       REFRESH PAGE
+    ================================================= */
 
     header(
         "Location: flight_schedule.php"
@@ -303,7 +284,79 @@ if (
     exit();
 
 }
-    /* Find Existing Airplane */
+
+
+
+/* =====================================================
+   ADD NEW FLIGHT
+===================================================== */
+
+if (
+    $_SERVER['REQUEST_METHOD'] === 'POST'
+    && isset($_POST['flight_number'])
+) {
+
+    $flight_number = mysqli_real_escape_string(
+        $conn,
+        trim($_POST['flight_number'])
+    );
+
+    $airline = mysqli_real_escape_string(
+        $conn,
+        trim($_POST['airline'])
+    );
+
+    $departure = mysqli_real_escape_string(
+        $conn,
+        trim($_POST['departure'])
+    );
+
+    $destination = mysqli_real_escape_string(
+        $conn,
+        trim($_POST['destination'])
+    );
+
+
+    /* =================================================
+       DEPARTURE DATE + TIME
+    ================================================= */
+
+    $departure_time = mysqli_real_escape_string(
+        $conn,
+        $_POST['departure_date']
+        . ' '
+        . $_POST['departure_time']
+        . ':00'
+    );
+
+
+    /* =================================================
+       ARRIVAL DATE + TIME
+    ================================================= */
+
+    $arrival_time = mysqli_real_escape_string(
+        $conn,
+        $_POST['arrival_date']
+        . ' '
+        . $_POST['arrival_time']
+        . ':00'
+    );
+
+
+    $aircraft = mysqli_real_escape_string(
+        $conn,
+        trim($_POST['aircraft'])
+    );
+
+    $gate_number = mysqli_real_escape_string(
+        $conn,
+        trim($_POST['gate_number'])
+    );
+
+
+    /* =================================================
+       FIND EXISTING AIRPLANE
+    ================================================= */
 
     $airplane_sql = "
         SELECT id
@@ -315,6 +368,16 @@ if (
 
     $airplane_result =
         mysqli_query($conn, $airplane_sql);
+
+
+    if (!$airplane_result) {
+
+        die(
+            "Airplane search error: "
+            . mysqli_error($conn)
+        );
+
+    }
 
 
     if ($airplane_row =
@@ -329,6 +392,7 @@ if (
 
         $registration_number =
             'REG-' . rand(100, 999);
+
 
         $airplane_insert = "
             INSERT INTO airplanes
@@ -350,17 +414,29 @@ if (
             )
         ";
 
-        mysqli_query(
+
+        if (!mysqli_query(
             $conn,
             $airplane_insert
-        );
+        )) {
+
+            die(
+                "Airplane insert error: "
+                . mysqli_error($conn)
+            );
+
+        }
+
 
         $airplane_id =
             mysqli_insert_id($conn);
+
     }
 
 
-    /* Insert Flight */
+    /* =================================================
+       INSERT FLIGHT
+    ================================================= */
 
     $flight_insert = "
         INSERT INTO flights
@@ -387,13 +463,18 @@ if (
     ";
 
 
-    if (mysqli_query($conn, $flight_insert)) {
+    if (mysqli_query(
+        $conn,
+        $flight_insert
+    )) {
 
         $flight_id =
             mysqli_insert_id($conn);
 
 
-        /* Add Gate */
+        /* =================================================
+           ADD GATE
+        ================================================= */
 
         if (!empty($gate_number)) {
 
@@ -421,7 +502,9 @@ if (
         }
 
 
-        /* Refresh Page */
+        /* =================================================
+           REFRESH PAGE
+        ================================================= */
 
         header(
             "Location: flight_schedule.php"
@@ -431,13 +514,18 @@ if (
 
     } else {
 
-        echo "Error: " .
-            mysqli_error($conn);
+        echo "Error: "
+            . mysqli_error($conn);
 
     }
 
 }
 
+
+
+/* =====================================================
+   STAFF INFORMATION
+===================================================== */
 
 $user_id = $_SESSION['user_id'];
 
@@ -450,15 +538,44 @@ $user_sql = "
     WHERE id = '$user_id'
 ";
 
-$user_result = mysqli_query($conn, $user_sql);
-$user_data = mysqli_fetch_assoc($user_result);
+$user_result =
+    mysqli_query(
+        $conn,
+        $user_sql
+    );
 
-$staff_name = $user_data['name'] ?? $_SESSION['name'] ?? 'Staff';
-$staff_role = $user_data['role'] ?? $_SESSION['role'] ?? 'Staff';
-$staff_initials = strtoupper(substr($staff_name, 0, 2));
+$user_data =
+    mysqli_fetch_assoc(
+        $user_result
+    );
 
 
-/* Get Flight Schedules */
+$staff_name =
+    $user_data['name']
+    ?? $_SESSION['name']
+    ?? 'Staff';
+
+
+$staff_role =
+    $user_data['role']
+    ?? $_SESSION['role']
+    ?? 'Staff';
+
+
+$staff_initials =
+    strtoupper(
+        substr(
+            $staff_name,
+            0,
+            2
+        )
+    );
+
+
+
+/* =====================================================
+   GET FLIGHT SCHEDULES
+===================================================== */
 
 $flights_sql = "
     SELECT
@@ -498,18 +615,31 @@ $flights_sql = "
 
 
 $flights_result =
-    mysqli_query($conn, $flights_sql);
+    mysqli_query(
+        $conn,
+        $flights_sql
+    );
 
 
 $total_flights =
-    mysqli_num_rows($flights_result);
+    mysqli_num_rows(
+        $flights_result
+    );
 
 
-/* Status Badge */
+
+/* =====================================================
+   STATUS BADGE
+===================================================== */
 
 function getScheduleBadgeClass($status)
 {
-    switch (strtolower(trim($status))) {
+
+    switch (
+        strtolower(
+            trim($status)
+        )
+    ) {
 
         case 'boarding':
             return 'status-boarding';
@@ -529,7 +659,9 @@ function getScheduleBadgeClass($status)
         case 'on time':
         default:
             return 'status-scheduled';
+
     }
+
 }
 
 ?>
@@ -540,7 +672,6 @@ function getScheduleBadgeClass($status)
 
 <head>
 
-```
 <meta charset="UTF-8">
 
 <meta
@@ -554,19 +685,18 @@ function getScheduleBadgeClass($status)
 <link
     rel="stylesheet"
     href="../assets/css/dashboard.css">
-```
 
 </head>
 
 <body>
 
+
 <!-- =====================================================
      SIDEBAR
-     ===================================================== -->
+===================================================== -->
 
 <aside class="sidebar">
 
-```
 <div class="sidebar-top">
 
 
@@ -705,13 +835,14 @@ function getScheduleBadgeClass($status)
     </p>
 
 </div>
-```
 
 </aside>
 
+
+
 <!-- =====================================================
      MAIN CONTENT
-     ===================================================== -->
+===================================================== -->
 
 <main class="main">
 
@@ -748,7 +879,7 @@ function getScheduleBadgeClass($status)
 
 <!-- =================================================
      ADD SCHEDULE FORM
-     ================================================= -->
+================================================= -->
 
 <div
     id="addScheduleCard"
@@ -852,6 +983,22 @@ function getScheduleBadgeClass($status)
             </div>
 
 
+            <!-- Departure Date -->
+
+            <div class="form-group">
+
+                <label>
+                    Departure Date
+                </label>
+
+                <input
+                    type="date"
+                    name="departure_date"
+                    required>
+
+            </div>
+
+
             <!-- Departure Time -->
 
             <div class="form-group">
@@ -863,6 +1010,22 @@ function getScheduleBadgeClass($status)
                 <input
                     type="time"
                     name="departure_time"
+                    required>
+
+            </div>
+
+
+            <!-- Arrival Date -->
+
+            <div class="form-group">
+
+                <label>
+                    Arrival Date
+                </label>
+
+                <input
+                    type="date"
+                    name="arrival_date"
                     required>
 
             </div>
@@ -949,7 +1112,7 @@ function getScheduleBadgeClass($status)
 
 <!-- =================================================
      FILTERS
-     ================================================= -->
+================================================= -->
 
 <div class="filter-container">
 
@@ -1049,7 +1212,7 @@ function getScheduleBadgeClass($status)
 
 <!-- =================================================
      FLIGHT SCHEDULE TABLE
-     ================================================= -->
+================================================= -->
 
 <div class="schedule-table-card">
 
@@ -1104,13 +1267,19 @@ function getScheduleBadgeClass($status)
         <?php if ($total_flights > 0): ?>
 
 
-            <?php while ($flight = mysqli_fetch_assoc($flights_result)): ?>
+            <?php while (
+                $flight =
+                mysqli_fetch_assoc(
+                    $flights_result
+                )
+            ): ?>
 
 
                 <?php
 
                 $status =
-                    $flight['status'] ?? 'On Time';
+                    $flight['status']
+                    ?? 'On Time';
 
                 $status_class =
                     getScheduleBadgeClass(
@@ -1202,12 +1371,15 @@ function getScheduleBadgeClass($status)
 
                         <div class="schedule-time-box">
 
+
+                            <!-- DEPARTURE -->
+
                             <span>
 
                                 <?php
                                 echo htmlspecialchars(
                                     date(
-                                        'H:i',
+                                        'd M Y, H:i',
                                         strtotime(
                                             $flight['departure_time']
                                         )
@@ -1218,12 +1390,14 @@ function getScheduleBadgeClass($status)
                             </span>
 
 
+                            <!-- ARRIVAL -->
+
                             <span>
 
                                 <?php
                                 echo htmlspecialchars(
                                     date(
-                                        'H:i',
+                                        'd M Y, H:i',
                                         strtotime(
                                             $flight['arrival_time']
                                         )
@@ -1232,6 +1406,7 @@ function getScheduleBadgeClass($status)
                                 ?>
 
                             </span>
+
 
                         </div>
 
@@ -1262,10 +1437,12 @@ function getScheduleBadgeClass($status)
                         <strong class="gate-bold-cyan">
 
                             <?php
+
                             echo htmlspecialchars(
                                 $flight['gate_number']
                                 ?? 'TBD'
                             );
+
                             ?>
 
                         </strong>
@@ -1281,6 +1458,7 @@ function getScheduleBadgeClass($status)
                             class="status-badge clickable-badge <?php echo $status_class; ?>">
 
                             •
+
                             <?php
                             echo htmlspecialchars(
                                 $status
@@ -1297,13 +1475,13 @@ function getScheduleBadgeClass($status)
                     <td>
 
                         <button
-    type="button"
-    class="btn-edit-action edit-flight-btn"
-    data-id="<?php echo $flight['id']; ?>">
+                            type="button"
+                            class="btn-edit-action edit-flight-btn"
+                            data-id="<?php echo $flight['id']; ?>">
 
-    Edit
+                            Edit
 
-</button>
+                        </button>
 
                     </td>
 
@@ -1338,9 +1516,11 @@ function getScheduleBadgeClass($status)
 
 </div>
 
+
+
 <!-- =================================================
      EDIT SCHEDULE FORM
-     ================================================= -->
+================================================= -->
 
 <div
     id="editScheduleCard"
@@ -1364,9 +1544,13 @@ function getScheduleBadgeClass($status)
     </div>
 
 
-    <form method="POST" action="">
+    <form
+        method="POST"
+        action="">
+
 
         <!-- Flight ID -->
+
         <input
             type="hidden"
             name="edit_flight_id"
@@ -1375,6 +1559,8 @@ function getScheduleBadgeClass($status)
 
         <div class="form-grid">
 
+
+            <!-- Flight Number -->
 
             <div class="form-group">
 
@@ -1391,6 +1577,8 @@ function getScheduleBadgeClass($status)
             </div>
 
 
+            <!-- Airline -->
+
             <div class="form-group">
 
                 <label>
@@ -1405,6 +1593,8 @@ function getScheduleBadgeClass($status)
 
             </div>
 
+
+            <!-- Origin -->
 
             <div class="form-group">
 
@@ -1422,6 +1612,8 @@ function getScheduleBadgeClass($status)
             </div>
 
 
+            <!-- Destination -->
+
             <div class="form-group">
 
                 <label>
@@ -1438,6 +1630,25 @@ function getScheduleBadgeClass($status)
             </div>
 
 
+            <!-- Departure Date -->
+
+            <div class="form-group">
+
+                <label>
+                    Departure Date
+                </label>
+
+                <input
+                    type="date"
+                    name="edit_departure_date"
+                    id="edit_departure_date"
+                    required>
+
+            </div>
+
+
+            <!-- Departure Time -->
+
             <div class="form-group">
 
                 <label>
@@ -1452,6 +1663,25 @@ function getScheduleBadgeClass($status)
 
             </div>
 
+
+            <!-- Arrival Date -->
+
+            <div class="form-group">
+
+                <label>
+                    Arrival Date
+                </label>
+
+                <input
+                    type="date"
+                    name="edit_arrival_date"
+                    id="edit_arrival_date"
+                    required>
+
+            </div>
+
+
+            <!-- Arrival Time -->
 
             <div class="form-group">
 
@@ -1468,6 +1698,8 @@ function getScheduleBadgeClass($status)
             </div>
 
 
+            <!-- Aircraft -->
+
             <div class="form-group">
 
                 <label>
@@ -1482,6 +1714,8 @@ function getScheduleBadgeClass($status)
 
             </div>
 
+
+            <!-- Gate -->
 
             <div class="form-group">
 
@@ -1500,6 +1734,7 @@ function getScheduleBadgeClass($status)
 
 
         <div class="form-actions">
+
 
             <button
                 type="submit"
@@ -1528,9 +1763,9 @@ function getScheduleBadgeClass($status)
 
 
 
-<!-- 
+<!-- =================================================
      STATUS LEGEND
-     ================================================= -->
+================================================= -->
 
 <div class="status-legend-bar">
 
@@ -1580,8 +1815,8 @@ function getScheduleBadgeClass($status)
 
 </main>
 
-<script src="../assets/js/dashboard.js"></script>
 
+<script src="../assets/js/dashboard.js"></script>
 
 
 </body>
