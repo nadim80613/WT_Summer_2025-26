@@ -17,22 +17,22 @@ if(isset($_POST['submit'])){
 
 
     $airline_name = $_POST['airline_name'];
-    $model = $_POST['model'];
-    $registration_number = $_POST['registration_number'];
-    $capacity = $_POST['capacity'];
+    $country = $_POST['country'];
+    $contact = $_POST['contact'];
+    $email = $_POST['email'];
     $status = $_POST['status'];
 
 
 
-    $sql = "INSERT INTO airplanes
-    (airline_name, model, registration_number, capacity, status)
+    $sql = "INSERT INTO airlines
+    (airline_name, country, contact, email, status)
 
     VALUES
 
     ('$airline_name',
-     '$model',
-     '$registration_number',
-     '$capacity',
+     '$country',
+     '$contact',
+     '$email',
      '$status')";
 
 
@@ -46,7 +46,7 @@ if(isset($_POST['submit'])){
     VALUES
 
     ('".$_SESSION['user_id']."',
-    'Added new airline: ".$airline_name."')";
+    'Added airline information: ".$airline_name."')";
 
 
     mysqli_query($conn,$log_sql);
@@ -67,7 +67,7 @@ if(isset($_POST['submit'])){
 
 <head>
 
-<title>Add Airline</title>
+<title>Add Airline Information</title>
 
 <link rel="stylesheet" href="../assets/css/admin.css">
 
@@ -86,7 +86,7 @@ if(isset($_POST['submit'])){
 <div class="main-content">
 
 
-<h1>Add Airline</h1>
+<h1>Add Airline Information</h1>
 
 
 <div class="form-card">
@@ -97,25 +97,35 @@ if(isset($_POST['submit'])){
 
 <label>Airline Name</label>
 
-<input type="text" name="airline_name" required>
+<input 
+type="text" 
+name="airline_name" 
+required>
 
 
 
-<label>Aircraft Model</label>
+<label>Country</label>
 
-<input type="text" name="model" required>
-
-
-
-<label>Registration Number</label>
-
-<input type="text" name="registration_number" required>
+<input 
+type="text" 
+name="country" 
+required>
 
 
 
-<label>Capacity</label>
+<label>Contact</label>
 
-<input type="number" name="capacity" required>
+<input 
+type="text" 
+name="contact">
+
+
+
+<label>Email</label>
+
+<input 
+type="email" 
+name="email">
 
 
 
@@ -123,17 +133,16 @@ if(isset($_POST['submit'])){
 
 <select name="status">
 
+
 <option value="Active">
 Active
 </option>
 
-<option value="Pending">
-Pending
+
+<option value="Inactive">
+Inactive
 </option>
 
-<option value="Rejected">
-Rejected
-</option>
 
 </select>
 
@@ -142,29 +151,39 @@ Rejected
 <div class="form-buttons">
 
 
-<button class="save-btn" type="submit" name="submit">
+<button 
+class="save-btn" 
+type="submit" 
+name="submit">
 
 Add Airline
 
 </button>
 
 
-<a class="back-btn" href="airlines.php">
+
+<a 
+class="back-btn" 
+href="airlines.php">
 
 Back
 
 </a>
 
+
 </div>
 
-</form>
 
-    </div>
+     </form>
+
+ 
+      </div>
 
 
-    </div>
+   </div>
 
- </div>
+</div>
+
 
 </body>
-</html>
+</html>  

@@ -12,7 +12,11 @@ if(!isset($_SESSION["user_id"]) || $_SESSION["role"]!="admin")
 }
 
 
-$sql = "SELECT * FROM airlines ORDER BY id DESC";
+$sql = "SELECT aircraft_requests.*, airlines.airline_name 
+FROM aircraft_requests
+JOIN airlines 
+ON aircraft_requests.airline_id = airlines.id
+ORDER BY aircraft_requests.id DESC";
 
 $result = mysqli_query($conn,$sql);
 
@@ -25,11 +29,12 @@ $result = mysqli_query($conn,$sql);
 
 <head>
 
-<title>Airline Information</title>
+<title>Aircraft Approval</title>
 
 <link rel="stylesheet" href="../assets/css/admin.css">
 
 </head>
+
 
 <body>
 
@@ -43,12 +48,10 @@ $result = mysqli_query($conn,$sql);
 <div class="main-content">
 
 
-<h1>Airline Information</h1>
+<h1>Aircraft Approval</h1>
 
-<br> <br>
-<a class="save-btn" href="add_airline.php">
-Add Airline
-</a>
+
+<br><br>
 
 
 <div class="table-card">
@@ -63,17 +66,18 @@ Add Airline
 
 <th>Airline Name</th>
 
-<th>Country</th>
+<th>Aircraft Model</th>
 
-<th>Contact</th>
+<th>Registration</th>
 
-<th>Email</th>
+<th>Capacity</th>
 
 <th>Status</th>
 
 <th>Action</th>
 
 </tr>
+
 
 
 <?php while($row=mysqli_fetch_assoc($result)){ ?>
@@ -93,17 +97,17 @@ Add Airline
 
 
 <td>
-<?php echo $row['country']; ?>
+<?php echo $row['aircraft_model']; ?>
 </td>
 
 
 <td>
-<?php echo $row['contact']; ?>
+<?php echo $row['registration_number']; ?>
 </td>
 
 
 <td>
-<?php echo $row['email']; ?>
+<?php echo $row['capacity']; ?>
 </td>
 
 
@@ -112,18 +116,33 @@ Add Airline
 </td>
 
 
+
 <td>
 
-<a class="edit-btn" href="edit_airline.php?id=<?php echo $row['id']; ?>">
-Edit
+
+<?php if($row['status']=="Pending"){ ?>
+
+
+<a class="edit-btn"
+href="approve_aircraft.php?id=<?php echo $row['id']; ?>">
+Approve
 </a>
 
 
 <a class="delete-btn"
-href="delete_airline.php?id=<?php echo $row['id']; ?>"
-onclick="return confirm('Delete this airline?')">
-Delete
+href="reject_aircraft.php?id=<?php echo $row['id']; ?>"
+onclick="return confirm('Reject this request?')">
+Reject
 </a>
+
+
+<?php } else { ?>
+
+
+Completed
+
+
+<?php } ?>
 
 
 </td>
@@ -134,11 +153,10 @@ Delete
 
 <?php } ?>
 
-
 </table>
 
-
 </div>
+
 </div>
 
 </div>

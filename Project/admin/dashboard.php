@@ -21,6 +21,13 @@ $total_staff = mysqli_fetch_assoc($total_staff)['total'];
 $total_airlines = mysqli_query($conn,"SELECT COUNT(*) AS total FROM users WHERE role='airline'");
 $total_airlines = mysqli_fetch_assoc($total_airlines)['total'];
 
+$total_services = mysqli_query($conn,"SELECT COUNT(*) AS total FROM airport_services");
+$total_services = mysqli_fetch_assoc($total_services)['total'];
+
+
+$total_activities = mysqli_query($conn,"SELECT COUNT(*) AS total FROM activity_logs");
+$total_activities = mysqli_fetch_assoc($total_activities)['total'];
+
 ?>
 
 
@@ -94,6 +101,33 @@ $total_airlines = mysqli_fetch_assoc($total_airlines)['total'];
 <div class="number">
 <?php echo $total_airlines; ?>
 </div>
+
+</div>
+
+
+<div class="card">
+
+<h3>Airport Services</h3>
+
+<div class="number">
+<?php echo $total_services; ?>
+</div>
+
+</div>
+
+
+
+<div class="card">
+
+<h3>System Activities</h3>
+
+<div class="number">
+<?php echo $total_activities; ?>
+</div>
+
+</div>
+
+
 
 </div>
 
