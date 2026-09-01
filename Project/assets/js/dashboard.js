@@ -760,5 +760,124 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     );
 
+    /* =====================================================
+   BAGGAGE SEARCH
+===================================================== */
+
+const baggageSearch = document.getElementById("baggageSearch");
+
+const baggageRows = document.querySelectorAll(".baggage-row");
+
+const itemsCount = document.getElementById("itemsCount");
+
+
+if (baggageSearch) {
+
+    baggageSearch.addEventListener("input", function () {
+
+        const searchText = this.value.toLowerCase().trim();
+
+        let visibleItems = 0;
+
+
+        baggageRows.forEach(function (row) {
+
+            const rowText = row.innerText.toLowerCase();
+
+
+            if (rowText.includes(searchText)) {
+
+                row.style.display = "";
+
+                visibleItems++;
+
+            } else {
+
+                row.style.display = "none";
+
+            }
+
+        });
+
+
+        if (itemsCount) {
+
+            itemsCount.textContent = visibleItems;
+
+        }
+
+    });
+
+}
+
+
+/* =====================================================
+   UPDATE BAGGAGE STATUS
+===================================================== */
+
+function updateBaggageStep(bagId, step) {
+
+    const formData = new FormData();
+
+
+    formData.append(
+        "update_step",
+        "1"
+    );
+
+
+    formData.append(
+        "bag_id",
+        bagId
+    );
+
+
+    formData.append(
+        "step",
+        step
+    );
+
+
+    fetch(
+        "baggage_status.php",
+        {
+            method: "POST",
+            body: formData
+        }
+    )
+
+
+    .then(function (response) {
+
+        return response.json();
+
+    })
+
+
+    .then(function (data) {
+
+        if (data.success) {
+
+            location.reload();
+
+        } else {
+
+            alert("Could not update baggage status.");
+
+        }
+
+    })
+
+
+    .catch(function (error) {
+
+        console.log(error);
+
+        alert("Something went wrong.");
+
+    });
+
+}
+
 
 });

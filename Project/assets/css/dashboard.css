@@ -2293,7 +2293,7 @@ body:not(.light-mode) .btn-cancel {
    RESPONSIVE
 ================================================== */
 
-@media (max-width: 1000px) {
+@media (max-width: 700px) {
 
     .gate-stat-cards {
         grid-template-columns:
@@ -2324,5 +2324,343 @@ body:not(.light-mode) .btn-cancel {
 
         gap: 5px;
     }
+
+    /* =====================================================
+   BAGGAGE PAGE
+===================================================== */
+
+.baggage-stat-cards {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 18px;
+    margin-bottom: 25px;
+}
+
+
+/* =====================================================
+   SEARCH
+===================================================== */
+
+.search-filter-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 22px;
+}
+
+.search-input-wrapper {
+    flex: 1;
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.search-input-wrapper input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 14px 18px 14px 45px;
+    border: 1px solid #dce6f0;
+    border-radius: 16px;
+    font-size: 14px;
+    outline: none;
+    background: white;
+}
+
+.search-input-wrapper input:focus {
+    border-color: #009fe3;
+}
+
+.items-count-badge {
+    padding: 14px 20px;
+    background: white;
+    border: 1px solid #dce6f0;
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+
+/* =====================================================
+   TABLE
+===================================================== */
+
+.baggage-table-card {
+    background: white;
+    border: 1px solid #dce6f0;
+    border-radius: 20px;
+    overflow-x: auto;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+}
+
+.baggage-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+
+.baggage-table th {
+    background: #f8fafc;
+    padding: 16px 20px;
+    text-align: left;
+    font-size: 12px;
+    color: #64748b;
+    border-bottom: 1px solid #dce6f0;
+}
+
+.baggage-table td {
+    padding: 18px 20px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+.baggage-table tr:last-child td {
+    border-bottom: none;
+}
+
+
+/* =====================================================
+   BAGGAGE TAG
+===================================================== */
+
+.baggage-tag-box {
+    display: flex;
+    flex-direction: column;
+    color: #009fe3;
+    font-weight: bold;
+    line-height: 1.3;
+}
+
+
+/* =====================================================
+   TEXT
+===================================================== */
+
+.cell-passenger strong,
+.cell-flight strong {
+    color: #0f172a;
+}
+
+.cell-route {
+    color: #64748b;
+}
+
+
+/* =====================================================
+   PROGRESS STEPPER
+===================================================== */
+
+.progress-stepper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 230px;
+}
+
+
+/* Circle */
+
+.step-circle {
+    width: 30px;
+    height: 30px;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 12px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    flex-shrink: 0;
+
+    transition: 0.2s;
+}
+
+
+/* Completed */
+
+.step-circle.completed {
+    background: #009fe3;
+    color: white;
+    border: 2px solid #009fe3;
+}
+
+
+/* Current */
+
+.step-circle.active {
+    background: white;
+    color: #009fe3;
+    border: 2px solid #009fe3;
+}
+
+
+/* Future */
+
+.step-circle.inactive {
+    background: #f1f5f9;
+    color: #94a3b8;
+    border: 2px solid #dce6f0;
+}
+
+
+/* Hover */
+
+.step-circle:hover {
+    transform: scale(1.1);
+}
+
+
+/* Line */
+
+.step-line {
+    height: 3px;
+    width: 28px;
+    background: #dce6f0;
+}
+
+.step-line.completed {
+    background: #009fe3;
+}
+
+
+/* =====================================================
+   STATUS BADGES
+===================================================== */
+
+.baggage-badge {
+    display: inline-block;
+    padding: 7px 13px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+
+/* Checked In */
+
+.status-checked-in {
+    background: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+}
+
+
+/* Loaded */
+
+.status-loaded {
+    background: #e0f2fe;
+    color: #0284c7;
+    border: 1px solid #bae6fd;
+}
+
+
+/* Transit */
+
+.status-transit {
+    background: #fef3c7;
+    color: #d97706;
+    border: 1px solid #fde68a;
+}
+
+
+/* Arrived */
+
+.status-arrived {
+    background: #dcfce7;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+
+/* Delivered */
+
+.status-delivered {
+    background: #e0e7ff;
+    color: #4f46e5;
+    border: 1px solid #c7d2fe;
+}
+
+
+/* =====================================================
+   DARK MODE
+===================================================== */
+
+body:not(.light-mode) .search-input-wrapper input {
+    background: #071a30;
+    color: white;
+    border-color: #18304d;
+}
+
+body:not(.light-mode) .items-count-badge {
+    background: #071a30;
+    color: white;
+    border-color: #18304d;
+}
+
+body:not(.light-mode) .baggage-table-card {
+    background: #071a30;
+    border-color: #18304d;
+}
+
+body:not(.light-mode) .baggage-table th {
+    background: #0c1c33;
+    color: #91a0b7;
+    border-color: #18304d;
+}
+
+body:not(.light-mode) .baggage-table td {
+    color: #d8e2f0;
+    border-color: #18304d;
+}
+
+body:not(.light-mode) .cell-passenger strong,
+body:not(.light-mode) .cell-flight strong {
+    color: white;
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 1100px) {
+
+    .baggage-stat-cards {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+}
+
+
+@media (max-width: 768px) {
+
+    .baggage-stat-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .search-filter-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .items-count-badge {
+        text-align: center;
+    }
+
+}
+
+
 
 }
