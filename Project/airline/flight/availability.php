@@ -3,25 +3,81 @@
 session_start();
 require_once '../../config/database.php';
 
+
+/* CHECK LOGIN */
+
 if(!isset($_SESSION['user_id'])){
     header('Location: ../../login.php');
     exit();
 }
+
 
 if(strtolower(trim($_SESSION['role'] ?? '')) !== 'airline'){
     header('Location: ../../index.php');
     exit();
 }
 
-$airline_id=(int)$_SESSION['user_id'];
 
-$airline_name=$_SESSION['user_name']
-    ?? $_SESSION['name']
-    ?? 'Airline';
+/* GET LOGGED IN USER ID */
 
+$user_id=(int)$_SESSION['user_id'];
+
+
+/* GET USER EMAIL */
 
 $stmt=$conn->prepare(
-    'SELECT
+    "SELECT email
+     FROM users
+     WHERE id=?
+     LIMIT 1"
+);
+
+$stmt->bind_param('i',$user_id);
+
+$stmt->execute();
+
+$user=$stmt->get_result()->fetch_assoc();
+
+$stmt->close();
+
+
+if(!$user){
+    die("User information not found.");
+}
+
+
+/* GET AIRLINE INFORMATION */
+
+$stmt=$conn->prepare(
+    "SELECT id,airline_name
+     FROM airlines
+     WHERE email=?
+     LIMIT 1"
+);
+
+$stmt->bind_param('s',$user['email']);
+
+$stmt->execute();
+
+$airline=$stmt->get_result()->fetch_assoc();
+
+$stmt->close();
+
+
+if(!$airline){
+    die("Airline information not found.");
+}
+
+
+$airline_id=(int)$airline['id'];
+
+$airline_name=$airline['airline_name'];
+
+
+/* GET FLIGHTS */
+
+$stmt=$conn->prepare(
+    "SELECT
         f.id,
         f.flight_number,
         f.departure,
@@ -35,7 +91,7 @@ $stmt=$conn->prepare(
      JOIN airplanes a
      ON f.airplane_id=a.id
      WHERE a.airline_id=?
-     ORDER BY f.departure_time'
+     ORDER BY f.departure_time ASC"
 );
 
 $stmt->bind_param('i',$airline_id);

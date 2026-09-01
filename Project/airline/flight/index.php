@@ -3,35 +3,78 @@
 session_start();
 require_once '../../config/database.php';
 
-if(!isset($_SESSION['user_id'])){
-    header('Location: ../../login.php');
+
+/* CHECK LOGIN */
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../../login.php");
     exit();
 }
 
-if(strtolower(trim($_SESSION['role'] ?? '')) !== 'airline'){
-    header('Location: ../../index.php');
+if ($_SESSION['role'] != 'airline') {
+    header("Location: ../../index.php");
     exit();
 }
 
-$airline_id=(int)$_SESSION['user_id'];
-$airline_name=$_SESSION['user_name'] ?? $_SESSION['name'] ?? 'Airline';
+
+/* GET USER ID */
+
+$user_id = $_SESSION['user_id'];
 
 
-$stmt=$conn->prepare(
-    'SELECT f.*,
-            a.model,
-            a.registration_number
-     FROM flights f
-     LEFT JOIN airplanes a
-     ON f.airplane_id=a.id
-     WHERE a.airline_id=?
-     ORDER BY f.departure_time ASC'
-);
+/* GET USER EMAIL */
 
-$stmt->bind_param('i',$airline_id);
+$sql = "SELECT email FROM users WHERE id = ?";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
 $stmt->execute();
 
-$result=$stmt->get_result();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
+
+$email = $user['email'];
+
+
+/* GET AIRLINE */
+
+$sql = "SELECT id, airline_name
+        FROM airlines
+        WHERE email = ?";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $email);
+$stmt->execute();
+
+$result = $stmt->get_result();
+$airline = $result->fetch_assoc();
+
+
+if (!$airline) {
+    die("Airline record not found.");
+}
+
+
+$airline_id = $airline['id'];
+$airline_name = $airline['airline_name'];
+
+
+/* GET FLIGHTS */
+
+$sql = "SELECT f.*,
+               a.model,
+               a.registration_number
+        FROM flights f
+        JOIN airplanes a
+        ON f.airplane_id = a.id
+        WHERE a.airline_id = ?
+        ORDER BY f.departure_time ASC";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $airline_id);
+$stmt->execute();
+
+$result = $stmt->get_result();
 
 ?>
 
@@ -56,6 +99,8 @@ $result=$stmt->get_result();
 <div class="airline-container">
 
 
+<!-- SIDEBAR -->
+
 <div class="sidebar">
 
 
@@ -75,6 +120,7 @@ $result=$stmt->get_result();
    class="menu-item">
 
 <span>📊</span>
+
 Dashboard
 
 </a>
@@ -83,7 +129,9 @@ Dashboard
 <div class="menu-section">
 
 <p class="menu-title">
+
 Aircraft
+
 </p>
 
 
@@ -91,6 +139,7 @@ Aircraft
    class="menu-item">
 
 <span>✈️</span>
+
 My Aircraft
 
 </a>
@@ -100,6 +149,7 @@ My Aircraft
    class="menu-item">
 
 <span>➕</span>
+
 Add Aircraft
 
 </a>
@@ -109,6 +159,7 @@ Add Aircraft
    class="menu-item">
 
 <span>📋</span>
+
 Approval Requests
 
 </a>
@@ -119,7 +170,9 @@ Approval Requests
 <div class="menu-section">
 
 <p class="menu-title">
+
 Flights
+
 </p>
 
 
@@ -127,6 +180,7 @@ Flights
    class="menu-item active">
 
 <span>🛫</span>
+
 My Flights
 
 </a>
@@ -136,6 +190,7 @@ My Flights
    class="menu-item">
 
 <span>➕</span>
+
 Add Flight
 
 </a>
@@ -145,6 +200,7 @@ Add Flight
    class="menu-item">
 
 <span>💺</span>
+
 Seat Availability
 
 </a>
@@ -154,6 +210,7 @@ Seat Availability
    class="menu-item">
 
 <span>🕐</span>
+
 Schedule Requests
 
 </a>
@@ -164,7 +221,9 @@ Schedule Requests
 <div class="menu-section">
 
 <p class="menu-title">
+
 Account
+
 </p>
 
 
@@ -172,6 +231,7 @@ Account
    class="menu-item logout-item">
 
 <span>🚪</span>
+
 Logout
 
 </a>
@@ -183,6 +243,8 @@ Logout
 
 </div>
 
+
+<!-- MAIN CONTENT -->
 
 <div class="main-content">
 
@@ -205,7 +267,11 @@ Logout
 <div class="user-avatar">
 
 <?php
-echo strtoupper(substr($airline_name,0,1));
+
+echo strtoupper(
+    substr($airline_name, 0, 1)
+);
+
 ?>
 
 </div>
@@ -216,7 +282,9 @@ echo strtoupper(substr($airline_name,0,1));
 <strong>
 
 <?php
+
 echo htmlspecialchars($airline_name);
+
 ?>
 
 </strong>
@@ -232,6 +300,8 @@ echo htmlspecialchars($airline_name);
 </header>
 
 
+<!-- PAGE HEADER -->
+
 <section class="page-header">
 
 
@@ -240,7 +310,9 @@ echo htmlspecialchars($airline_name);
 <h2>My Flights</h2>
 
 <p>
+
 Manage routes, schedules and assigned aircraft.
+
 </p>
 
 </div>
@@ -256,6 +328,8 @@ Manage routes, schedules and assigned aircraft.
 
 </section>
 
+
+<!-- FLIGHT TABLE -->
 
 <section class="content-card">
 
@@ -292,26 +366,27 @@ Manage routes, schedules and assigned aircraft.
 <tbody>
 
 
-<?php
+<?php if ($result->num_rows > 0): ?>
 
-if($result->num_rows > 0):
 
-while($f=$result->fetch_assoc()):
-
-?>
+<?php while ($f = $result->fetch_assoc()): ?>
 
 
 <tr>
 
+
+<!-- FLIGHT NUMBER -->
 
 <td>
 
 <strong>
 
 <?php
+
 echo htmlspecialchars(
     $f['flight_number']
 );
+
 ?>
 
 </strong>
@@ -319,12 +394,16 @@ echo htmlspecialchars(
 </td>
 
 
+<!-- ROUTE -->
+
 <td>
 
 <?php
 
 echo htmlspecialchars(
-    $f['departure'].' → '.$f['destination']
+    $f['departure']
+    . " → "
+    . $f['destination']
 );
 
 ?>
@@ -332,49 +411,65 @@ echo htmlspecialchars(
 </td>
 
 
+<!-- DEPARTURE -->
+
 <td>
 
 <?php
+
 echo htmlspecialchars(
     $f['departure_time']
 );
+
 ?>
 
 </td>
 
 
+<!-- ARRIVAL -->
+
 <td>
 
 <?php
+
 echo htmlspecialchars(
     $f['arrival_time']
 );
+
 ?>
 
 </td>
 
+
+<!-- AIRCRAFT -->
 
 <td>
 
 <?php
 
 echo htmlspecialchars(
-    ($f['model'] ?? 'N/A').
-    ' / '.
-    ($f['registration_number'] ?? 'N/A')
+    $f['model']
+    . " / "
+    . $f['registration_number']
 );
 
 ?>
 
 </td>
 
+
+<!-- STATUS -->
 
 <td>
 
 <span class="status-badge">
 
 <?php
-echo htmlspecialchars($f['status']);
+
+echo htmlspecialchars(
+    $f['status']
+);
+
 ?>
 
 </span>
@@ -382,13 +477,15 @@ echo htmlspecialchars($f['status']);
 </td>
 
 
+<!-- ACTIONS -->
+
 <td>
 
 <div class="table-actions">
 
 
 <a
-href="view.php?id=<?php echo (int)$f['id']; ?>"
+href="view.php?id=<?php echo $f['id']; ?>"
 class="btn btn-small btn-secondary">
 
 View
@@ -397,7 +494,7 @@ View
 
 
 <a
-href="edit.php?id=<?php echo (int)$f['id']; ?>"
+href="edit.php?id=<?php echo $f['id']; ?>"
 class="btn btn-small btn-primary">
 
 Edit
@@ -413,19 +510,16 @@ Edit
 </tr>
 
 
-<?php
+<?php endwhile; ?>
 
-endwhile;
 
-else:
-
-?>
+<?php else: ?>
 
 
 <tr>
 
 <td colspan="7"
-    style="text-align:center">
+    style="text-align:center;">
 
 No flights found.
 
@@ -454,10 +548,3 @@ No flights found.
 </body>
 
 </html>
-
-
-<?php
-
-$stmt->close();
-
-?>
