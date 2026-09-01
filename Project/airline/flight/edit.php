@@ -1,224 +1,204 @@
 <?php
 
 session_start();
-
 require_once '../../config/database.php';
 
 
-if(!isset($_SESSION['user_id']))
-{
-    header('Location: ../../login.php');
+/* CHECK LOGIN */
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../../login.php");
+    exit();
+}
+
+if ($_SESSION['role'] != 'airline') {
+    header("Location: ../../index.php");
     exit();
 }
 
 
-if(strtolower(trim($_SESSION['role'] ?? '')) !== 'airline')
-{
-    header('Location: ../../index.php');
-    exit();
-}
+/* GET USER */
 
+$user_id = $_SESSION['user_id'];
 
-$airline_id=(int)$_SESSION['user_id'];
+$sql = "SELECT email FROM users WHERE id = ?";
 
-$airline_name=$_SESSION['user_name'] ??
-$_SESSION['name'] ?? 'Airline';
-
-
-/*
-GET FLIGHT
-*/
-
-$id=(int)($_GET['id'] ?? $_POST['id'] ?? 0);
-
-$errors=[];
-
-
-$stmt=$conn->prepare(
-    'SELECT *
-     FROM flights
-     WHERE id=?
-     AND airline_id=?
-     LIMIT 1'
-);
-
-
-$stmt->bind_param(
-    'ii',
-    $id,
-    $airline_id
-);
-
-
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
 $stmt->execute();
 
-$flight=$stmt->get_result()->fetch_assoc();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
 
-$stmt->close();
+$email = $user['email'];
 
 
-if(!$flight)
-{
-    header('Location: index.php');
+/* GET AIRLINE */
+
+$sql = "SELECT id, airline_name
+        FROM airlines
+        WHERE email = ?";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $email);
+$stmt->execute();
+
+$result = $stmt->get_result();
+$airline = $result->fetch_assoc();
+
+
+if (!$airline) {
+    die("Airline record not found.");
+}
+
+
+$airline_id = $airline['id'];
+$airline_name = $airline['airline_name'];
+
+
+/* GET FLIGHT ID */
+
+$flight_id = $_GET['id'] ?? 0;
+
+if ($flight_id <= 0) {
+    header("Location: index.php");
     exit();
 }
 
 
-/*
-FLIGHT INFORMATION
-*/
+/* GET FLIGHT */
 
-$flight_number=$flight['flight_number'];
+$sql = "SELECT f.*
+        FROM flights f
+        JOIN airplanes a
+        ON f.airplane_id = a.id
+        WHERE f.id = ?
+        AND a.airline_id = ?";
 
-$departure=$flight['departure'];
-
-$destination=$flight['destination'];
-
-$departure_time=date(
-    'Y-m-d\TH:i',
-    strtotime($flight['departure_time'])
-);
-
-$arrival_time=date(
-    'Y-m-d\TH:i',
-    strtotime($flight['arrival_time'])
-);
-
-$airplane_id=(int)$flight['airplane_id'];
-
-$status=$flight['status'];
-
-
-/*
-GET AIRCRAFT
-*/
-
-$stmt=$conn->prepare(
-    'SELECT id,
-            model,
-            registration_number,
-            capacity
-     FROM airplanes
-     WHERE airline_id=?
-     AND LOWER(status)=\'active\''
-);
-
-
-$stmt->bind_param(
-    'i',
-    $airline_id
-);
-
-
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("ii", $flight_id, $airline_id);
 $stmt->execute();
 
-$aircraft_result=$stmt->get_result();
+$result = $stmt->get_result();
+
+$flight = $result->fetch_assoc();
 
 
-/*
-UPDATE FLIGHT
-*/
-
-if($_SERVER['REQUEST_METHOD']==='POST')
-{
-
-    $flight_number=trim(
-        $_POST['flight_number'] ?? ''
-    );
-
-    $departure=trim(
-        $_POST['departure'] ?? ''
-    );
-
-    $destination=trim(
-        $_POST['destination'] ?? ''
-    );
-
-    $departure_time=trim(
-        $_POST['departure_time'] ?? ''
-    );
-
-    $arrival_time=trim(
-        $_POST['arrival_time'] ?? ''
-    );
-
-    $airplane_id=(int)(
-        $_POST['airplane_id'] ?? 0
-    );
-
-    $status=trim(
-        $_POST['status'] ?? 'Scheduled'
-    );
+if (!$flight) {
+    die("Flight not found.");
+}
 
 
-    /*
-    VALIDATION
-    */
+/* GET AIRCRAFT */
 
-    if($flight_number==='')
-    {
-        $errors[]='Flight number is required.';
+$sql = "SELECT id, model, registration_number, capacity
+        FROM airplanes
+        WHERE airline_id = ?
+        ORDER BY model";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $airline_id);
+$stmt->execute();
+
+$aircraft_result = $stmt->get_result();
+
+
+/* VARIABLES */
+
+$errors = [];
+
+$flight_number = $flight['flight_number'];
+$departure = $flight['departure'];
+$destination = $flight['destination'];
+$departure_time = $flight['departure_time'];
+$arrival_time = $flight['arrival_time'];
+$airplane_id = $flight['airplane_id'];
+$status = $flight['status'];
+
+
+/* UPDATE FLIGHT */
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+    $flight_number = trim($_POST['flight_number']);
+    $departure = trim($_POST['departure']);
+    $destination = trim($_POST['destination']);
+    $departure_time = $_POST['departure_time'];
+    $arrival_time = $_POST['arrival_time'];
+    $airplane_id = $_POST['airplane_id'];
+    $status = $_POST['status'];
+
+
+    /* CHECK FIELDS */
+
+    if ($flight_number == "") {
+        $errors[] = "Flight number is required.";
+    }
+
+    if ($departure == "") {
+        $errors[] = "Departure location is required.";
+    }
+
+    if ($destination == "") {
+        $errors[] = "Arrival location is required.";
+    }
+
+    if ($departure_time == "") {
+        $errors[] = "Departure time is required.";
+    }
+
+    if ($arrival_time == "") {
+        $errors[] = "Arrival time is required.";
+    }
+
+    if ($airplane_id == "") {
+        $errors[] = "Please select an aircraft.";
+    }
+
+    if ($status == "") {
+        $errors[] = "Please select a status.";
     }
 
 
-    if($departure==='')
-    {
-        $errors[]='Departure is required.';
+    /* CHECK AIRCRAFT */
+
+    if (empty($errors)) {
+
+        $sql = "SELECT id
+                FROM airplanes
+                WHERE id = ?
+                AND airline_id = ?";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ii", $airplane_id, $airline_id);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+
+        if ($result->num_rows == 0) {
+            $errors[] = "Invalid aircraft selected.";
+        }
     }
 
 
-    if($destination==='')
-    {
-        $errors[]='Arrival is required.';
-    }
+    /* UPDATE */
 
+    if (empty($errors)) {
 
-    if($departure_time==='' || $arrival_time==='')
-    {
-        $errors[]='Date and time are required.';
-    }
+        $sql = "UPDATE flights
+                SET flight_number = ?,
+                    airplane_id = ?,
+                    departure = ?,
+                    destination = ?,
+                    departure_time = ?,
+                    arrival_time = ?,
+                    status = ?
+                WHERE id = ?";
 
-
-    if($airplane_id<=0)
-    {
-        $errors[]='Aircraft is required.';
-    }
-
-
-    if(
-        $departure_time!=='' &&
-        $arrival_time!=='' &&
-        strtotime($arrival_time)<=strtotime($departure_time)
-    )
-    {
-        $errors[]=
-            'Arrival must be after departure.';
-    }
-
-
-    /*
-    UPDATE
-    */
-
-    if(empty($errors))
-    {
-
-        $stmt=$conn->prepare(
-            'UPDATE flights
-             SET flight_number=?,
-                 airplane_id=?,
-                 departure=?,
-                 destination=?,
-                 departure_time=?,
-                 arrival_time=?,
-                 status=?
-             WHERE id=?
-             AND airline_id=?'
-        );
-
+        $stmt = $conn->prepare($sql);
 
         $stmt->bind_param(
-            'sisssssii',
+            "sisssssi",
             $flight_number,
             $airplane_id,
             $departure,
@@ -226,31 +206,20 @@ if($_SERVER['REQUEST_METHOD']==='POST')
             $departure_time,
             $arrival_time,
             $status,
-            $id,
-            $airline_id
+            $flight_id
         );
 
 
-        if($stmt->execute())
-        {
+        if ($stmt->execute()) {
 
-            $stmt->close();
-
-            header(
-                'Location: view.php?id='.$id
-            );
-
+            header("Location: index.php?success=updated");
             exit();
 
+        } else {
+
+            $errors[] = "Could not update flight.";
         }
-
-
-        $errors[]='Failed to update flight.';
-
-        $stmt->close();
-
     }
-
 }
 
 ?>
@@ -259,7 +228,6 @@ if($_SERVER['REQUEST_METHOD']==='POST')
 <!DOCTYPE html>
 
 <html>
-
 
 <head>
 
@@ -277,155 +245,151 @@ if($_SERVER['REQUEST_METHOD']==='POST')
 <div class="airline-container">
 
 
+<!-- SIDEBAR -->
+
 <div class="sidebar">
 
+    <div class="sidebar-logo">
 
-<div class="sidebar-logo">
+        <h2>AMS</h2>
 
-<h2>AMS</h2>
+        <p>Airline Portal</p>
 
-<p>Airline Portal</p>
+    </div>
+
+
+    <nav class="sidebar-menu">
+
+
+        <a href="../dashboard.php"
+           class="menu-item">
+
+            <span>📊</span>
+
+            Dashboard
+
+        </a>
+
+
+        <div class="menu-section">
+
+            <p class="menu-title">
+
+                Aircraft
+
+            </p>
+
+
+            <a href="../airplane/index.php"
+               class="menu-item">
+
+                <span>✈️</span>
+
+                My Aircraft
+
+            </a>
+
+
+            <a href="../airplane/add.php"
+               class="menu-item">
+
+                <span>➕</span>
+
+                Add Aircraft
+
+            </a>
+
+
+            <a href="../approval/index.php"
+               class="menu-item">
+
+                <span>📋</span>
+
+                Approval Requests
+
+            </a>
+
+        </div>
+
+
+        <div class="menu-section">
+
+            <p class="menu-title">
+
+                Flights
+
+            </p>
+
+
+            <a href="index.php"
+               class="menu-item active">
+
+                <span>🛫</span>
+
+                My Flights
+
+            </a>
+
+
+            <a href="add.php"
+               class="menu-item">
+
+                <span>➕</span>
+
+                Add Flight
+
+            </a>
+
+
+            <a href="availability.php"
+               class="menu-item">
+
+                <span>💺</span>
+
+                Seat Availability
+
+            </a>
+
+
+            <a href="schedule_request.php"
+               class="menu-item">
+
+                <span>🕐</span>
+
+                Schedule Requests
+
+            </a>
+
+        </div>
+
+
+        <div class="menu-section">
+
+            <p class="menu-title">
+
+                Account
+
+            </p>
+
+
+            <a href="../../logout.php"
+               class="menu-item logout-item">
+
+                <span>🚪</span>
+
+                Logout
+
+            </a>
+
+        </div>
+
+
+    </nav>
 
 </div>
 
 
-<nav class="sidebar-menu">
-
-
-<a href="../dashboard.php"
-   class="menu-item">
-
-<span>📊</span>
-
-Dashboard
-
-</a>
-
-
-<div class="menu-section">
-
-
-<p class="menu-title">
-
-Aircraft
-
-</p>
-
-
-<a href="../airplane/index.php"
-   class="menu-item">
-
-<span>✈️</span>
-
-My Aircraft
-
-</a>
-
-
-<a href="../airplane/add.php"
-   class="menu-item">
-
-<span>➕</span>
-
-Add Aircraft
-
-</a>
-
-
-<a href="../approval/index.php"
-   class="menu-item">
-
-<span>📋</span>
-
-Approval Requests
-
-</a>
-
-
-</div>
-
-
-<div class="menu-section">
-
-
-<p class="menu-title">
-
-Flights
-
-</p>
-
-
-<a href="index.php"
-   class="menu-item active">
-
-<span>🛫</span>
-
-My Flights
-
-</a>
-
-
-<a href="add.php"
-   class="menu-item">
-
-<span>➕</span>
-
-Add Flight
-
-</a>
-
-
-<a href="availability.php"
-   class="menu-item">
-
-<span>💺</span>
-
-Seat Availability
-
-</a>
-
-
-<a href="schedule_request.php"
-   class="menu-item">
-
-<span>🕐</span>
-
-Schedule Requests
-
-</a>
-
-
-</div>
-
-
-<div class="menu-section">
-
-
-<p class="menu-title">
-
-Account
-
-</p>
-
-
-<a href="../../logout.php"
-   class="menu-item logout-item">
-
-<span>🚪</span>
-
-Logout
-
-</a>
-
-
-</div>
-
-
-</nav>
-
-
-</div>
-
+<!-- MAIN CONTENT -->
 
 <div class="main-content">
 
@@ -433,65 +397,51 @@ Logout
 <header class="topbar">
 
 
-<div>
+    <div>
 
-<h1>
+        <h1>Edit Flight</h1>
 
-Edit Flight
+        <p>Update flight information.</p>
 
-</h1>
-
-<p>
-
-Update flight information.
-
-</p>
-
-</div>
+    </div>
 
 
-<div class="user-info">
+    <div class="user-info">
 
 
-<div class="user-avatar">
+        <div class="user-avatar">
 
-<?php
+            <?php
 
-echo strtoupper(
-    substr($airline_name,0,1)
-);
+            echo strtoupper(
+                substr($airline_name, 0, 1)
+            );
 
-?>
+            ?>
 
-</div>
-
-
-<div>
-
-<strong>
-
-<?php
-
-echo htmlspecialchars(
-    $airline_name
-);
-
-?>
-
-</strong>
+        </div>
 
 
-<small>
+        <div>
 
-Airline
+            <strong>
 
-</small>
+                <?php
+
+                echo htmlspecialchars(
+                    $airline_name
+                );
+
+                ?>
+
+            </strong>
+
+            <small>Airline</small>
+
+        </div>
 
 
-</div>
-
-
-</div>
+    </div>
 
 
 </header>
@@ -500,95 +450,56 @@ Airline
 <section class="page-header">
 
 
-<div>
+    <div>
 
-<h2>
+        <h2>Flight Information</h2>
 
-Edit Flight
+        <p>Edit the flight details below.</p>
 
-</h2>
-
-
-<p>
-
-Update the details of this flight.
-
-</p>
+    </div>
 
 
-</div>
+    <a href="index.php"
+       class="btn btn-secondary">
 
+        ← Back
 
-<a href="view.php?id=<?php echo $id; ?>"
-   class="btn btn-secondary">
-
-← Back
-
-</a>
+    </a>
 
 
 </section>
 
 
-<?php
+<!-- ERRORS -->
 
-if(!empty($errors))
-{
+<?php if (!empty($errors)): ?>
 
-?>
+    <div class="alert alert-error">
 
+        <ul>
 
-<div class="alert alert-error">
+            <?php foreach ($errors as $error): ?>
 
+                <li>
 
-<strong>
+                    <?php
 
-Please fix the following:
+                    echo htmlspecialchars($error);
 
-</strong>
+                    ?>
 
+                </li>
 
-<ul>
+            <?php endforeach; ?>
 
+        </ul>
 
-<?php
+    </div>
 
-foreach($errors as $error)
-{
-
-?>
-
-
-<li>
-
-<?php
-
-echo htmlspecialchars($error);
-
-?>
-
-</li>
+<?php endif; ?>
 
 
-<?php
-
-}
-
-?>
-
-
-</ul>
-
-
-</div>
-
-
-<?php
-
-}
-
-?>
-
+<!-- FORM -->
 
 <section class="content-card">
 
@@ -597,308 +508,242 @@ echo htmlspecialchars($error);
       class="airline-form">
 
 
-<input
-type="hidden"
-name="id"
-value="<?php echo $id; ?>"
->
+    <div class="form-group">
 
+        <label>
 
-<div class="form-group">
+            Flight Number *
 
+        </label>
 
-<label>
 
-Flight Number
+        <input
+            type="text"
+            name="flight_number"
+            value="<?php echo htmlspecialchars($flight_number); ?>"
+            required>
 
-<span class="required">*</span>
+    </div>
 
-</label>
 
+    <div class="form-group">
 
-<input
-type="text"
-name="flight_number"
-value="<?php echo htmlspecialchars($flight_number); ?>"
-required
->
+        <label>
 
+            Departure Location *
 
-</div>
+        </label>
 
 
-<div class="form-group">
+        <input
+            type="text"
+            name="departure"
+            value="<?php echo htmlspecialchars($departure); ?>"
+            required>
 
+    </div>
 
-<label>
 
-Departure
+    <div class="form-group">
 
-<span class="required">*</span>
+        <label>
 
-</label>
+            Arrival Location *
 
+        </label>
 
-<input
-type="text"
-name="departure"
-value="<?php echo htmlspecialchars($departure); ?>"
-required
->
 
+        <input
+            type="text"
+            name="destination"
+            value="<?php echo htmlspecialchars($destination); ?>"
+            required>
 
-</div>
+    </div>
 
 
-<div class="form-group">
+    <div class="form-group">
 
+        <label>
 
-<label>
+            Departure Time *
 
-Arrival
+        </label>
 
-<span class="required">*</span>
 
-</label>
+        <input
+            type="datetime-local"
+            name="departure_time"
+            value="<?php echo date('Y-m-d\TH:i', strtotime($departure_time)); ?>"
+            required>
 
+    </div>
 
-<input
-type="text"
-name="destination"
-value="<?php echo htmlspecialchars($destination); ?>"
-required
->
 
+    <div class="form-group">
 
-</div>
+        <label>
 
+            Arrival Time *
 
-<div class="form-group">
+        </label>
 
 
-<label>
+        <input
+            type="datetime-local"
+            name="arrival_time"
+            value="<?php echo date('Y-m-d\TH:i', strtotime($arrival_time)); ?>"
+            required>
 
-Departure Time
+    </div>
 
-<span class="required">*</span>
 
-</label>
+    <div class="form-group">
 
+        <label>
 
-<input
-type="datetime-local"
-name="departure_time"
-value="<?php echo htmlspecialchars($departure_time); ?>"
-required
->
+            Aircraft *
 
+        </label>
 
-</div>
 
+        <select name="airplane_id" required>
 
-<div class="form-group">
 
+            <option value="">
 
-<label>
+                -- Select Aircraft --
 
-Arrival Time
+            </option>
 
-<span class="required">*</span>
 
-</label>
+            <?php while ($aircraft = $aircraft_result->fetch_assoc()): ?>
 
 
-<input
-type="datetime-local"
-name="arrival_time"
-value="<?php echo htmlspecialchars($arrival_time); ?>"
-required
->
+                <option
+                    value="<?php echo $aircraft['id']; ?>"
+                    <?php
 
+                    if ($airplane_id == $aircraft['id']) {
 
-</div>
+                        echo "selected";
 
+                    }
 
-<div class="form-group">
+                    ?>
+                >
 
 
-<label>
+                    <?php
 
-Aircraft
+                    echo htmlspecialchars(
+                        $aircraft['model']
+                        . " - "
+                        . $aircraft['registration_number']
+                        . " ("
+                        . $aircraft['capacity']
+                        . " seats)"
+                    );
 
-<span class="required">*</span>
+                    ?>
 
-</label>
 
+                </option>
 
-<select name="airplane_id"
-        required>
 
+            <?php endwhile; ?>
 
-<?php
 
-while($a=$aircraft_result->fetch_assoc())
-{
+        </select>
 
-?>
+    </div>
 
 
-<option
-value="<?php echo (int)$a['id']; ?>"
-<?php
+    <div class="form-group">
 
-if($airplane_id==$a['id'])
-{
-    echo 'selected';
-}
+        <label>
 
-?>
->
+            Status *
 
-<?php
+        </label>
 
-echo htmlspecialchars(
-    $a['model'] .
-    ' - ' .
-    $a['registration_number'] .
-    ' (' .
-    $a['capacity'] .
-    ' seats)'
-);
 
-?>
+        <select name="status" required>
 
-</option>
 
+            <option value="Scheduled"
+                <?php if ($status == "Scheduled") echo "selected"; ?>>
 
-<?php
+                Scheduled
 
-}
+            </option>
 
-?>
 
+            <option value="Boarding"
+                <?php if ($status == "Boarding") echo "selected"; ?>>
 
-</select>
+                Boarding
 
+            </option>
 
-</div>
 
+            <option value="Departed"
+                <?php if ($status == "Departed") echo "selected"; ?>>
 
-<div class="form-group">
+                Departed
 
+            </option>
 
-<label>
 
-Status
+            <option value="Completed"
+                <?php if ($status == "Completed") echo "selected"; ?>>
 
-</label>
+                Completed
 
+            </option>
 
-<select name="status">
 
+            <option value="Cancelled"
+                <?php if ($status == "Cancelled") echo "selected"; ?>>
 
-<option
-<?php
+                Cancelled
 
-if($status==='Scheduled')
-{
-    echo 'selected';
-}
+            </option>
 
-?>
->
 
-Scheduled
+        </select>
 
-</option>
+    </div>
 
 
-<option
-<?php
+    <div class="form-actions">
 
-if($status==='Delayed')
-{
-    echo 'selected';
-}
 
-?>
->
+        <a href="index.php"
+           class="btn btn-secondary">
 
-Delayed
+            Cancel
 
-</option>
+        </a>
 
 
-<option
-<?php
+        <button type="submit"
+                class="btn btn-primary">
 
-if($status==='Cancelled')
-{
-    echo 'selected';
-}
+            Update Flight
 
-?>
->
+        </button>
 
-Cancelled
 
-</option>
-
-
-<option
-<?php
-
-if($status==='Completed')
-{
-    echo 'selected';
-}
-
-?>
->
-
-Completed
-
-</option>
-
-
-</select>
-
-
-</div>
-
-
-<div class="form-actions">
-
-
-<a href="index.php"
-   class="btn btn-secondary">
-
-Cancel
-
-</a>
-
-
-<button
-type="submit"
-class="btn btn-primary"
->
-
-Save Changes
-
-</button>
-
-
-</div>
+    </div>
 
 
 </form>
-
 
 </section>
 
 
 </div>
-
 
 </div>
 
