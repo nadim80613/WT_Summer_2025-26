@@ -1,48 +1,100 @@
-```php
 <?php
 
 session_start();
 require_once '../../config/database.php';
 
-if(!isset($_SESSION['user_id'])){
-    header('Location: ../../login.php');
+
+/* CHECK LOGIN */
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../../login.php");
     exit();
 }
 
-if(strtolower(trim($_SESSION['role'] ?? '')) !== 'airline'){
-    header('Location: ../../index.php');
+if ($_SESSION['role'] != 'airline') {
+    header("Location: ../../index.php");
     exit();
 }
 
-$airline_id=(int)$_SESSION['user_id'];
-$airline_name=$_SESSION['user_name'] ?? $_SESSION['name'] ?? 'Airline';
 
-$id=(int)($_GET['id'] ?? 0);
+/* GET USER */
 
+$user_id = $_SESSION['user_id'];
 
-$stmt=$conn->prepare(
-    'SELECT f.*,
-            a.model,
-            a.registration_number,
-            a.capacity
-     FROM flights f
-     LEFT JOIN airplanes a ON f.airplane_id=a.id
-     WHERE f.id=?
-     AND f.airline_id=?
-     LIMIT 1'
-);
+$sql = "SELECT email FROM users WHERE id = ?";
 
-$stmt->bind_param('ii',$id,$airline_id);
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
 $stmt->execute();
 
-$flight=$stmt->get_result()->fetch_assoc();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
 
-$stmt->close();
+$email = $user['email'];
 
 
-if(!$flight){
-    header('Location: index.php');
+/* GET AIRLINE */
+
+$sql = "SELECT id, airline_name
+        FROM airlines
+        WHERE email = ?";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $email);
+$stmt->execute();
+
+$result = $stmt->get_result();
+$airline = $result->fetch_assoc();
+
+
+if (!$airline) {
+    die("Airline record not found.");
+}
+
+
+$airline_id = $airline['id'];
+$airline_name = $airline['airline_name'];
+
+
+/* GET FLIGHT ID */
+
+$flight_id = $_GET['id'] ?? 0;
+
+if ($flight_id <= 0) {
+    header("Location: index.php");
     exit();
+}
+
+
+/* GET FLIGHT */
+
+$sql = "SELECT f.*,
+               a.model,
+               a.registration_number,
+               a.capacity
+        FROM flights f
+        JOIN airplanes a
+        ON f.airplane_id = a.id
+        WHERE f.id = ?
+        AND a.airline_id = ?";
+
+$stmt = $conn->prepare($sql);
+
+$stmt->bind_param(
+    "ii",
+    $flight_id,
+    $airline_id
+);
+
+$stmt->execute();
+
+$result = $stmt->get_result();
+
+$flight = $result->fetch_assoc();
+
+
+if (!$flight) {
+    die("Flight not found.");
 }
 
 ?>
@@ -67,6 +119,8 @@ if(!$flight){
 
 <div class="airline-container">
 
+
+<!-- SIDEBAR -->
 
 <div class="sidebar">
 
@@ -96,7 +150,9 @@ Dashboard
 <div class="menu-section">
 
 <p class="menu-title">
+
 Aircraft
+
 </p>
 
 
@@ -135,7 +191,9 @@ Approval Requests
 <div class="menu-section">
 
 <p class="menu-title">
+
 Flights
+
 </p>
 
 
@@ -184,7 +242,9 @@ Schedule Requests
 <div class="menu-section">
 
 <p class="menu-title">
+
 Account
+
 </p>
 
 
@@ -205,6 +265,8 @@ Logout
 </div>
 
 
+<!-- MAIN CONTENT -->
+
 <div class="main-content">
 
 
@@ -215,9 +277,7 @@ Logout
 
 <h1>Flight Details</h1>
 
-<p>
-View flight information.
-</p>
+<p>View flight information.</p>
 
 </div>
 
@@ -228,7 +288,11 @@ View flight information.
 <div class="user-avatar">
 
 <?php
-echo strtoupper(substr($airline_name,0,1));
+
+echo strtoupper(
+    substr($airline_name, 0, 1)
+);
+
 ?>
 
 </div>
@@ -239,7 +303,11 @@ echo strtoupper(substr($airline_name,0,1));
 <strong>
 
 <?php
-echo htmlspecialchars($airline_name);
+
+echo htmlspecialchars(
+    $airline_name
+);
+
 ?>
 
 </strong>
@@ -251,9 +319,10 @@ echo htmlspecialchars($airline_name);
 
 </div>
 
-
 </header>
 
+
+<!-- PAGE HEADER -->
 
 <section class="page-header">
 
@@ -262,50 +331,41 @@ echo htmlspecialchars($airline_name);
 
 <h2>
 
-Flight <?php
-echo htmlspecialchars($flight['flight_number']);
+<?php
+
+echo htmlspecialchars(
+    $flight['flight_number']
+);
+
 ?>
 
 </h2>
 
-
 <p>
 
-<?php
-
-echo htmlspecialchars(
-    $flight['departure'] .
-    ' → ' .
-    $flight['destination']
-);
-
-?>
+Flight information and assigned aircraft.
 
 </p>
 
 </div>
 
 
-<div class="table-actions">
+<div>
 
+<a href="edit.php?id=<?php echo $flight['id']; ?>"
+   class="btn btn-primary">
 
-<a
-href="edit.php?id=<?php echo $id; ?>"
-class="btn btn-primary">
-
-Edit
+Edit Flight
 
 </a>
 
 
-<a
-href="index.php"
-class="btn btn-secondary">
+<a href="index.php"
+   class="btn btn-secondary">
 
 ← Back
 
 </a>
-
 
 </div>
 
@@ -313,7 +373,12 @@ class="btn btn-secondary">
 </section>
 
 
+<!-- FLIGHT INFORMATION -->
+
 <section class="content-card">
+
+
+<h3>Flight Information</h3>
 
 
 <div class="details-grid">
@@ -321,102 +386,15 @@ class="btn btn-secondary">
 
 <div class="detail-item">
 
-<span>Flight Number</span>
+<label>Flight Number</label>
 
 <strong>
 
 <?php
+
 echo htmlspecialchars(
     $flight['flight_number']
 );
-?>
-
-</strong>
-
-</div>
-
-
-<div class="detail-item">
-
-<span>Departure</span>
-
-<strong>
-
-<?php
-echo htmlspecialchars(
-    $flight['departure']
-);
-?>
-
-</strong>
-
-</div>
-
-
-<div class="detail-item">
-
-<span>Arrival</span>
-
-<strong>
-
-<?php
-echo htmlspecialchars(
-    $flight['destination']
-);
-?>
-
-</strong>
-
-</div>
-
-
-<div class="detail-item">
-
-<span>Departure Time</span>
-
-<strong>
-
-<?php
-echo htmlspecialchars(
-    $flight['departure_time']
-);
-?>
-
-</strong>
-
-</div>
-
-
-<div class="detail-item">
-
-<span>Arrival Time</span>
-
-<strong>
-
-<?php
-echo htmlspecialchars(
-    $flight['arrival_time']
-);
-?>
-
-</strong>
-
-</div>
-
-
-<div class="detail-item">
-
-<span>Aircraft</span>
-
-<strong>
-
-<?php
-
-echo htmlspecialchars(
-    ($flight['model'] ?? 'N/A') .
-    ' / ' .
-    ($flight['registration_number'] ?? 'N/A')
-);
 
 ?>
 
@@ -427,31 +405,165 @@ echo htmlspecialchars(
 
 <div class="detail-item">
 
-<span>Aircraft Capacity</span>
+<label>Status</label>
 
 <strong>
 
 <?php
-echo (int)($flight['capacity'] ?? 0);
-?>
 
-seats
-
-</strong>
-
-</div>
-
-
-<div class="detail-item">
-
-<span>Status</span>
-
-<strong>
-
-<?php
 echo htmlspecialchars(
     $flight['status']
 );
+
+?>
+
+</strong>
+
+</div>
+
+
+<div class="detail-item">
+
+<label>Departure</label>
+
+<strong>
+
+<?php
+
+echo htmlspecialchars(
+    $flight['departure']
+);
+
+?>
+
+</strong>
+
+</div>
+
+
+<div class="detail-item">
+
+<label>Arrival</label>
+
+<strong>
+
+<?php
+
+echo htmlspecialchars(
+    $flight['destination']
+);
+
+?>
+
+</strong>
+
+</div>
+
+
+<div class="detail-item">
+
+<label>Departure Time</label>
+
+<strong>
+
+<?php
+
+echo htmlspecialchars(
+    $flight['departure_time']
+);
+
+?>
+
+</strong>
+
+</div>
+
+
+<div class="detail-item">
+
+<label>Arrival Time</label>
+
+<strong>
+
+<?php
+
+echo htmlspecialchars(
+    $flight['arrival_time']
+);
+
+?>
+
+</strong>
+
+</div>
+
+
+</div>
+
+</section>
+
+
+<!-- AIRCRAFT INFORMATION -->
+
+<section class="content-card">
+
+
+<h3>Assigned Aircraft</h3>
+
+
+<div class="details-grid">
+
+
+<div class="detail-item">
+
+<label>Aircraft Model</label>
+
+<strong>
+
+<?php
+
+echo htmlspecialchars(
+    $flight['model']
+);
+
+?>
+
+</strong>
+
+</div>
+
+
+<div class="detail-item">
+
+<label>Registration Number</label>
+
+<strong>
+
+<?php
+
+echo htmlspecialchars(
+    $flight['registration_number']
+);
+
+?>
+
+</strong>
+
+</div>
+
+
+<div class="detail-item">
+
+<label>Total Seats</label>
+
+<strong>
+
+<?php
+
+echo htmlspecialchars(
+    $flight['capacity']
+);
+
 ?>
 
 </strong>
@@ -472,4 +584,3 @@ echo htmlspecialchars(
 </body>
 
 </html>
-```
