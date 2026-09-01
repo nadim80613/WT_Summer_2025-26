@@ -2,23 +2,27 @@
 
 session_start();
 
-include "../../config/database.php";
+require_once '../../config/database.php';
 
 
 /*
 CHECK LOGIN
 */
 
-if(!isset($_SESSION['user_id']))
+if (!isset($_SESSION['user_id']))
 {
-    header("Location:../../login.php");
+    header("Location: ../../login.php");
     exit();
 }
 
 
-if($_SESSION['role'] != "airline")
+/*
+CHECK AIRLINE ROLE
+*/
+
+if ($_SESSION['role'] != "airline")
 {
-    header("Location:../../index.php");
+    header("Location: ../../index.php");
     exit();
 }
 
@@ -28,6 +32,7 @@ GET USER ID
 */
 
 $user_id = $_SESSION['user_id'];
+
 $airline_name = $_SESSION['user_name'] ?? "Airline";
 
 
@@ -35,43 +40,52 @@ $airline_name = $_SESSION['user_name'] ?? "Airline";
 GET USER EMAIL
 */
 
-$sql = "SELECT email FROM users WHERE id='$user_id'";
+$sql = "SELECT email
+        FROM users
+        WHERE id='$user_id'";
 
-$result = mysqli_query($conn,$sql);
+$result = mysqli_query($conn, $sql);
+
 $user = mysqli_fetch_assoc($result);
+
 $user_email = $user['email'];
 
 
 /*
-GET AIRLINE ID
+GET AIRLINE INFORMATION
 */
 
-$sql = "SELECT * FROM airlines WHERE email='$user_email'";
-$result = mysqli_query($conn,$sql);
+$sql = "SELECT *
+        FROM airlines
+        WHERE email='$user_email'";
+
+$result = mysqli_query($conn, $sql);
 
 
-if(mysqli_num_rows($result) == 0)
+if (mysqli_num_rows($result) == 0)
 {
     die("Airline account is not connected.");
 }
 
 
 $airline = mysqli_fetch_assoc($result);
+
 $airline_id = $airline['id'];
+
 $airline_name = $airline['airline_name'];
 
 
 /*
-GET AIRCRAFT
+GET APPROVAL REQUESTS
 */
 
-$sql = "SELECT * FROM airplanes
+$sql = "SELECT *
+        FROM aircraft_approval_requests
         WHERE airline_id='$airline_id'
         ORDER BY id DESC";
 
 
-$result = mysqli_query($conn,$sql);
-
+$result = mysqli_query($conn, $sql);
 
 ?>
 
@@ -80,10 +94,9 @@ $result = mysqli_query($conn,$sql);
 
 <html>
 
-
 <head>
 
-<title>Aircraft Management</title>
+<title>Approval Requests</title>
 
 <link rel="stylesheet"
       href="../../assets/css/airline.css">
@@ -98,7 +111,6 @@ $result = mysqli_query($conn,$sql);
 
 
 <!-- SIDEBAR -->
-
 
 <div class="sidebar">
 
@@ -127,7 +139,6 @@ Dashboard
 
 <div class="menu-section">
 
-
 <p class="menu-title">
 
 Aircraft
@@ -135,8 +146,8 @@ Aircraft
 </p>
 
 
-<a href="index.php"
-   class="menu-item active">
+<a href="../airplane/index.php"
+   class="menu-item">
 
 <span>✈️</span>
 
@@ -145,7 +156,7 @@ My Aircraft
 </a>
 
 
-<a href="add.php"
+<a href="../airplane/add.php"
    class="menu-item">
 
 <span>➕</span>
@@ -155,8 +166,8 @@ Add Aircraft
 </a>
 
 
-<a href="../approval/index.php"
-   class="menu-item">
+<a href="index.php"
+   class="menu-item active">
 
 <span>📋</span>
 
@@ -164,12 +175,10 @@ Approval Requests
 
 </a>
 
-
 </div>
 
 
 <div class="menu-section">
-
 
 <p class="menu-title">
 
@@ -217,12 +226,10 @@ Schedule Requests
 
 </a>
 
-
 </div>
 
 
 <div class="menu-section">
-
 
 <p class="menu-title">
 
@@ -240,24 +247,20 @@ Logout
 
 </a>
 
-
 </div>
 
 
 </nav>
-
 
 </div>
 
 
 <!-- MAIN CONTENT -->
 
-
 <div class="main-content">
 
 
 <!-- TOPBAR -->
-
 
 <header class="topbar">
 
@@ -266,13 +269,13 @@ Logout
 
 <h1>
 
-Aircraft Management
+Approval Requests
 
 </h1>
 
 <p>
 
-Manage your aircraft.
+Track your aircraft approval requests.
 
 </p>
 
@@ -287,7 +290,7 @@ Manage your aircraft.
 <?php
 
 echo strtoupper(
-    substr($airline_name,0,1)
+    substr($airline_name, 0, 1)
 );
 
 ?>
@@ -301,9 +304,7 @@ echo strtoupper(
 
 <?php
 
-echo htmlspecialchars(
-    $airline_name
-);
+echo htmlspecialchars($airline_name);
 
 ?>
 
@@ -327,7 +328,6 @@ Airline
 
 <!-- PAGE HEADER -->
 
-
 <section class="page-header">
 
 
@@ -335,23 +335,24 @@ Airline
 
 <h2>
 
-My Aircraft
+Aircraft Approval Requests
 
 </h2>
 
+
 <p>
 
-View and manage aircraft registered under your airline.
+Track requests submitted to the airport authority.
 
 </p>
 
 </div>
 
 
-<a href="add.php"
+<a href="submit.php"
    class="btn btn-primary">
 
-+ Add Aircraft
++ New Request
 
 </a>
 
@@ -359,52 +360,7 @@ View and manage aircraft registered under your airline.
 </section>
 
 
-<!-- SUCCESS MESSAGE -->
-
-
-<?php
-
-if(isset($_GET['success']))
-{
-
-?>
-
-
-<div class="alert alert-success">
-
-
-<?php
-
-if($_GET['success'] == "added")
-{
-    echo "Aircraft added successfully. An approval request has been submitted.";
-}
-
-elseif($_GET['success'] == "updated")
-{
-    echo "Aircraft updated successfully.";
-}
-
-else
-{
-    echo "Operation completed successfully.";
-}
-
-?>
-
-
-</div>
-
-
-<?php
-
-}
-
-?>
-
-
-<!-- AIRCRAFT TABLE -->
-
+<!-- APPROVAL TABLE -->
 
 <section class="content-card">
 
@@ -414,14 +370,14 @@ else
 
 <h2>
 
-Aircraft Records
+My Approval Requests
 
 </h2>
 
 
 <p>
 
-Aircraft belonging to your airline.
+Requests submitted for your aircraft.
 
 </p>
 
@@ -431,7 +387,7 @@ Aircraft belonging to your airline.
 
 <?php
 
-if(mysqli_num_rows($result) > 0)
+if (mysqli_num_rows($result) > 0)
 {
 
 ?>
@@ -445,28 +401,24 @@ if(mysqli_num_rows($result) > 0)
 
 <tr>
 
-
 <th>ID</th>
 
-<th>Model</th>
+<th>Aircraft</th>
 
-<th>Manufacturer</th>
+<th>Request Type</th>
 
-<th>Registration</th>
-
-<th>Capacity</th>
+<th>Submitted</th>
 
 <th>Status</th>
 
 <th>Action</th>
-
 
 </tr>
 
 
 <?php
 
-while($row = mysqli_fetch_assoc($result))
+while ($row = mysqli_fetch_assoc($result))
 {
 
 ?>
@@ -475,23 +427,31 @@ while($row = mysqli_fetch_assoc($result))
 <tr>
 
 
+<!-- ID -->
+
 <td>
 
-<?php
+<strong>
+
+#<?php
 
 echo $row['id'];
 
 ?>
 
+</strong>
+
 </td>
 
+
+<!-- AIRCRAFT -->
 
 <td>
 
 <?php
 
 echo htmlspecialchars(
-    $row['model']
+    $row['proposed_model'] ?? 'N/A'
 );
 
 ?>
@@ -499,12 +459,22 @@ echo htmlspecialchars(
 </td>
 
 
+<!-- REQUEST TYPE -->
+
 <td>
 
 <?php
 
+$type = $row['request_type'] ?? 'request';
+
+$type = str_replace(
+    '_',
+    ' ',
+    $type
+);
+
 echo htmlspecialchars(
-    $row['manufacturer']
+    ucwords($type)
 );
 
 ?>
@@ -512,12 +482,14 @@ echo htmlspecialchars(
 </td>
 
 
+<!-- DATE -->
+
 <td>
 
 <?php
 
 echo htmlspecialchars(
-    $row['registration_number']
+    $row['submitted_at'] ?? 'N/A'
 );
 
 ?>
@@ -525,18 +497,7 @@ echo htmlspecialchars(
 </td>
 
 
-<td>
-
-<?php
-
-echo $row['capacity'];
-
-?>
-
-seats
-
-</td>
-
+<!-- STATUS -->
 
 <td>
 
@@ -544,38 +505,22 @@ seats
 <?php
 
 $status = strtolower(
-    $row['status']
+    trim(
+        $row['status'] ?? ''
+    )
 );
 
 
-if($status == "active")
+if ($status == "approved")
 {
 
     echo '<span class="status-badge status-approved">
-          🟢 Active
+          🟢 Approved
           </span>';
 
 }
 
-elseif(strpos($status,"pending") !== false)
-{
-
-    echo '<span class="status-badge status-pending">
-          🟡 Pending Approval
-          </span>';
-
-}
-
-elseif($status == "maintenance")
-{
-
-    echo '<span class="status-badge status-warning">
-          🟠 Maintenance
-          </span>';
-
-}
-
-elseif($status == "rejected")
+elseif ($status == "rejected")
 {
 
     echo '<span class="status-badge status-rejected">
@@ -587,13 +532,9 @@ elseif($status == "rejected")
 else
 {
 
-    echo '<span class="status-badge">';
-
-    echo htmlspecialchars(
-        $row['status']
-    );
-
-    echo '</span>';
+    echo '<span class="status-badge status-pending">
+          🟡 Pending
+          </span>';
 
 }
 
@@ -603,36 +544,17 @@ else
 </td>
 
 
+<!-- ACTION -->
+
 <td>
 
 
-<div class="table-actions">
-
-
-<a class="btn btn-small btn-secondary"
-   href="view.php?id=<?php echo $row['id']; ?>">
+<a href="view.php?id=<?php echo $row['id']; ?>"
+   class="btn btn-small btn-secondary">
 
 View
 
 </a>
-
-
-<a class="btn btn-small btn-primary"
-   href="edit.php?id=<?php echo $row['id']; ?>">
-
-Edit
-
-</a>
-<a class="btn btn-small btn-danger"
-    href="delete.php?id=<?php echo $row['id']; ?>"
-    onclick="return confirm('Are you sure you want to delete this aircraft?');">
-
-    Delete
-
-</a>
-
-
-</div>
 
 
 </td>
@@ -664,37 +586,36 @@ else
 ?>
 
 
-<!-- NO AIRCRAFT -->
-
+<!-- NO REQUESTS -->
 
 <div class="empty-state">
 
 
 <div class="empty-icon">
 
-✈️
+📋
 
 </div>
 
 
 <h3>
 
-No Aircraft Found
+No Approval Requests
 
 </h3>
 
 
 <p>
 
-You have not added any aircraft yet.
+You have not submitted any aircraft approval requests yet.
 
 </p>
 
 
-<a href="add.php"
+<a href="../airplane/add.php"
    class="btn btn-primary">
 
-+ Add Your First Aircraft
++ Add Aircraft
 
 </a>
 
@@ -712,8 +633,7 @@ You have not added any aircraft yet.
 </section>
 
 
-<!-- APPROVAL INFORMATION -->
-
+<!-- INFORMATION BOX -->
 
 <section class="info-box">
 
@@ -730,24 +650,17 @@ You have not added any aircraft yet.
 
 <h3>
 
-Aircraft Approval
+About Aircraft Approval
 
 </h3>
 
 
 <p>
 
-New aircraft and aircraft changes
+New aircraft and aircraft information changes
 must be approved by the airport authority.
 
 </p>
-
-
-<a href="../approval/index.php">
-
-View Approval Requests →
-
-</a>
 
 
 </div>
