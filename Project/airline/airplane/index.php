@@ -1,4 +1,3 @@
-```php
 <?php
 
 session_start();
@@ -29,7 +28,6 @@ GET USER ID
 */
 
 $user_id = $_SESSION['user_id'];
-
 $airline_name = $_SESSION['user_name'] ?? "Airline";
 
 
@@ -40,9 +38,7 @@ GET USER EMAIL
 $sql = "SELECT email FROM users WHERE id='$user_id'";
 
 $result = mysqli_query($conn,$sql);
-
 $user = mysqli_fetch_assoc($result);
-
 $user_email = $user['email'];
 
 
@@ -51,7 +47,6 @@ GET AIRLINE ID
 */
 
 $sql = "SELECT * FROM airlines WHERE email='$user_email'";
-
 $result = mysqli_query($conn,$sql);
 
 
@@ -62,9 +57,7 @@ if(mysqli_num_rows($result) == 0)
 
 
 $airline = mysqli_fetch_assoc($result);
-
 $airline_id = $airline['id'];
-
 $airline_name = $airline['airline_name'];
 
 
@@ -630,6 +623,13 @@ View
 Edit
 
 </a>
+<a class="btn btn-small btn-danger"
+    href="delete.php?id=<?php echo $row['id']; ?>"
+    onclick="return confirm('Are you sure you want to delete this aircraft?');">
+
+    Delete
+
+</a>
 
 
 </div>
@@ -765,4 +765,3 @@ View Approval Requests →
 </body>
 
 </html>
-```
