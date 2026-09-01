@@ -17,29 +17,37 @@ $id = $_GET['id'];
 
 
 $result = mysqli_query($conn,
-"SELECT * FROM aircraft_requests WHERE id=$id"
+"SELECT * FROM aircraft_approval_requests WHERE id=$id"
 );
-
 
 $data = mysqli_fetch_assoc($result);
 
+$model = $data['proposed_model'];
+
+$aircraft_id = $data['aircraft_id'];
 
 
-$model = $data['aircraft_model'];
 
+// update approval request status
 
-
-// update status
-
-$sql = "UPDATE aircraft_requests
+$sql = "UPDATE aircraft_approval_requests
 
 SET status='Rejected'
 
 WHERE id=$id";
 
-
 mysqli_query($conn,$sql);
 
+
+// update airplane status
+
+mysqli_query($conn,
+"UPDATE airplanes
+
+SET status='Rejected'
+
+WHERE id='$aircraft_id'"
+);
 
 
 

@@ -12,11 +12,11 @@ if(!isset($_SESSION["user_id"]) || $_SESSION["role"]!="admin")
 }
 
 
-$sql = "SELECT aircraft_requests.*, airlines.airline_name 
-FROM aircraft_requests
+$sql = "SELECT aircraft_approval_requests.*, airlines.airline_name 
+FROM aircraft_approval_requests
 JOIN airlines 
-ON aircraft_requests.airline_id = airlines.id
-ORDER BY aircraft_requests.id DESC";
+ON aircraft_approval_requests.airline_id = airlines.id
+ORDER BY aircraft_approval_requests.id DESC";
 
 $result = mysqli_query($conn,$sql);
 
@@ -97,17 +97,17 @@ $result = mysqli_query($conn,$sql);
 
 
 <td>
-<?php echo $row['aircraft_model']; ?>
+<?php echo $row['proposed_model']; ?>
 </td>
 
 
 <td>
-<?php echo $row['registration_number']; ?>
+<?php echo $row['aircraft_id']; ?>
 </td>
 
 
 <td>
-<?php echo $row['capacity']; ?>
+<?php echo $row['proposed_capacity']; ?>
 </td>
 
 
@@ -120,7 +120,7 @@ $result = mysqli_query($conn,$sql);
 <td>
 
 
-<?php if($row['status']=="Pending"){ ?>
+<?php if(strtolower($row['status'])=="pending"){ ?>
 
 
 <a class="edit-btn"
