@@ -760,5 +760,255 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     );
 
+    /* =====================================================
+   BAGGAGE SEARCH
+===================================================== */
+
+const baggageSearch = document.getElementById("baggageSearch");
+
+const baggageRows = document.querySelectorAll(".baggage-row");
+
+const itemsCount = document.getElementById("itemsCount");
+
+
+if (baggageSearch) {
+
+    baggageSearch.addEventListener("input", function () {
+
+        const searchText = this.value.toLowerCase().trim();
+
+        let visibleItems = 0;
+
+
+        baggageRows.forEach(function (row) {
+
+            const rowText = row.innerText.toLowerCase();
+
+
+            if (rowText.includes(searchText)) {
+
+                row.style.display = "";
+
+                visibleItems++;
+
+            } else {
+
+                row.style.display = "none";
+
+            }
+
+        });
+
+
+        if (itemsCount) {
+
+            itemsCount.textContent = visibleItems;
+
+        }
+
+    });
+
+}
+
+
+/* =====================================================
+   BAGGAGE EDIT STATUS MODAL
+===================================================== */
+
+window.openBaggageEditModal = function (bagId, status) {
+
+    const modal =
+        document.getElementById("baggageEditModal");
+
+    const baggageId =
+        document.getElementById("editBaggageId");
+
+    const baggageStatus =
+        document.getElementById("editBaggageStatus");
+
+
+    if (!modal) {
+
+        console.error(
+            "baggageEditModal not found"
+        );
+
+        return;
+    }
+
+
+    if (baggageId) {
+
+        baggageId.value = bagId;
+
+    }
+
+
+    /*
+     * Convert old database value
+     * "Checked In" to "Checked"
+     */
+
+    if (status === "Checked In") {
+
+        status = "Checked";
+
+    }
+
+
+    if (baggageStatus) {
+
+        baggageStatus.value = status;
+
+    }
+
+
+    modal.classList.add("show");
+
+};
+
+
+/* =====================================================
+   CLOSE BAGGAGE EDIT MODAL
+===================================================== */
+
+window.closeBaggageEditModal = function () {
+
+    const modal =
+        document.getElementById("baggageEditModal");
+
+
+    if (modal) {
+
+        modal.classList.remove("show");
+
+    }
+
+};
+
+
+/* =====================================================
+   SAVE BAGGAGE STATUS
+===================================================== */
+
+const baggageStatusForm =
+    document.getElementById(
+        "baggageStatusForm"
+    );
+
+
+if (baggageStatusForm) {
+
+    baggageStatusForm.addEventListener(
+        "submit",
+        function (event) {
+
+            event.preventDefault();
+
+
+            const formData =
+                new FormData(this);
+
+
+            formData.append(
+                "update_baggage_status",
+                "1"
+            );
+
+
+            fetch(
+                "baggage_status.php",
+                {
+                    method: "POST",
+                    body: formData
+                }
+            )
+
+
+            .then(function (response) {
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Server returned an error."
+                    );
+
+                }
+
+                return response.json();
+
+            })
+
+
+            .then(function (data) {
+
+                if (data.success) {
+
+                    closeBaggageEditModal();
+
+                    location.reload();
+
+                }
+                else {
+
+                    alert(
+                        data.message ||
+                        "Could not update baggage status."
+                    );
+
+                }
+
+            })
+
+
+            .catch(function (error) {
+
+                console.error(
+                    "Baggage update error:",
+                    error
+                );
+
+                alert(
+                    "Something went wrong while updating baggage status."
+                );
+
+            });
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   CLOSE BAGGAGE MODAL WHEN CLICKING OUTSIDE
+===================================================== */
+
+document.addEventListener(
+    "click",
+    function (event) {
+
+        const baggageModal =
+            document.getElementById(
+                "baggageEditModal"
+            );
+
+
+        if (
+            baggageModal &&
+            event.target === baggageModal
+        ) {
+
+            closeBaggageEditModal();
+
+        }
+
+    }
+);
+
+
+
+
+
 
 });

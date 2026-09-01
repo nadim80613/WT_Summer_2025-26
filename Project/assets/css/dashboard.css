@@ -1,4 +1,3 @@
-
 /* ==================================================
    RESET
 ================================================== */
@@ -208,6 +207,8 @@ body {
     padding: 40px;
 
     min-height: 100vh;
+
+    width: calc(100% - 320px);
 }
 
 
@@ -215,9 +216,17 @@ body {
    PAGE HEADER
 ================================================== */
 
+.page-header {
+    margin-bottom: 30px;
+}
+
 .page-header h1 {
-    font-size: 42px;
-    color: #e6e7ea;
+    font-size: 38px;
+    color: #17213a;
+}
+
+.page-header .sub {
+    margin-top: 8px;
 }
 
 .sub {
@@ -344,7 +353,7 @@ body {
 
 
 /* ==================================================
-   BAGGAGE
+   BAGGAGE HEADER
 ================================================== */
 
 .baggage-header {
@@ -353,7 +362,7 @@ body {
 
 
 /* ==================================================
-   TABLE
+   GENERAL TABLE
 ================================================== */
 
 table {
@@ -499,9 +508,6 @@ td strong {
     gap: 15px;
 }
 
-
-/* Individual gate */
-
 .gate-item {
     display: flex;
 
@@ -512,12 +518,9 @@ td strong {
     gap: 6px;
 }
 
-
-/* Gate box */
-
 .gate-box {
-    width: 65px;
-    height: 55px;
+    width: 75px;
+    height: 60px;
 
     border-radius: 12px;
 
@@ -533,21 +536,16 @@ td strong {
     transition: 0.2s ease;
 }
 
+.gate-box:hover {
+    transform: translateY(-3px);
 
-/* ==================================================
-   OCCUPIED = RED
-================================================== */
-
-.gate-box.gate-occupied {
-    background-color: #fee2e2;
-    color: #dc2626;
-    border-color: #dc2626;
+    box-shadow:
+        0 6px 12px
+        rgba(0, 0, 0, 0.12);
 }
 
 
-/* ==================================================
-   AVAILABLE = GREEN
-================================================== */
+/* AVAILABLE */
 
 .gate-box.gate-available {
     background-color: #dcfce7;
@@ -556,9 +554,16 @@ td strong {
 }
 
 
-/* ==================================================
-   MAINTENANCE = ORANGE
-================================================== */
+/* OCCUPIED */
+
+.gate-box.gate-occupied {
+    background-color: #fee2e2;
+    color: #dc2626;
+    border-color: #dc2626;
+}
+
+
+/* MAINTENANCE */
 
 .gate-box.gate-maintenance {
     background-color: #ffedd5;
@@ -566,8 +571,6 @@ td strong {
     border-color: #ea580c;
 }
 
-
-/* Gate status text */
 
 .gate-status-text {
     font-size: 11px;
@@ -580,13 +583,6 @@ td strong {
 }
 
 
-/* Hover */
-
-.gate-box:hover {
-    transform: translateY(-2px);
-}
-
-
 /* ==================================================
    GATE LEGEND
 ================================================== */
@@ -596,13 +592,17 @@ td strong {
 
     flex-wrap: wrap;
 
-    gap: 12px 18px;
+    gap: 25px;
 
-    margin-top: 16px;
+    margin-top: 25px;
 
-    font-size: 12px;
+    padding-top: 20px;
 
-    color: #718096;
+    border-top: 1px solid #e2e8f0;
+
+    color: #526176;
+
+    font-size: 13px;
 }
 
 .legend-item {
@@ -610,7 +610,7 @@ td strong {
 
     align-items: center;
 
-    gap: 6px;
+    gap: 8px;
 }
 
 .legend-box {
@@ -631,6 +631,27 @@ td strong {
 }
 
 .legend-box.maintenance {
+    background: #ea580c;
+}
+
+.legend-circle {
+    width: 13px;
+    height: 13px;
+
+    border-radius: 50%;
+
+    display: inline-block;
+}
+
+.legend-circle.available {
+    background: #16a34a;
+}
+
+.legend-circle.occupied {
+    background: #dc2626;
+}
+
+.legend-circle.maintenance {
     background: #ea580c;
 }
 
@@ -664,320 +685,6 @@ td strong {
     font-weight: bold;
 
     text-align: center;
-}
-
-
-/* ==================================================
-   RESPONSIVE
-================================================== */
-
-@media (max-width: 1200px) {
-
-    .sidebar {
-        width: 250px;
-    }
-
-    .main {
-        margin-left: 250px;
-    }
-
-    .content {
-        flex-direction: column;
-    }
-
-    .flight,
-    .right {
-        width: 100%;
-    }
-}
-
-
-@media (max-width: 900px) {
-
-    .cards {
-        flex-direction: column;
-    }
-
-    .card {
-        width: 100%;
-    }
-}
-
-
-@media (max-width: 700px) {
-
-    .sidebar {
-        position: relative;
-
-        width: 100%;
-        height: auto;
-    }
-
-    .main {
-        margin-left: 0;
-
-        padding: 25px;
-    }
-
-    .sidebar-bottom {
-        padding-top: 10px;
-    }
-
-    .page-header h1 {
-        font-size: 32px;
-    }
-
-    .cards {
-        margin-top: 25px;
-    }
-
-    .content {
-        margin-top: 25px;
-    }
-
-    table {
-        display: block;
-
-        overflow-x: auto;
-
-        white-space: nowrap;
-    }
-}
-
-
-/* ==================================================
-   LIGHT MODE
-================================================== */
-
-body.light-mode {
-    background: #eef5ff;
-    color: #17213a;
-}
-
-
-/* HEADER */
-
-body.light-mode .page-header h1 {
-    color: #17213a;
-}
-
-body.light-mode .sub {
-    color: #718096;
-}
-
-
-/* CARDS */
-
-body.light-mode .card {
-    background: #ffffff;
-
-    color: #17213a;
-
-    border: 1px solid #dce6f0;
-
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-}
-
-body.light-mode .card h4 {
-    color: #718096;
-}
-
-body.light-mode .card h2 {
-    color: #17213a;
-}
-
-
-/* SECTION HEADERS */
-
-body.light-mode .section-header h2,
-body.light-mode .right h2 {
-    color: #17213a;
-}
-
-
-/* LINKS */
-
-body.light-mode .view-link {
-    color: #008dcc;
-}
-
-
-/* TABLE */
-
-body.light-mode table {
-    background: #ffffff;
-
-    color: #17213a;
-
-    border: 1px solid #dce6f0;
-
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-}
-
-body.light-mode th {
-    background: #e5edf6;
-    color: #17213a;
-}
-
-body.light-mode td {
-    color: #17213a;
-
-    border-bottom: 1px solid #e1e7ef;
-}
-
-body.light-mode td strong {
-    color: #17213a;
-}
-
-
-/* GATE TEXT */
-
-body.light-mode .gate-text {
-    color: #008f70;
-}
-
-
-/* GATES */
-
-body.light-mode .gates {
-    background: #ffffff;
-
-    border: 1px solid #dce6f0;
-
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-}
-
-
-/* Gate colors remain strong in light mode */
-
-body.light-mode .gate-box.gate-occupied {
-    background-color: #fee2e2;
-    color: #dc2626;
-    border-color: #dc2626;
-}
-
-body.light-mode .gate-box.gate-available {
-    background-color: #dcfce7;
-    color: #16a34a;
-    border-color: #16a34a;
-}
-
-body.light-mode .gate-box.gate-maintenance {
-    background-color: #ffedd5;
-    color: #ea580c;
-    border-color: #ea580c;
-}
-
-
-body.light-mode .gate-status-text {
-    color: #526176;
-}
-
-
-/* LEGEND */
-
-body.light-mode .gate-legend {
-    color: #526176;
-}
-
-
-/* SIDEBAR */
-
-body.light-mode .sidebar {
-    background: #ffffff;
-
-    color: #17213a;
-
-    border-right: 1px solid #dce6f0;
-}
-
-body.light-mode .logo {
-    border-bottom: 1px solid #e2e8f0;
-}
-
-body.light-mode .logo h2 {
-    color: #17213a;
-}
-
-body.light-mode .logo p {
-    color: #718096;
-}
-
-body.light-mode .logo-icon {
-    background: #009fe3;
-    color: white;
-}
-
-body.light-mode .profile {
-    background: #eaf7f5;
-}
-
-body.light-mode .profile h3 {
-    color: #008dcc;
-}
-
-body.light-mode .profile span {
-    color: #008f70;
-}
-
-body.light-mode .avatar {
-    background: #00b889;
-    color: white;
-}
-
-body.light-mode .title {
-    background: #f1f5f9;
-
-    color: #27344d;
-
-    border-bottom: 1px solid #e2e8f0;
-}
-
-body.light-mode .menu {
-    color: #526176;
-}
-
-body.light-mode .menu:hover {
-    background: #e7f7f3;
-    color: #008f70;
-}
-
-body.light-mode .menu.active {
-    background: #dff5ef;
-    color: #008f70;
-
-    font-weight: bold;
-}
-
-body.light-mode .sidebar-bottom {
-    color: #526176;
-}
-
-body.light-mode .sign-out {
-    color: #526176;
-}
-
-body.light-mode .sign-out:hover {
-    color: #d9534f;
-}
-
-
-/* THEME TOGGLE */
-
-body.light-mode #themeToggle {
-    color: #526176;
-}
-
-body.light-mode #themeToggle:hover {
-    color: #008f70;
-}
-
-
-/* TERMINAL */
-
-body.light-mode .terminal-banner {
-    background: #009fe3;
-    color: white;
 }
 
 
@@ -1016,6 +723,10 @@ body.light-mode .terminal-banner {
     background-color: #0284c7;
 }
 
+
+/* ==================================================
+   FORM
+================================================== */
 
 .form-card {
     background: #06111e;
@@ -1096,6 +807,10 @@ body.light-mode .terminal-banner {
 }
 
 
+/* ==================================================
+   DAYS SELECTOR
+================================================== */
+
 .days-selector {
     display: flex;
     gap: 6px;
@@ -1137,6 +852,10 @@ body.light-mode .terminal-banner {
 }
 
 
+/* ==================================================
+   FORM ACTIONS
+================================================== */
+
 .form-actions {
     margin-top: 22px;
 
@@ -1176,7 +895,9 @@ body.light-mode .terminal-banner {
 }
 
 
-/* FILTERS */
+/* ==================================================
+   FILTERS
+================================================== */
 
 .filter-container {
     display: flex;
@@ -1233,7 +954,9 @@ body.light-mode .terminal-banner {
 }
 
 
-/* SCHEDULE TABLE */
+/* ==================================================
+   SCHEDULE TABLE
+================================================== */
 
 .schedule-table-card {
     background: #050e1a;
@@ -1364,7 +1087,9 @@ body.light-mode .terminal-banner {
 }
 
 
-/* SCHEDULE STATUS */
+/* ==================================================
+   SCHEDULE STATUS
+================================================== */
 
 .status-badge {
     display: inline-block;
@@ -1395,7 +1120,9 @@ body.light-mode .terminal-banner {
 }
 
 
-/* STATUS LEGEND */
+/* ==================================================
+   STATUS LEGEND
+================================================== */
 
 .status-legend-bar {
     margin-top: 24px;
@@ -1449,98 +1176,16 @@ body.light-mode .terminal-banner {
 }
 
 
-/* SCHEDULE LIGHT MODE */
-
-body.light-mode .form-card {
-    background: #ffffff;
-
-    border-color: #dce6f0;
-}
-
-body.light-mode .form-header h3,
-body.light-mode .route-iata,
-body.light-mode .schedule-time-box {
-    color: #17213a;
-}
-
-body.light-mode .form-group input,
-body.light-mode .day-pill {
-    background: #f8fafc;
-
-    border-color: #dce6f0;
-
-    color: #17213a;
-}
-
-body.light-mode .filter-btn {
-    background: #ffffff;
-
-    border-color: #dce6f0;
-
-    color: #718096;
-}
-
-body.light-mode .filter-btn.active {
-    background: #009fe3;
-
-    color: #ffffff;
-}
-
-body.light-mode .schedule-table-card {
-    background: #ffffff;
-
-    border-color: #dce6f0;
-}
-
-body.light-mode .schedule-table th {
-    background: #f1f5f9;
-
-    color: #718096;
-
-    border-color: #dce6f0;
-}
-
-body.light-mode .schedule-table td {
-    border-color: #e2e8f0;
-}
-
-body.light-mode .airline-text,
-body.light-mode .days-text,
-body.light-mode .aircraft-text {
-    color: #475569;
-}
-
-
 /* ==================================================
    GATE & TERMINAL PAGE
 ================================================== */
 
-
-/* PAGE HEADER */
-
-.page-header {
-    margin-bottom: 30px;
-}
-
-.page-header h1 {
-    font-size: 38px;
-    color: #17213a;
-}
-
-.page-header .sub {
-    margin-top: 8px;
-}
-
-
-/* ==================================================
-   STAT CARDS
-================================================== */
-
 .gate-stat-cards {
+    width: 100%;
+
     display: grid;
 
-    grid-template-columns:
-        repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
 
     gap: 20px;
 
@@ -1548,6 +1193,9 @@ body.light-mode .aircraft-text {
 }
 
 .stat-card {
+    width: 100%;
+    min-width: 0;
+
     background: #ffffff;
 
     border: 1px solid #dce6f0;
@@ -1610,7 +1258,7 @@ body.light-mode .aircraft-text {
         rgba(0, 0, 0, 0.06);
 }
 
-.section-header {
+.terminal-map-card .section-header {
     display: flex;
 
     justify-content: space-between;
@@ -1620,7 +1268,7 @@ body.light-mode .aircraft-text {
     margin-bottom: 25px;
 }
 
-.section-header h2 {
+.terminal-map-card .section-header h2 {
     color: #17213a;
 
     font-size: 22px;
@@ -1635,7 +1283,9 @@ body.light-mode .aircraft-text {
 }
 
 
-/* TERMINAL */
+/* ==================================================
+   TERMINAL
+================================================== */
 
 .terminal-group {
     margin-bottom: 30px;
@@ -1654,7 +1304,9 @@ body.light-mode .aircraft-text {
 }
 
 
-/* GATE GRID */
+/* ==================================================
+   GATE GRID
+================================================== */
 
 .terminal-grid {
     display: flex;
@@ -1662,131 +1314,6 @@ body.light-mode .aircraft-text {
     flex-wrap: wrap;
 
     gap: 15px;
-}
-
-
-/* ==================================================
-   GATE ITEM
-================================================== */
-
-.gate-item {
-    cursor: pointer;
-}
-
-.gate-box {
-    width: 75px;
-
-    height: 60px;
-
-    border-radius: 12px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    font-size: 16px;
-
-    font-weight: bold;
-
-    transition: 0.2s ease;
-
-    border: 2px solid;
-}
-
-.gate-box:hover {
-    transform: translateY(-3px);
-
-    box-shadow:
-        0 6px 12px
-        rgba(0, 0, 0, 0.12);
-}
-
-
-/* AVAILABLE */
-
-.gate-available {
-    background: #dcfce7;
-
-    color: #16a34a;
-
-    border-color: #16a34a;
-}
-
-
-/* OCCUPIED */
-
-.gate-occupied {
-    background: #fee2e2;
-
-    color: #dc2626;
-
-    border-color: #dc2626;
-}
-
-
-/* MAINTENANCE */
-
-.gate-maintenance {
-    background: #ffedd5;
-
-    color: #ea580c;
-
-    border-color: #ea580c;
-}
-
-
-/* ==================================================
-   LEGEND
-================================================== */
-
-.gate-legend {
-    display: flex;
-
-    flex-wrap: wrap;
-
-    gap: 25px;
-
-    margin-top: 25px;
-
-    padding-top: 20px;
-
-    border-top: 1px solid #e2e8f0;
-
-    color: #526176;
-
-    font-size: 13px;
-}
-
-.legend-item {
-    display: flex;
-
-    align-items: center;
-
-    gap: 8px;
-}
-
-.legend-circle {
-    width: 13px;
-
-    height: 13px;
-
-    border-radius: 50%;
-
-    display: inline-block;
-}
-
-.legend-circle.available {
-    background: #16a34a;
-}
-
-.legend-circle.occupied {
-    background: #dc2626;
-}
-
-.legend-circle.maintenance {
-    background: #ea580c;
 }
 
 
@@ -1908,29 +1435,6 @@ body.light-mode .aircraft-text {
     color: #718096;
 }
 
-.btn-primary {
-    background: #009fe3;
-
-    color: white;
-
-    border: none;
-
-    padding: 9px 18px;
-
-    border-radius: 9px;
-
-    font-weight: bold;
-
-    cursor: pointer;
-}
-
-.btn-primary:hover {
-    background: #0284c7;
-}
-
-
-/* EMPTY */
-
 .empty-message {
     padding: 30px;
 
@@ -2043,8 +1547,7 @@ body.light-mode .aircraft-text {
 
     inset: 0;
 
-    background:
-        rgba(0, 0, 0, 0.55);
+    background: rgba(0, 0, 0, 0.55);
 
     align-items: center;
 
@@ -2157,7 +1660,7 @@ body.light-mode .aircraft-text {
     margin-top: 25px;
 }
 
-.btn-save {
+.modal-actions .btn-save {
     background: #009fe3;
 
     color: white;
@@ -2173,11 +1676,11 @@ body.light-mode .aircraft-text {
     cursor: pointer;
 }
 
-.btn-save:hover {
+.modal-actions .btn-save:hover {
     background: #0284c7;
 }
 
-.btn-cancel {
+.modal-actions .btn-cancel {
     background: #e2e8f0;
 
     color: #334155;
@@ -2189,6 +1692,727 @@ body.light-mode .aircraft-text {
     border-radius: 9px;
 
     cursor: pointer;
+}
+
+
+/* ==================================================
+   BAGGAGE PAGE
+================================================== */
+
+.baggage-stat-cards {
+    width: 100%;
+
+    display: grid !important;
+
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+
+    gap: 18px;
+
+    margin-bottom: 25px;
+}
+
+.baggage-stat-cards .stat-card {
+    width: 100%;
+
+    min-width: 0;
+
+    margin: 0;
+}
+
+
+/* ==================================================
+   BAGGAGE SEARCH
+================================================== */
+
+.search-filter-container {
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    margin-bottom: 22px;
+}
+
+.search-input-wrapper {
+    flex: 1;
+
+    min-width: 0;
+
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+
+    left: 18px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+}
+
+.search-input-wrapper input {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 14px 18px 14px 45px;
+
+    border: 1px solid #dce6f0;
+
+    border-radius: 16px;
+
+    font-size: 14px;
+
+    outline: none;
+
+    background: white;
+
+    color: #17213a;
+}
+
+.search-input-wrapper input:focus {
+    border-color: #009fe3;
+}
+
+.items-count-badge {
+    padding: 14px 20px;
+
+    background: white;
+
+    border: 1px solid #dce6f0;
+
+    border-radius: 16px;
+
+    font-size: 14px;
+
+    font-weight: bold;
+
+    white-space: nowrap;
+
+    color: #17213a;
+}
+
+
+/* ==================================================
+   BAGGAGE TABLE
+================================================== */
+
+.baggage-table-card {
+    width: 100%;
+
+    background: white;
+
+    border: 1px solid #dce6f0;
+
+    border-radius: 20px;
+
+    overflow-x: auto;
+
+    box-shadow:
+        0 4px 15px
+        rgba(0, 0, 0, 0.04);
+}
+
+.baggage-table {
+    width: 100%;
+
+    min-width: 900px;
+
+    border-collapse: collapse;
+}
+
+.baggage-table th {
+    background: #f8fafc;
+
+    padding: 16px 20px;
+
+    text-align: left;
+
+    font-size: 12px;
+
+    color: #64748b;
+
+    border-bottom: 1px solid #dce6f0;
+}
+
+.baggage-table td {
+    padding: 18px 20px;
+
+    border-bottom: 1px solid #f1f5f9;
+
+    font-size: 14px;
+
+    vertical-align: middle;
+}
+
+.baggage-table tr:last-child td {
+    border-bottom: none;
+}
+
+
+/* ==================================================
+   BAGGAGE TAG
+================================================== */
+
+.baggage-tag-box {
+    display: flex;
+
+    flex-direction: column;
+
+    color: #009fe3;
+
+    font-weight: bold;
+
+    line-height: 1.3;
+}
+
+
+/* ==================================================
+   BAGGAGE TEXT
+================================================== */
+
+.cell-passenger strong,
+.cell-flight strong {
+    color: #0f172a;
+}
+
+.cell-route {
+    color: #64748b;
+}
+
+
+/* ==================================================
+   PROGRESS STEPPER
+================================================== */
+
+.progress-stepper {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 230px;
+}
+
+.step-circle {
+    width: 30px;
+
+    height: 30px;
+
+    border-radius: 50%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    flex-shrink: 0;
+
+    transition: 0.2s;
+}
+
+.step-circle.completed {
+    background: #009fe3;
+
+    color: white;
+
+    border: 2px solid #009fe3;
+}
+
+.step-circle.active {
+    background: white;
+
+    color: #009fe3;
+
+    border: 2px solid #009fe3;
+}
+
+.step-circle.inactive {
+    background: #f1f5f9;
+
+    color: #94a3b8;
+
+    border: 2px solid #dce6f0;
+}
+
+.step-circle:hover {
+    transform: scale(1.1);
+}
+
+.step-line {
+    height: 3px;
+
+    width: 28px;
+
+    background: #dce6f0;
+}
+
+.step-line.completed {
+    background: #009fe3;
+}
+
+
+/* ==================================================
+   BAGGAGE STATUS
+================================================== */
+
+.baggage-badge {
+    display: inline-block;
+
+    padding: 7px 13px;
+
+    border-radius: 20px;
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+    white-space: nowrap;
+}
+
+.status-checked-in {
+    background: #f1f5f9;
+
+    color: #64748b;
+
+    border: 1px solid #e2e8f0;
+}
+
+.status-delivered {
+    background: #e0e7ff;
+
+    color: #4f46e5;
+
+    border: 1px solid #c7d2fe;
+}
+
+
+/* ==================================================
+   LIGHT MODE
+================================================== */
+
+body.light-mode {
+    background: #eef5ff;
+
+    color: #17213a;
+}
+
+
+/* HEADER */
+
+body.light-mode .page-header h1 {
+    color: #17213a;
+}
+
+body.light-mode .sub {
+    color: #718096;
+}
+
+
+/* CARDS */
+
+body.light-mode .card {
+    background: #ffffff;
+
+    color: #17213a;
+
+    border: 1px solid #dce6f0;
+
+    box-shadow:
+        0 4px 15px
+        rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .card h4 {
+    color: #718096;
+}
+
+body.light-mode .card h2 {
+    color: #17213a;
+}
+
+
+/* SECTION HEADERS */
+
+body.light-mode .section-header h2,
+body.light-mode .right h2 {
+    color: #17213a;
+}
+
+
+/* LINKS */
+
+body.light-mode .view-link {
+    color: #008dcc;
+}
+
+
+/* GENERAL TABLE */
+
+body.light-mode table {
+    background: #ffffff;
+
+    color: #17213a;
+
+    border: 1px solid #dce6f0;
+
+    box-shadow:
+        0 4px 15px
+        rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode th {
+    background: #e5edf6;
+
+    color: #17213a;
+}
+
+body.light-mode td {
+    color: #17213a;
+
+    border-bottom: 1px solid #e1e7ef;
+}
+
+body.light-mode td strong {
+    color: #17213a;
+}
+
+
+/* GATE TEXT */
+
+body.light-mode .gate-text {
+    color: #008f70;
+}
+
+
+/* GATES */
+
+body.light-mode .gates {
+    background: #ffffff;
+
+    border: 1px solid #dce6f0;
+
+    box-shadow:
+        0 4px 15px
+        rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .gate-status-text {
+    color: #526176;
+}
+
+body.light-mode .gate-legend {
+    color: #526176;
+}
+
+
+/* SIDEBAR */
+
+body.light-mode .sidebar {
+    background: #ffffff;
+
+    color: #17213a;
+
+    border-right: 1px solid #dce6f0;
+}
+
+body.light-mode .logo {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+body.light-mode .logo h2 {
+    color: #17213a;
+}
+
+body.light-mode .logo p {
+    color: #718096;
+}
+
+body.light-mode .logo-icon {
+    background: #009fe3;
+
+    color: white;
+}
+
+body.light-mode .profile {
+    background: #eaf7f5;
+}
+
+body.light-mode .profile h3 {
+    color: #008dcc;
+}
+
+body.light-mode .profile span {
+    color: #008f70;
+}
+
+body.light-mode .avatar {
+    background: #00b889;
+
+    color: white;
+}
+
+body.light-mode .title {
+    background: #f1f5f9;
+
+    color: #27344d;
+
+    border-bottom: 1px solid #e2e8f0;
+}
+
+body.light-mode .menu {
+    color: #526176;
+}
+
+body.light-mode .menu:hover {
+    background: #e7f7f3;
+
+    color: #008f70;
+}
+
+body.light-mode .menu.active {
+    background: #dff5ef;
+
+    color: #008f70;
+
+    font-weight: bold;
+}
+
+body.light-mode .sidebar-bottom {
+    color: #526176;
+}
+
+body.light-mode .sign-out {
+    color: #526176;
+}
+
+body.light-mode .sign-out:hover {
+    color: #d9534f;
+}
+
+
+/* THEME TOGGLE */
+
+body.light-mode #themeToggle {
+    color: #526176;
+}
+
+body.light-mode #themeToggle:hover {
+    color: #008f70;
+}
+
+
+/* TERMINAL */
+
+body.light-mode .terminal-banner {
+    background: #009fe3;
+
+    color: white;
+}
+
+
+/* ==================================================
+   SCHEDULE LIGHT MODE
+================================================== */
+
+body.light-mode .form-card {
+    background: #ffffff;
+
+    border-color: #dce6f0;
+}
+
+body.light-mode .form-header h3,
+body.light-mode .route-iata,
+body.light-mode .schedule-time-box {
+    color: #17213a;
+}
+
+body.light-mode .form-group input,
+body.light-mode .day-pill {
+    background: #f8fafc;
+
+    border-color: #dce6f0;
+
+    color: #17213a;
+}
+
+body.light-mode .filter-btn {
+    background: #ffffff;
+
+    border-color: #dce6f0;
+
+    color: #718096;
+}
+
+body.light-mode .filter-btn.active {
+    background: #009fe3;
+
+    color: #ffffff;
+}
+
+body.light-mode .schedule-table-card {
+    background: #ffffff;
+
+    border-color: #dce6f0;
+}
+
+body.light-mode .schedule-table th {
+    background: #f1f5f9;
+
+    color: #718096;
+
+    border-color: #dce6f0;
+}
+
+body.light-mode .schedule-table td {
+    border-color: #e2e8f0;
+}
+
+body.light-mode .airline-text,
+body.light-mode .days-text,
+body.light-mode .aircraft-text {
+    color: #475569;
+}
+
+
+/* ==================================================
+   GATE & TERMINAL LIGHT MODE
+================================================== */
+
+body.light-mode .stat-card,
+body.light-mode .terminal-map-card,
+body.light-mode .unassigned-section,
+body.light-mode .gate-overview {
+    background: #ffffff;
+
+    border-color: #dce6f0;
+}
+
+body.light-mode .section-sub {
+    color: #718096;
+}
+
+body.light-mode .terminal-group h3 {
+    color: #17213a;
+}
+
+body.light-mode .unassigned-item {
+    background: #f8fafc;
+
+    border-color: #e2e8f0;
+}
+
+body.light-mode .flight-info p {
+    color: #718096;
+}
+
+body.light-mode .flight-route {
+    color: #17213a;
+}
+
+body.light-mode .gate-overview th {
+    background: #f1f5f9;
+
+    color: #526176;
+}
+
+body.light-mode .gate-overview td {
+    color: #475569;
+
+    border-color: #e2e8f0;
+}
+
+
+/* ==================================================
+   MODAL LIGHT MODE
+================================================== */
+
+body.light-mode .modal-card {
+    background: #ffffff;
+}
+
+body.light-mode .modal-header h2 {
+    color: #17213a;
+}
+
+body.light-mode .modal-group label {
+    color: #526176;
+}
+
+body.light-mode .modal-group select {
+    background: #f8fafc;
+
+    color: #17213a;
+
+    border-color: #dce6f0;
+}
+
+body.light-mode .modal-actions .btn-cancel {
+    background: #e2e8f0;
+
+    color: #334155;
+}
+
+
+/* ==================================================
+   BAGGAGE LIGHT MODE
+================================================== */
+
+body.light-mode .search-input-wrapper input {
+    background: #ffffff;
+
+    color: #17213a;
+
+    border-color: #dce6f0;
+}
+
+body.light-mode .items-count-badge {
+    background: #ffffff;
+
+    color: #17213a;
+
+    border-color: #dce6f0;
+}
+
+body.light-mode .baggage-table-card {
+    background: #ffffff;
+
+    border-color: #dce6f0;
+}
+
+body.light-mode .baggage-table th {
+    background: #f8fafc;
+
+    color: #64748b;
+
+    border-color: #dce6f0;
+}
+
+body.light-mode .baggage-table td {
+    color: #17213a;
+
+    border-color: #f1f5f9;
+}
+
+body.light-mode .cell-passenger strong,
+body.light-mode .cell-flight strong {
+    color: #0f172a;
+}
+
+body.light-mode .cell-route {
+    color: #64748b;
 }
 
 
@@ -2282,7 +2506,7 @@ body:not(.light-mode) .modal-group select {
     border-color: #18304d;
 }
 
-body:not(.light-mode) .btn-cancel {
+body:not(.light-mode) .modal-actions .btn-cancel {
     background: #112846;
 
     color: #ffffff;
@@ -2290,20 +2514,227 @@ body:not(.light-mode) .btn-cancel {
 
 
 /* ==================================================
-   RESPONSIVE
+   BAGGAGE DARK MODE
 ================================================== */
 
-@media (max-width: 1000px) {
+body:not(.light-mode) .search-input-wrapper input {
+    background: #071a30;
 
-    .gate-stat-cards {
-        grid-template-columns:
-            repeat(2, 1fr);
-    }
+    color: white;
 
+    border-color: #18304d;
+}
+
+body:not(.light-mode) .items-count-badge {
+    background: #071a30;
+
+    color: white;
+
+    border-color: #18304d;
+}
+
+body:not(.light-mode) .baggage-table-card {
+    background: #071a30;
+
+    border-color: #18304d;
+}
+
+body:not(.light-mode) .baggage-table th {
+    background: #0c1c33;
+
+    color: #91a0b7;
+
+    border-color: #18304d;
+}
+
+body:not(.light-mode) .baggage-table td {
+    color: #d8e2f0;
+
+    border-color: #18304d;
+}
+
+body:not(.light-mode) .cell-passenger strong,
+body:not(.light-mode) .cell-flight strong {
+    color: white;
+}
+
+body:not(.light-mode) .cell-route {
+    color: #91a0b7;
 }
 
 
+/* ==================================================
+   RESPONSIVE
+================================================== */
+
+@media (max-width: 1200px) {
+
+    .sidebar {
+        width: 250px;
+    }
+
+    .main {
+        margin-left: 250px;
+
+        width: calc(100% - 250px);
+    }
+
+    .content {
+        flex-direction: column;
+    }
+
+    .flight,
+    .right {
+        width: 100%;
+    }
+
+    .form-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .gate-stat-cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .baggage-stat-cards {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+}
+
+
+/* ==================================================
+   TABLET
+================================================== */
+
+@media (max-width: 900px) {
+
+    .cards {
+        flex-direction: column;
+    }
+
+    .card {
+        width: 100%;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* ==================================================
+   MOBILE
+================================================== */
+
+@media (max-width: 768px) {
+
+    .baggage-stat-cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .search-filter-container {
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+    .items-count-badge {
+        text-align: center;
+    }
+}
+
+
+/* ==================================================
+   SMALL MOBILE
+================================================== */
+
 @media (max-width: 700px) {
+
+    .sidebar {
+        position: relative;
+
+        width: 100%;
+
+        height: auto;
+    }
+
+    .main {
+        margin-left: 0;
+
+        width: 100%;
+
+        padding: 25px;
+    }
+
+    .sidebar-bottom {
+        padding-top: 10px;
+    }
+
+    .page-header h1 {
+        font-size: 32px;
+    }
+
+    .cards {
+        margin-top: 25px;
+    }
+
+    .content {
+        margin-top: 25px;
+    }
+
+    table {
+        display: block;
+
+        overflow-x: auto;
+
+        white-space: nowrap;
+    }
+
+    .gate-stat-cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .terminal-map-card,
+    .unassigned-section,
+    .gate-overview {
+        padding: 20px;
+    }
+
+    .page-top-bar {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 15px;
+    }
+
+    .filter-container {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 15px;
+    }
+}
+
+
+/* ==================================================
+   VERY SMALL MOBILE
+================================================== */
+
+@media (max-width: 500px) {
+
+    .baggage-stat-cards {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+
+/* ==================================================
+   EXTRA SMALL MOBILE
+================================================== */
+
+@media (max-width: 400px) {
 
     .gate-stat-cards {
         grid-template-columns: 1fr;
@@ -2324,5 +2755,4 @@ body:not(.light-mode) .btn-cancel {
 
         gap: 5px;
     }
-
 }
