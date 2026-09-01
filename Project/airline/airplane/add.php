@@ -1,4 +1,3 @@
-```php
 <?php
 
 session_start();
@@ -922,7 +921,7 @@ type="submit"
 class="btn btn-primary"
 >
 
-✈️ Add Aircraft
+    Add Aircraft
 
 </button>
 
@@ -945,4 +944,3 @@ class="btn btn-primary"
 </body>
 
 </html>
-```
