@@ -12,30 +12,36 @@ if(!isset($_SESSION["user_id"]) || $_SESSION["role"]!="admin")
 }
 
 
-
 $id = $_GET['id'];
 
 
 
-// get airline name for log
+// get aircraft info
 
 $result = mysqli_query($conn,
-"SELECT airline_name FROM airlines WHERE id=$id"
+"SELECT * FROM aircraft_requests WHERE id=$id"
 );
 
 
 $data = mysqli_fetch_assoc($result);
 
-$airline_name = $data['airline_name'];
+
+
+$model = $data['aircraft_model'];
 
 
 
-// delete airline
+// update status
 
-$sql = "DELETE FROM airlines WHERE id=$id";
+$sql = "UPDATE aircraft_requests
+
+SET status='Approved'
+
+WHERE id=$id";
 
 
 mysqli_query($conn,$sql);
+
 
 
 
@@ -47,14 +53,14 @@ $log_sql = "INSERT INTO activity_logs
 VALUES
 
 ('".$_SESSION['user_id']."',
-'Deleted airline: ".$airline_name."')";
+'Approved aircraft request: ".$model."')";
 
 
 mysqli_query($conn,$log_sql);
 
 
 
-header("Location: airlines.php");
+header("Location: aircraft_requests.php");
 
 exit();
 

@@ -19,12 +19,12 @@
          </li> 
 
 
-        <li>
-            Reports
+        <li onclick="window.location.href='airlines.php'">
+          Airline Information
         </li>
 
-        <li onclick="window.location.href='airlines.php'">
-          Airline Management
+        <li onclick="window.location.href='aircraft_requests.php'">
+            Aircraft Approval
         </li>
 
         <li onclick="window.location.href='airport_services.php'">

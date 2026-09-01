@@ -12,13 +12,11 @@ if(!isset($_SESSION["user_id"]) || $_SESSION["role"]!="admin")
 }
 
 
-
 $id = $_GET['id'];
 
 
-
 $result = mysqli_query($conn,
-"SELECT * FROM airplanes WHERE id=$id"
+"SELECT * FROM airlines WHERE id=$id"
 );
 
 
@@ -30,19 +28,19 @@ if(isset($_POST['submit'])){
 
 
     $airline_name = $_POST['airline_name'];
-    $model = $_POST['model'];
-    $registration_number = $_POST['registration_number'];
-    $capacity = $_POST['capacity'];
+    $country = $_POST['country'];
+    $contact = $_POST['contact'];
+    $email = $_POST['email'];
     $status = $_POST['status'];
 
 
 
-    $sql = "UPDATE airplanes SET
+    $sql = "UPDATE airlines SET
 
     airline_name='$airline_name',
-    model='$model',
-    registration_number='$registration_number',
-    capacity='$capacity',
+    country='$country',
+    contact='$contact',
+    email='$email',
     status='$status'
 
     WHERE id=$id";
@@ -59,8 +57,7 @@ if(isset($_POST['submit'])){
     VALUES
 
     ('".$_SESSION['user_id']."',
-    'Updated airline: ".$airline_name."')";
-
+    'Updated airline information: ".$airline_name."')";
 
 
     mysqli_query($conn,$log_sql);
@@ -74,7 +71,6 @@ if(isset($_POST['submit'])){
 
 
 ?>
-
 
 
 <!DOCTYPE html>
@@ -112,37 +108,34 @@ if(isset($_POST['submit'])){
 
 <label>Airline Name</label>
 
-<input type="text" 
+<input type="text"
 name="airline_name"
 value="<?php echo $airline['airline_name']; ?>"
 required>
 
 
 
-<label>Aircraft Model</label>
+<label>Country</label>
 
 <input type="text"
-name="model"
-value="<?php echo $airline['model']; ?>"
-required>
+name="country"
+value="<?php echo $airline['country']; ?>">
 
 
 
-<label>Registration Number</label>
+<label>Contact</label>
 
 <input type="text"
-name="registration_number"
-value="<?php echo $airline['registration_number']; ?>"
-required>
+name="contact"
+value="<?php echo $airline['contact']; ?>">
 
 
 
-<label>Capacity</label>
+<label>Email</label>
 
-<input type="number"
-name="capacity"
-value="<?php echo $airline['capacity']; ?>"
-required>
+<input type="email"
+name="email"
+value="<?php echo $airline['email']; ?>">
 
 
 
@@ -152,40 +145,52 @@ required>
 
 
 <option value="Active"
-<?php if($airline['status']=="Active") echo "selected"; ?>> 
+<?php if($airline['status']=="Active") echo "selected"; ?>>
 Active
 </option>
 
 
-
 <option value="Pending"
-<?php if($airline['status']=="Pending") echo "selected"; ?>> Pending </option>
-
+<?php if($airline['status']=="Pending") echo "selected"; ?>>
+Pending
+</option>
 
 
 <option value="Rejected"
-<?php if($airline['status']=="Rejected") echo "selected"; ?>> Rejected </option>
+<?php if($airline['status']=="Rejected") echo "selected"; ?>>
+Rejected
+</option>
+
 
 </select>
 
 
+
 <div class="form-buttons">
 
-<button class="save-btn" name="submit"> Update </button>
+
+<button class="save-btn" name="submit">
+Update
+</button>
 
 
-
-<a class="back-btn" href="airlines.php"> Back </a>
+<a class="back-btn" href="airlines.php">
+Back
+</a>
 
 
 </div>
+
 
 </form>
 
+
 </div>
+
 
  </div>
 
+ 
  </div>
 
 </body>
