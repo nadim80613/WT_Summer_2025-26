@@ -1148,6 +1148,87 @@ $total_count =
 
 </div>
 
+```html
+<div class="modal-backdrop" id="baggageEditModal">
+    <div class="modal-card">
+
+        <div class="modal-header">
+            <div>
+                <h2>Edit Baggage Status</h2>
+                <p>Update the current baggage status</p>
+            </div>
+
+            <button
+                type="button"
+                class="modal-close"
+                onclick="closeBaggageEditModal()"
+            >
+                ×
+            </button>
+        </div>
+
+        <form id="baggageStatusForm">
+
+            <input
+                type="hidden"
+                id="editBaggageId"
+                name="bag_id"
+            >
+
+            <div class="modal-group">
+                <label for="editBaggageStatus">Status</label>
+
+                <select
+                    id="editBaggageStatus"
+                    name="baggage_status"
+                    required
+                >
+                    <option value="Checked">Checked</option>
+                    <option value="Loaded">Loaded</option>
+                    <option value="In Transit">In Transit</option>
+                    <option value="Arrived">Arrived</option>
+                    <option value="Delivered">Delivered</option>
+                </select>
+            </div>
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="btn-cancel"
+                    onclick="closeBaggageEditModal()"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn-save"
+                >
+                    Save
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+```
+```php
+<button
+    type="button"
+    class="btn-edit-baggage"
+    onclick="openBaggageEditModal(
+        <?= $bag['id']; ?>,
+        '<?= htmlspecialchars($bag['baggage_status'], ENT_QUOTES); ?>'
+    )"
+>
+    Edit
+</button>
+```
+
+
 
 
 <!-- =====================================================

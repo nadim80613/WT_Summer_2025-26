@@ -812,72 +812,203 @@ if (baggageSearch) {
 
 
 /* =====================================================
-   UPDATE BAGGAGE STATUS
+   BAGGAGE EDIT STATUS MODAL
 ===================================================== */
 
-function updateBaggageStep(bagId, step) {
+window.openBaggageEditModal = function (bagId, status) {
 
-    const formData = new FormData();
+    const modal =
+        document.getElementById("baggageEditModal");
+
+    const baggageId =
+        document.getElementById("editBaggageId");
+
+    const baggageStatus =
+        document.getElementById("editBaggageStatus");
 
 
-    formData.append(
-        "update_step",
-        "1"
+    if (!modal) {
+
+        console.error(
+            "baggageEditModal not found"
+        );
+
+        return;
+    }
+
+
+    if (baggageId) {
+
+        baggageId.value = bagId;
+
+    }
+
+
+    /*
+     * Convert old database value
+     * "Checked In" to "Checked"
+     */
+
+    if (status === "Checked In") {
+
+        status = "Checked";
+
+    }
+
+
+    if (baggageStatus) {
+
+        baggageStatus.value = status;
+
+    }
+
+
+    modal.classList.add("show");
+
+};
+
+
+/* =====================================================
+   CLOSE BAGGAGE EDIT MODAL
+===================================================== */
+
+window.closeBaggageEditModal = function () {
+
+    const modal =
+        document.getElementById("baggageEditModal");
+
+
+    if (modal) {
+
+        modal.classList.remove("show");
+
+    }
+
+};
+
+
+/* =====================================================
+   SAVE BAGGAGE STATUS
+===================================================== */
+
+const baggageStatusForm =
+    document.getElementById(
+        "baggageStatusForm"
     );
 
 
-    formData.append(
-        "bag_id",
-        bagId
-    );
+if (baggageStatusForm) {
+
+    baggageStatusForm.addEventListener(
+        "submit",
+        function (event) {
+
+            event.preventDefault();
 
 
-    formData.append(
-        "step",
-        step
-    );
+            const formData =
+                new FormData(this);
 
 
-    fetch(
-        "baggage_status.php",
-        {
-            method: "POST",
-            body: formData
+            formData.append(
+                "update_baggage_status",
+                "1"
+            );
+
+
+            fetch(
+                "baggage_status.php",
+                {
+                    method: "POST",
+                    body: formData
+                }
+            )
+
+
+            .then(function (response) {
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Server returned an error."
+                    );
+
+                }
+
+                return response.json();
+
+            })
+
+
+            .then(function (data) {
+
+                if (data.success) {
+
+                    closeBaggageEditModal();
+
+                    location.reload();
+
+                }
+                else {
+
+                    alert(
+                        data.message ||
+                        "Could not update baggage status."
+                    );
+
+                }
+
+            })
+
+
+            .catch(function (error) {
+
+                console.error(
+                    "Baggage update error:",
+                    error
+                );
+
+                alert(
+                    "Something went wrong while updating baggage status."
+                );
+
+            });
+
         }
-    )
-
-
-    .then(function (response) {
-
-        return response.json();
-
-    })
-
-
-    .then(function (data) {
-
-        if (data.success) {
-
-            location.reload();
-
-        } else {
-
-            alert("Could not update baggage status.");
-
-        }
-
-    })
-
-
-    .catch(function (error) {
-
-        console.log(error);
-
-        alert("Something went wrong.");
-
-    });
+    );
 
 }
+
+
+/* =====================================================
+   CLOSE BAGGAGE MODAL WHEN CLICKING OUTSIDE
+===================================================== */
+
+document.addEventListener(
+    "click",
+    function (event) {
+
+        const baggageModal =
+            document.getElementById(
+                "baggageEditModal"
+            );
+
+
+        if (
+            baggageModal &&
+            event.target === baggageModal
+        ) {
+
+            closeBaggageEditModal();
+
+        }
+
+    }
+);
+
+
+
+
 
 
 });
