@@ -254,7 +254,7 @@ textarea {
     height: 48px;
     flex-shrink: 0; /* icon keeps its size even if card shrinks */
     border-radius: 10px;
-    background: #221223; /* overview logo/icon background */
+    background: #e4e3e4; /* overview logo/icon background */
     display: flex;
     align-items: center;
     justify-content: center;
