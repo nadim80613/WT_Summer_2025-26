@@ -405,7 +405,7 @@ if($_SERVER['REQUEST_METHOD']==='POST')
 
 <div class="sidebar-logo">
 
-<h2>AMS</h2>
+<h2>AIRPORT MANAGEMENT SYSTEM</h2>
 
 <p>Airline Portal</p>
 
@@ -921,7 +921,7 @@ type="submit"
 class="btn btn-primary"
 >
 
-    Add Aircraft
+✈️ Add Aircraft
 
 </button>
 
