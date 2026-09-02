@@ -5,7 +5,7 @@ include 'header.php';
 $user_id = (int)$_SESSION['user_id'];
 $msg = "";
 
-// Handle Ticket Cancellation
+
 if (isset($_GET['cancel_id'])) {
     $cancel_id = (int)$_GET['cancel_id'];
     $del = $conn->query("DELETE FROM bookings WHERE id = $cancel_id AND user_id = $user_id");
@@ -17,7 +17,7 @@ if (isset($_GET['cancel_id'])) {
     }
 }
 
-// Fetch upcoming bookings for logged in user
+
 $sql = "SELECT b.id AS booking_id, b.seat_number, b.payment_status, f.flight_number, f.departure, f.destination, f.departure_time 
         FROM bookings b
         JOIN flights f ON b.flight_id = f.id

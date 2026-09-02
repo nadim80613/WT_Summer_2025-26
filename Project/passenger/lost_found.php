@@ -5,7 +5,7 @@ include 'header.php';
 $user_id = (int)$_SESSION['user_id'];
 $msg = "";
 
-// Handle submission
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $item_name = $conn->real_escape_string(trim($_POST['item_name'] ?? ''));
     $lost_location = $conn->real_escape_string(trim($_POST['lost_location'] ?? ''));
@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $ins = "INSERT INTO lost_items (user_id, item_name, description, lost_location, status, reported_date) 
                 VALUES ($user_id, '$item_name', '$description', '$lost_location', 'Pending', NOW())";
         if ($conn->query($ins)) {
-            // Add notification
+           
             $conn->query("INSERT INTO notifications (user_id, message, type, status, created_at) 
                          VALUES ($user_id, 'Report filed for missing item: $item_name. Airport desk is searching.', 'Lost Item', 'Unread', NOW())");
             
@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch user's reported items
+
 $items = $conn->query("SELECT * FROM lost_items WHERE user_id = $user_id ORDER BY id DESC");
 ?>
 
@@ -117,7 +117,7 @@ $items = $conn->query("SELECT * FROM lost_items WHERE user_id = $user_id ORDER B
 
 <div class="lf-grid">
     
-    <!-- Left: Report Form -->
+   
     <div class="lf-card">
         <h3>🔍 Report a Missing Belonging</h3>
         <p class="desc">Provide specific details to help airport security locate your item quickly.</p>
@@ -142,7 +142,7 @@ $items = $conn->query("SELECT * FROM lost_items WHERE user_id = $user_id ORDER B
         </form>
     </div>
 
-    <!-- Right: Airport Lost & Found Guidelines -->
+    
     <div>
         <div class="helpdesk-box">
             <h4>🛡 Airport Security Helpdesk</h4>
@@ -167,7 +167,7 @@ $items = $conn->query("SELECT * FROM lost_items WHERE user_id = $user_id ORDER B
 
 </div>
 
-<!-- Reported Items Table -->
+
 <h3 style="margin-bottom: 12px; font-size: 18px;">My Reported Items History</h3>
 
 <table>
