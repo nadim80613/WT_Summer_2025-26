@@ -14,23 +14,28 @@ body{
 }
 
 .container{
+
     width:900px;
-    height:520px;
+    min-height:520px;
+    height:auto;
     display:flex;
     background:white;
     border-radius:35px;
     overflow:hidden;
+
     box-shadow:0 10px 30px rgba(0,0,0,0.15);
+
 }
 
 .form-box{
+
     width:50%;
     padding:60px;
     display:flex;
     flex-direction:column;
     justify-content:center;
-}
 
+}
 .form-box h2{
     font-size:38px;
     margin-bottom:25px;
@@ -139,4 +144,14 @@ a{
 
 .register-welcome{
     border-radius:0 160px 160px 0;
+}
+
+
+
+.error {
+    display: block;
+    color: red;
+    font-size: 13px;
+    margin-top: 5px;
+    margin-bottom: 10px;
 }

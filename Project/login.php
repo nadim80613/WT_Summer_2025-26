@@ -7,8 +7,6 @@ session_start();
 $error = "";
 
 
-
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
@@ -18,31 +16,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
 
-    if (!empty($email) && !empty($password)) {
+    if(empty($email) || empty($password))
+    {
+
+        $error = "Please fill all fields.";
+
+    }
+
+    else
+    {
 
 
         $email_safe = $conn->real_escape_string($email);
 
 
+
         $res = $conn->query(
-            "SELECT * FROM users WHERE email = '$email_safe' LIMIT 1"
+            "SELECT * FROM users 
+             WHERE email='$email_safe'
+             LIMIT 1"
         );
 
 
 
-        if ($res && $res->num_rows > 0) {
+        if($res && $res->num_rows > 0)
+        {
+
+
             $user = $res->fetch_assoc();
+
+
             $db_pass = $user['password'];
+
             $pass_valid = false;
 
 
 
-           
-            if (
+            if(
                 $password === $db_pass ||
                 md5($password) === $db_pass ||
-                password_verify($password, $db_pass)
-            ) {
+                password_verify($password,$db_pass)
+            )
+            {
 
                 $pass_valid = true;
 
@@ -50,51 +65,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
 
-            if ($pass_valid) 
-                {
+            if($pass_valid)
+            {
+
+
                 $_SESSION['user_id'] = (int)$user['id'];
 
                 $_SESSION['user_name'] = $user['name'];
 
-                $_SESSION['role'] = strtolower(trim($user['role'] ?? 'passenger'));
+                $_SESSION['role'] = strtolower(
+                    trim($user['role'] ?? 'passenger')
+                );
+
 
 
 
                 // Activity Log
 
-                $log_sql = "INSERT INTO activity_logs (user_id, action)
-                 VALUES ('".$user['id']."','User logged in')";
+                $log_sql="
+                INSERT INTO activity_logs
+                (user_id,action)
 
-                 mysqli_query($conn,$log_sql);
+                VALUES
+                (
+                '".$user['id']."',
+                'User logged in'
+                )";
 
-                // Role based 
 
-                if ($_SESSION['role'] == "admin") {
+                mysqli_query($conn,$log_sql);
 
+
+
+
+
+                // Role Redirect
+
+                if($_SESSION['role']=="admin")
+                {
 
                     header("Location: admin/dashboard.php");
 
+                }
 
-                } 
-                elseif ($_SESSION['role'] == "staff") {
-
+                elseif($_SESSION['role']=="staff")
+                {
 
                     header("Location: staff/dashboard.php");
 
+                }
 
-                } 
-                elseif ($_SESSION['role'] == "airline") {
-
+                elseif($_SESSION['role']=="airline")
+                {
 
                     header("Location: airline/dashboard.php");
 
+                }
 
-                } 
-                else {
-
+                else
+                {
 
                     header("Location: passenger/dashboard.php");
-
 
                 }
 
@@ -102,153 +133,194 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit();
 
 
+            }
 
-            } else {
+            else
+            {
 
-
-                $error = "Incorrect password! Please try again.";
-
+                $error="Incorrect password!";
 
             }
 
 
 
-        } else {
+        }
 
+        else
+        {
 
-            $error = "No user found with this email address.";
-
+            $error="Email not found!";
 
         }
 
 
-
-    } else {
-
-
-        $error = "Please fill in both email and password.";
-
-
     }
+
 
 }
 
-
 ?>
 
+
+
 <!DOCTYPE html>
+
 <html>
+
 
 <head>
 
-    <title>Airport Management System - Login</title>
 
-    <link rel="stylesheet" href="assets/css/auth.css">
+<title>
+Airport Management System - Login
+</title>
+
+
+<link rel="stylesheet" href="assets/css/auth.css">
+
+
+<script src="assets/js/validation.js"></script>
+
 
 </head>
+
 
 
 <body>
 
 
+
 <div class="container">
 
 
-    <div class="form-box">
+
+<div class="form-box">
 
 
-        <h2>Sign In</h2>
+<h2>
+Sign In
+</h2>
 
 
-        <p class="subtitle">
-            Sign in with your email and password
-        </p>
-
-
-
-        <?php if(!empty($error)): ?>
-
-            <p style="color:red; margin-bottom:15px;">
-                <?php echo $error; ?>
-            </p>
-
-        <?php endif; ?>
+<p class="subtitle">
+Sign in with your email and password
+</p>
 
 
 
-        <form method="post" action="login.php">
 
+<?php if(!empty($error)){ ?>
 
-            <input 
-                type="email" 
-                name="email" 
-                placeholder="Enter E-mail"
-                required
-            >
+<p class="server-error">
 
+<?php echo $error; ?>
 
+</p>
 
-            <input 
-                type="password" 
-                name="password" 
-                placeholder="Enter Password"
-                required
-            >
-
-
-
-            <button type="submit">
-                Sign In
-            </button>
-
-
-        </form>
-
-
-
-        
-
-
-
-    </div>
+<?php } ?>
 
 
 
 
 
-    <div class="welcome-box login-welcome">
-
-
-        <h1>
-            Welcome Back!
-        </h1>
-
-
-        <p>
-            Airport Management System
-        </p>
-
-        <p>
-            Don't Have any Account?
-        </p>
-
-        <a href="register.php">
-        <button class="register-btn">
-            Sign Up
-        </button>
-    </a>
+<form method="post"
+action="login.php"
+onsubmit="return validateLogin()">
 
 
 
 
-    </div>
 
+<input
+
+type="email"
+
+id="email"
+
+name="email"
+
+placeholder="Enter E-mail"
+
+>
+
+
+<span id="emailError" class="error"></span>
+
+
+
+
+
+
+<input
+
+type="password"
+
+id="password"
+
+name="password"
+
+placeholder="Enter Password"
+
+>
+
+
+<span id="passwordError" class="error"></span>
+
+
+
+
+
+
+<button type="submit">
+
+Sign In
+
+</button>
+
+
+
+</form>
 
 
 </div>
 
 
 
-</body>
 
+
+
+<div class="welcome-box login-welcome">
+
+
+<h1>
+Welcome Back!
+</h1>
+
+
+<p>
+Airport Management System
+</p>
+
+
+<p>
+Don't Have any Account?
+</p>
+
+
+
+<a href="register.php">
+
+<button class="register-btn">
+
+Sign Up
+
+</button>
+
+</a>
+
+</div>
+
+</div>
+
+</body>
 </html>
