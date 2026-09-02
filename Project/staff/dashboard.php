@@ -1,4 +1,3 @@
-```php
 <?php
 
 session_start();
@@ -638,18 +637,24 @@ function getGateStatusClass($availability)
 
                         <tr>
 
+                            <!-- FLIGHT -->
+
                             <td>
 
                                 <strong>
+
                                     <?php
                                     echo htmlspecialchars(
                                         $flight['flight_number']
                                     );
                                     ?>
+
                                 </strong>
 
                             </td>
 
+
+                            <!-- ROUTE -->
 
                             <td>
 
@@ -670,12 +675,14 @@ function getGateStatusClass($availability)
                             </td>
 
 
+                            <!-- DEPARTURE -->
+
                             <td>
 
                                 <?php
                                 echo htmlspecialchars(
                                     date(
-                                        'H:i',
+                                        'd M Y, H:i',
                                         strtotime(
                                             $flight['departure_time']
                                         )
@@ -686,12 +693,14 @@ function getGateStatusClass($availability)
                             </td>
 
 
+                            <!-- ARRIVAL -->
+
                             <td>
 
                                 <?php
                                 echo htmlspecialchars(
                                     date(
-                                        'H:i',
+                                        'd M Y, H:i',
                                         strtotime(
                                             $flight['arrival_time']
                                         )
@@ -701,6 +710,8 @@ function getGateStatusClass($availability)
 
                             </td>
 
+
+                            <!-- GATE -->
 
                             <td>
 
@@ -716,6 +727,8 @@ function getGateStatusClass($availability)
 
                             </td>
 
+
+                            <!-- STATUS -->
 
                             <td>
 
@@ -1021,4 +1034,3 @@ function getGateStatusClass($availability)
 </body>
 
 </html>
-```
