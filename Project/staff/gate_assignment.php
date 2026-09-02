@@ -12,11 +12,6 @@ if (!isset($_SESSION['user_id'])) {
 
 include "../config/database.php";
 
-
-/* =========================================================
-   STAFF INFORMATION
-========================================================= */
-
 $user_id = $_SESSION['user_id'];
 
 $user_sql = "
@@ -33,11 +28,6 @@ $staff_role = $user_data['role'] ?? $_SESSION['role'] ?? 'Staff';
 
 $staff_initials = strtoupper(substr($staff_name, 0, 2));
 
-
-/* =========================================================
-   CHANGE GATE STATUS / TERMINAL
-========================================================= */
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_gate'])) {
 
     $gate_id = (int) $_POST['gate_id'];
@@ -52,16 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_gate'])) {
         $_POST['terminal']
     );
 
-
     if ($gate_id > 0) {
-
-        /*
-         * If the gate becomes Available
-         * or Maintenance, remove its flight.
-         *
-         * The removed flight will automatically
-         * appear in Unassigned Flights.
-         */
 
         if (
             $status === 'Available' ||
@@ -79,11 +60,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_gate'])) {
 
         } else {
 
-            /*
-             * If status is Occupied,
-             * keep the existing flight_id.
-             */
-
             $update_sql = "
                 UPDATE gates
                 SET
@@ -96,15 +72,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_gate'])) {
         mysqli_query($conn, $update_sql);
     }
 
-
     header("Location: gate_assignment.php");
     exit();
 }
-
-
-/* =========================================================
-   ASSIGN UNASSIGNED FLIGHT TO GATE
-========================================================= */
 
 if (
     $_SERVER['REQUEST_METHOD'] === 'POST'
@@ -114,16 +84,10 @@ if (
     $flight_id = (int) $_POST['flight_id'];
     $gate_id = (int) $_POST['gate_id'];
 
-
     if (
         $flight_id > 0 &&
         $gate_id > 0
     ) {
-
-        /*
-         * Check whether selected gate
-         * is actually available.
-         */
 
         $check_gate_sql = "
             SELECT id
@@ -138,16 +102,10 @@ if (
             $check_gate_sql
         );
 
-
         if (
             $check_gate_result &&
             mysqli_num_rows($check_gate_result) > 0
         ) {
-
-            /*
-             * Make sure this flight does not
-             * already have another gate.
-             */
 
             $check_flight_sql = "
                 SELECT id
@@ -160,12 +118,6 @@ if (
                 $conn,
                 $check_flight_sql
             );
-
-
-            /*
-             * Only assign if the flight
-             * does not already have a gate.
-             */
 
             if (
                 !$check_flight_result ||
@@ -188,15 +140,9 @@ if (
         }
     }
 
-
     header("Location: gate_assignment.php");
     exit();
 }
-
-
-/* =========================================================
-   GATE STATISTICS
-========================================================= */
 
 $stats_sql = "
     SELECT
@@ -239,7 +185,6 @@ $stats = mysqli_fetch_assoc(
     $stats_result
 );
 
-
 $total_gates = $stats['total_gates'] ?? 0;
 
 $available_gates =
@@ -250,11 +195,6 @@ $occupied_gates =
 
 $maintenance_gates =
     $stats['maintenance_gates'] ?? 0;
-
-
-/* =========================================================
-   GET ALL GATES
-========================================================= */
 
 $gates_sql = "
 
@@ -305,15 +245,12 @@ $gates_sql = "
         g.id ASC
 ";
 
-
 $gates_result = mysqli_query(
     $conn,
     $gates_sql
 );
 
-
 $gates = [];
-
 
 if ($gates_result) {
 
@@ -326,11 +263,6 @@ if ($gates_result) {
         $gates[] = $row;
     }
 }
-
-
-/* =========================================================
-   GET UNASSIGNED FLIGHTS
-========================================================= */
 
 $unassigned_sql = "
 
@@ -370,15 +302,12 @@ $unassigned_sql = "
         f.departure_time ASC
 ";
 
-
 $unassigned_result = mysqli_query(
     $conn,
     $unassigned_sql
 );
 
-
 $unassigned_flights = [];
-
 
 if ($unassigned_result) {
 
@@ -392,14 +321,8 @@ if ($unassigned_result) {
     }
 }
 
-
 $unassigned_count =
     count($unassigned_flights);
-
-
-/* =========================================================
-   GET AVAILABLE GATES
-========================================================= */
 
 $available_gate_sql = "
 
@@ -420,15 +343,12 @@ $available_gate_sql = "
         id ASC
 ";
 
-
 $available_gate_result = mysqli_query(
     $conn,
     $available_gate_sql
 );
 
-
 $available_gate_list = [];
-
 
 if ($available_gate_result) {
 
@@ -441,11 +361,6 @@ if ($available_gate_result) {
         $available_gate_list[] = $row;
     }
 }
-
-
-/* =========================================================
-   GATE STATUS CLASS
-========================================================= */
 
 function getGateClass($status)
 {
@@ -487,23 +402,13 @@ function getGateClass($status)
 
 </head>
 
-
 <body>
 
-
 <div class="app-layout">
-
-
-    <!-- =====================================================
-         SIDEBAR
-    ====================================================== -->
 
     <aside class="sidebar">
 
         <div class="sidebar-top">
-
-
-            <!-- LOGO -->
 
             <div class="logo">
 
@@ -524,9 +429,6 @@ function getGateClass($status)
                 </div>
 
             </div>
-
-
-            <!-- PROFILE -->
 
             <div class="profile">
 
@@ -556,15 +458,9 @@ function getGateClass($status)
 
             </div>
 
-
-            <!-- MENU TITLE -->
-
             <div class="title">
                 STAFF OPERATIONS
             </div>
-
-
-            <!-- MENU -->
 
             <nav>
 
@@ -575,7 +471,6 @@ function getGateClass($status)
                     ▦ Dashboard
                 </a>
 
-
                 <a
                     href="flight_schedule.php"
                     class="menu"
@@ -583,14 +478,12 @@ function getGateClass($status)
                     📅 Flight Schedules
                 </a>
 
-
                 <a
                     href="gate_assignment.php"
                     class="menu active"
                 >
                     🛫 Gate & Terminal
                 </a>
-
 
                 <a
                     href="baggage_status.php"
@@ -602,9 +495,6 @@ function getGateClass($status)
             </nav>
 
         </div>
-
-
-        <!-- SIDEBAR BOTTOM -->
 
         <div class="sidebar-bottom">
 
@@ -623,7 +513,6 @@ function getGateClass($status)
 
             </p>
 
-
             <p>
 
                 <a
@@ -639,16 +528,7 @@ function getGateClass($status)
 
     </aside>
 
-
-
-    <!-- =====================================================
-         MAIN CONTENT
-    ====================================================== -->
-
     <main class="main">
-
-
-        <!-- PAGE HEADER -->
 
         <div class="page-header">
 
@@ -662,14 +542,7 @@ function getGateClass($status)
 
         </div>
 
-
-
-        <!-- =====================================================
-             STATISTICS
-        ====================================================== -->
-
         <section class="gate-stat-cards">
-
 
             <div class="stat-card">
 
@@ -683,7 +556,6 @@ function getGateClass($status)
 
             </div>
 
-
             <div class="stat-card">
 
                 <h4>
@@ -695,7 +567,6 @@ function getGateClass($status)
                 </h2>
 
             </div>
-
 
             <div class="stat-card">
 
@@ -709,7 +580,6 @@ function getGateClass($status)
 
             </div>
 
-
             <div class="stat-card">
 
                 <h4>
@@ -722,17 +592,9 @@ function getGateClass($status)
 
             </div>
 
-
         </section>
 
-
-
-        <!-- =====================================================
-             TERMINAL GATE MAP
-        ====================================================== -->
-
         <section class="terminal-map-card">
-
 
             <div class="section-header">
 
@@ -749,7 +611,6 @@ function getGateClass($status)
                 </div>
 
             </div>
-
 
             <?php
 
@@ -768,22 +629,18 @@ function getGateClass($status)
 
             <div class="terminal-group">
 
-
                 <h3>
                     <?= htmlspecialchars(
                         $terminal
                     ); ?>
                 </h3>
 
-
                 <div class="terminal-grid">
-
 
                     <?php foreach (
                         $gates
                         as $gate
                     ): ?>
-
 
                         <?php
 
@@ -796,14 +653,12 @@ function getGateClass($status)
                             continue;
                         }
 
-
                         $gate_class =
                             getGateClass(
                                 $gate['availability']
                             );
 
                         ?>
-
 
                         <div
                             class="gate-item"
@@ -828,23 +683,15 @@ function getGateClass($status)
 
                         </div>
 
-
                     <?php endforeach; ?>
-
 
                 </div>
 
             </div>
 
-
             <?php endforeach; ?>
 
-
-
-            <!-- LEGEND -->
-
             <div class="gate-legend">
-
 
                 <div class="legend-item">
 
@@ -856,7 +703,6 @@ function getGateClass($status)
 
                 </div>
 
-
                 <div class="legend-item">
 
                     <span
@@ -866,7 +712,6 @@ function getGateClass($status)
                     Occupied
 
                 </div>
-
 
                 <div class="legend-item">
 
@@ -878,20 +723,11 @@ function getGateClass($status)
 
                 </div>
 
-
             </div>
-
 
         </section>
 
-
-
-        <!-- =====================================================
-             UNASSIGNED FLIGHTS
-        ====================================================== -->
-
         <section class="unassigned-section">
-
 
             <div class="section-header">
 
@@ -907,7 +743,6 @@ function getGateClass($status)
 
                 </div>
 
-
                 <span class="unassigned-count">
 
                     <?= $unassigned_count; ?>
@@ -916,15 +751,11 @@ function getGateClass($status)
 
             </div>
 
-
-
             <div class="unassigned-list">
-
 
                 <?php if (
                     $unassigned_count === 0
                 ): ?>
-
 
                     <div class="empty-message">
 
@@ -932,23 +763,18 @@ function getGateClass($status)
 
                     </div>
 
-
                 <?php else: ?>
-
 
                     <?php foreach (
                         $unassigned_flights
                         as $flight
                     ): ?>
 
-
                         <div
                             class="unassigned-item"
                         >
 
-
                             <div class="flight-info">
-
 
                                 <div>
 
@@ -962,7 +788,6 @@ function getGateClass($status)
 
                                     </strong>
 
-
                                     <p>
 
                                         <?= htmlspecialchars(
@@ -974,7 +799,6 @@ function getGateClass($status)
                                     </p>
 
                                 </div>
-
 
                                 <span
                                     class="flight-status"
@@ -988,9 +812,7 @@ function getGateClass($status)
 
                                 </span>
 
-
                             </div>
-
 
                             <div
                                 class="flight-route"
@@ -1014,7 +836,6 @@ function getGateClass($status)
 
                                 </strong>
 
-
                                 <span>
 
                                     <?= htmlspecialchars(
@@ -1026,7 +847,6 @@ function getGateClass($status)
                                 </span>
 
                             </div>
-
 
                             <button
                                 type="button"
@@ -1041,29 +861,17 @@ function getGateClass($status)
 
                             </button>
 
-
                         </div>
-
 
                     <?php endforeach; ?>
 
-
                 <?php endif; ?>
-
 
             </div>
 
-
         </section>
 
-
-
-        <!-- =====================================================
-             GATE OVERVIEW
-        ====================================================== -->
-
         <section class="gate-overview">
-
 
             <div class="section-header">
 
@@ -1081,9 +889,7 @@ function getGateClass($status)
 
             </div>
 
-
             <div class="table-container">
-
 
                 <table>
 
@@ -1123,18 +929,14 @@ function getGateClass($status)
 
                     </thead>
 
-
                     <tbody>
-
 
                     <?php foreach (
                         $gates
                         as $gate
                     ): ?>
 
-
                         <tr>
-
 
                             <td>
 
@@ -1150,7 +952,6 @@ function getGateClass($status)
 
                             </td>
 
-
                             <td>
 
                                 <?= htmlspecialchars(
@@ -1160,7 +961,6 @@ function getGateClass($status)
                                 ); ?>
 
                             </td>
-
 
                             <td>
 
@@ -1183,7 +983,6 @@ function getGateClass($status)
 
                             </td>
 
-
                             <td>
 
                                 <?php if (
@@ -1208,7 +1007,6 @@ function getGateClass($status)
 
                             </td>
 
-
                             <td>
 
                                 <?php if (
@@ -1232,7 +1030,6 @@ function getGateClass($status)
                                 <?php endif; ?>
 
                             </td>
-
 
                             <td>
 
@@ -1272,7 +1069,6 @@ function getGateClass($status)
 
                             </td>
 
-
                             <td>
 
                                 <?php if (
@@ -1297,42 +1093,28 @@ function getGateClass($status)
 
                             </td>
 
-
                         </tr>
 
-
                     <?php endforeach; ?>
-
 
                     </tbody>
 
                 </table>
 
-
             </div>
 
-
         </section>
-
 
     </main>
 
 </div>
-
-
-
-<!-- =====================================================
-     CHANGE GATE MODAL
-====================================================== -->
 
 <div
     id="gateModal"
     class="modal-backdrop"
 >
 
-
     <div class="modal-card">
-
 
         <div class="modal-header">
 
@@ -1354,7 +1136,6 @@ function getGateClass($status)
 
             </div>
 
-
             <button
                 type="button"
                 class="modal-close"
@@ -1367,13 +1148,10 @@ function getGateClass($status)
 
         </div>
 
-
-
         <form
             method="POST"
             action=""
         >
-
 
             <input
                 type="hidden"
@@ -1381,15 +1159,11 @@ function getGateClass($status)
                 id="modalGateId"
             >
 
-
-            <!-- STATUS -->
-
             <div class="modal-group">
 
                 <label>
                     Gate Status
                 </label>
-
 
                 <select
                     name="status"
@@ -1413,16 +1187,11 @@ function getGateClass($status)
 
             </div>
 
-
-
-            <!-- TERMINAL -->
-
             <div class="modal-group">
 
                 <label>
                     Terminal
                 </label>
-
 
                 <select
                     name="terminal"
@@ -1446,12 +1215,7 @@ function getGateClass($status)
 
             </div>
 
-
-
-            <!-- BUTTONS -->
-
             <div class="modal-actions">
-
 
                 <button
                     type="submit"
@@ -1463,7 +1227,6 @@ function getGateClass($status)
 
                 </button>
 
-
                 <button
                     type="button"
                     class="btn-cancel"
@@ -1474,34 +1237,22 @@ function getGateClass($status)
 
                 </button>
 
-
             </div>
 
-
         </form>
-
 
     </div>
 
 </div>
-
-
-
-<!-- =====================================================
-     ASSIGN FLIGHT MODAL
-====================================================== -->
 
 <div
     id="assignFlightModal"
     class="modal-backdrop"
 >
 
-
     <div class="modal-card">
 
-
         <div class="modal-header">
-
 
             <div>
 
@@ -1521,7 +1272,6 @@ function getGateClass($status)
 
             </div>
 
-
             <button
                 type="button"
                 class="modal-close"
@@ -1532,16 +1282,12 @@ function getGateClass($status)
 
             </button>
 
-
         </div>
-
-
 
         <form
             method="POST"
             action=""
         >
-
 
             <input
                 type="hidden"
@@ -1549,14 +1295,11 @@ function getGateClass($status)
                 id="assignFlightId"
             >
 
-
             <div class="modal-group">
-
 
                 <label>
                     Select Available Gate
                 </label>
-
 
                 <select
                     name="gate_id"
@@ -1567,12 +1310,10 @@ function getGateClass($status)
                         -- Select Gate --
                     </option>
 
-
                     <?php foreach (
                         $available_gate_list
                         as $available_gate
                     ): ?>
-
 
                         <option
                             value="<?= (int)$available_gate['id']; ?>"
@@ -1594,19 +1335,13 @@ function getGateClass($status)
 
                         </option>
 
-
                     <?php endforeach; ?>
-
 
                 </select>
 
-
             </div>
 
-
-
             <div class="modal-actions">
-
 
                 <button
                     type="submit"
@@ -1618,7 +1353,6 @@ function getGateClass($status)
 
                 </button>
 
-
                 <button
                     type="button"
                     class="btn-cancel"
@@ -1629,33 +1363,19 @@ function getGateClass($status)
 
                 </button>
 
-
             </div>
 
-
         </form>
-
 
     </div>
 
 </div>
 
-
-
-<!-- HELP BUTTON -->
-
 <div class="help-btn">
     ?
 </div>
 
-
-
-<!-- =====================================================
-     JAVASCRIPT
-====================================================== -->
-
 <script src="../assets/js/dashboard.js"></script>
-
 
 </body>
 

@@ -5,18 +5,12 @@ ini_set('display_errors', 1);
 
 session_start();
 
-
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../login.php");
     exit();
 }
 
 include "../config/database.php";
-
-
-/* =====================================================
-   UPDATE FLIGHT
-===================================================== */
 
 if (
     $_SERVER['REQUEST_METHOD'] === 'POST'
@@ -45,11 +39,6 @@ if (
         trim($_POST['edit_destination'])
     );
 
-
-    /* =================================================
-       DEPARTURE DATE + TIME
-    ================================================= */
-
     $departure_time = mysqli_real_escape_string(
         $conn,
         $_POST['edit_departure_date']
@@ -58,11 +47,6 @@ if (
         . ':00'
     );
 
-
-    /* =================================================
-       ARRIVAL DATE + TIME
-    ================================================= */
-
     $arrival_time = mysqli_real_escape_string(
         $conn,
         $_POST['edit_arrival_date']
@@ -70,7 +54,6 @@ if (
         . $_POST['edit_arrival_time']
         . ':00'
     );
-
 
     $aircraft = mysqli_real_escape_string(
         $conn,
@@ -82,11 +65,6 @@ if (
         trim($_POST['edit_gate_number'])
     );
 
-
-    /* =================================================
-       FIND AIRPLANE
-    ================================================= */
-
     $airplane_sql = "
         SELECT id
         FROM airplanes
@@ -95,32 +73,22 @@ if (
         LIMIT 1
     ";
 
-    $airplane_result =
-        mysqli_query($conn, $airplane_sql);
-
+    $airplane_result = mysqli_query($conn, $airplane_sql);
 
     if (!$airplane_result) {
-
         die(
             "Airplane search error: "
             . mysqli_error($conn)
         );
-
     }
-
 
     if ($airplane = mysqli_fetch_assoc($airplane_result)) {
 
-        $airplane_id =
-            $airplane['id'];
+        $airplane_id = $airplane['id'];
 
     } else {
 
-        /* Create Airplane */
-
-        $registration_number =
-            'REG-' . rand(100, 999);
-
+        $registration_number = 'REG-' . rand(100, 999);
 
         $airplane_insert = "
             INSERT INTO airplanes
@@ -131,7 +99,6 @@ if (
                 capacity,
                 status
             )
-
             VALUES
             (
                 '$airline',
@@ -142,29 +109,15 @@ if (
             )
         ";
 
-
-        if (!mysqli_query(
-            $conn,
-            $airplane_insert
-        )) {
-
+        if (!mysqli_query($conn, $airplane_insert)) {
             die(
                 "Airplane insert error: "
                 . mysqli_error($conn)
             );
-
         }
 
-
-        $airplane_id =
-            mysqli_insert_id($conn);
-
+        $airplane_id = mysqli_insert_id($conn);
     }
-
-
-    /* =================================================
-       UPDATE FLIGHT
-    ================================================= */
 
     $update_flight = "
         UPDATE flights
@@ -175,27 +128,15 @@ if (
             destination = '$destination',
             departure_time = '$departure_time',
             arrival_time = '$arrival_time'
-
         WHERE id = '$flight_id'
     ";
 
-
-    if (!mysqli_query(
-        $conn,
-        $update_flight
-    )) {
-
+    if (!mysqli_query($conn, $update_flight)) {
         die(
             "Flight update error: "
             . mysqli_error($conn)
         );
-
     }
-
-
-    /* =================================================
-       UPDATE GATE
-    ================================================= */
 
     $gate_check = "
         SELECT id
@@ -204,28 +145,19 @@ if (
         LIMIT 1
     ";
 
-    $gate_result =
-        mysqli_query($conn, $gate_check);
+    $gate_result = mysqli_query($conn, $gate_check);
 
-
-    if ($gate_row =
-        mysqli_fetch_assoc($gate_result)) {
-
+    if ($gate_row = mysqli_fetch_assoc($gate_result)) {
 
         if (!empty($gate_number)) {
 
             $update_gate = "
                 UPDATE gates
-
                 SET gate_number = '$gate_number'
-
                 WHERE id = '{$gate_row['id']}'
             ";
 
-            mysqli_query(
-                $conn,
-                $update_gate
-            );
+            mysqli_query($conn, $update_gate);
 
         } else {
 
@@ -234,16 +166,10 @@ if (
                 WHERE id = '{$gate_row['id']}'
             ";
 
-            mysqli_query(
-                $conn,
-                $delete_gate
-            );
-
+            mysqli_query($conn, $delete_gate);
         }
 
-
     } else {
-
 
         if (!empty($gate_number)) {
 
@@ -254,7 +180,6 @@ if (
                     flight_id,
                     availability
                 )
-
                 VALUES
                 (
                     '$gate_number',
@@ -263,33 +188,13 @@ if (
                 )
             ";
 
-            mysqli_query(
-                $conn,
-                $insert_gate
-            );
-
+            mysqli_query($conn, $insert_gate);
         }
-
     }
 
-
-    /* =================================================
-       REFRESH PAGE
-    ================================================= */
-
-    header(
-        "Location: flight_schedule.php"
-    );
-
+    header("Location: flight_schedule.php");
     exit();
-
 }
-
-
-
-/* =====================================================
-   ADD NEW FLIGHT
-===================================================== */
 
 if (
     $_SERVER['REQUEST_METHOD'] === 'POST'
@@ -316,11 +221,6 @@ if (
         trim($_POST['destination'])
     );
 
-
-    /* =================================================
-       DEPARTURE DATE + TIME
-    ================================================= */
-
     $departure_time = mysqli_real_escape_string(
         $conn,
         $_POST['departure_date']
@@ -329,11 +229,6 @@ if (
         . ':00'
     );
 
-
-    /* =================================================
-       ARRIVAL DATE + TIME
-    ================================================= */
-
     $arrival_time = mysqli_real_escape_string(
         $conn,
         $_POST['arrival_date']
@@ -341,7 +236,6 @@ if (
         . $_POST['arrival_time']
         . ':00'
     );
-
 
     $aircraft = mysqli_real_escape_string(
         $conn,
@@ -353,11 +247,6 @@ if (
         trim($_POST['gate_number'])
     );
 
-
-    /* =================================================
-       FIND EXISTING AIRPLANE
-    ================================================= */
-
     $airplane_sql = "
         SELECT id
         FROM airplanes
@@ -366,33 +255,22 @@ if (
         LIMIT 1
     ";
 
-    $airplane_result =
-        mysqli_query($conn, $airplane_sql);
-
+    $airplane_result = mysqli_query($conn, $airplane_sql);
 
     if (!$airplane_result) {
-
         die(
             "Airplane search error: "
             . mysqli_error($conn)
         );
-
     }
 
+    if ($airplane_row = mysqli_fetch_assoc($airplane_result)) {
 
-    if ($airplane_row =
-        mysqli_fetch_assoc($airplane_result)) {
-
-        $airplane_id =
-            $airplane_row['id'];
+        $airplane_id = $airplane_row['id'];
 
     } else {
 
-        /* Create New Airplane */
-
-        $registration_number =
-            'REG-' . rand(100, 999);
-
+        $registration_number = 'REG-' . rand(100, 999);
 
         $airplane_insert = "
             INSERT INTO airplanes
@@ -403,7 +281,6 @@ if (
                 capacity,
                 status
             )
-
             VALUES
             (
                 '$airline',
@@ -414,29 +291,15 @@ if (
             )
         ";
 
-
-        if (!mysqli_query(
-            $conn,
-            $airplane_insert
-        )) {
-
+        if (!mysqli_query($conn, $airplane_insert)) {
             die(
                 "Airplane insert error: "
                 . mysqli_error($conn)
             );
-
         }
 
-
-        $airplane_id =
-            mysqli_insert_id($conn);
-
+        $airplane_id = mysqli_insert_id($conn);
     }
-
-
-    /* =================================================
-       INSERT FLIGHT
-    ================================================= */
 
     $flight_insert = "
         INSERT INTO flights
@@ -449,7 +312,6 @@ if (
             arrival_time,
             status
         )
-
         VALUES
         (
             '$flight_number',
@@ -462,19 +324,9 @@ if (
         )
     ";
 
+    if (mysqli_query($conn, $flight_insert)) {
 
-    if (mysqli_query(
-        $conn,
-        $flight_insert
-    )) {
-
-        $flight_id =
-            mysqli_insert_id($conn);
-
-
-        /* =================================================
-           ADD GATE
-        ================================================= */
+        $flight_id = mysqli_insert_id($conn);
 
         if (!empty($gate_number)) {
 
@@ -485,7 +337,6 @@ if (
                     flight_id,
                     availability
                 )
-
                 VALUES
                 (
                     '$gate_number',
@@ -494,43 +345,19 @@ if (
                 )
             ";
 
-            mysqli_query(
-                $conn,
-                $gate_insert
-            );
-
+            mysqli_query($conn, $gate_insert);
         }
 
-
-        /* =================================================
-           REFRESH PAGE
-        ================================================= */
-
-        header(
-            "Location: flight_schedule.php"
-        );
-
+        header("Location: flight_schedule.php");
         exit();
 
     } else {
 
-        echo "Error: "
-            . mysqli_error($conn);
-
+        echo "Error: " . mysqli_error($conn);
     }
-
 }
 
-
-
-/* =====================================================
-   STAFF INFORMATION
-===================================================== */
-
 $user_id = $_SESSION['user_id'];
-
-
-/* Get Staff Information */
 
 $user_sql = "
     SELECT name, role
@@ -538,44 +365,27 @@ $user_sql = "
     WHERE id = '$user_id'
 ";
 
-$user_result =
-    mysqli_query(
-        $conn,
-        $user_sql
-    );
+$user_result = mysqli_query($conn, $user_sql);
 
-$user_data =
-    mysqli_fetch_assoc(
-        $user_result
-    );
-
+$user_data = mysqli_fetch_assoc($user_result);
 
 $staff_name =
     $user_data['name']
     ?? $_SESSION['name']
     ?? 'Staff';
 
-
 $staff_role =
     $user_data['role']
     ?? $_SESSION['role']
     ?? 'Staff';
 
-
-$staff_initials =
-    strtoupper(
-        substr(
-            $staff_name,
-            0,
-            2
-        )
-    );
-
-
-
-/* =====================================================
-   GET FLIGHT SCHEDULES
-===================================================== */
+$staff_initials = strtoupper(
+    substr(
+        $staff_name,
+        0,
+        2
+    )
+);
 
 $flights_sql = "
     SELECT
@@ -613,33 +423,18 @@ $flights_sql = "
     ORDER BY f.departure_time ASC
 ";
 
+$flights_result = mysqli_query(
+    $conn,
+    $flights_sql
+);
 
-$flights_result =
-    mysqli_query(
-        $conn,
-        $flights_sql
-    );
-
-
-$total_flights =
-    mysqli_num_rows(
-        $flights_result
-    );
-
-
-
-/* =====================================================
-   STATUS BADGE
-===================================================== */
+$total_flights = mysqli_num_rows(
+    $flights_result
+);
 
 function getScheduleBadgeClass($status)
 {
-
-    switch (
-        strtolower(
-            trim($status)
-        )
-    ) {
+    switch (strtolower(trim($status))) {
 
         case 'boarding':
             return 'status-boarding';
@@ -659,15 +454,12 @@ function getScheduleBadgeClass($status)
         case 'on time':
         default:
             return 'status-scheduled';
-
     }
-
 }
 
 ?>
 
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
@@ -690,15 +482,9 @@ function getScheduleBadgeClass($status)
 
 <body>
 
-
-<!-- =====================================================
-     SIDEBAR
-===================================================== -->
-
 <aside class="sidebar">
 
 <div class="sidebar-top">
-
 
     <div class="logo">
 
@@ -719,7 +505,6 @@ function getScheduleBadgeClass($status)
         </div>
 
     </div>
-
 
     <div class="profile">
 
@@ -759,11 +544,9 @@ function getScheduleBadgeClass($status)
 
     </div>
 
-
     <div class="title">
         STAFF OPERATIONS
     </div>
-
 
     <nav>
 
@@ -775,7 +558,6 @@ function getScheduleBadgeClass($status)
 
         </a>
 
-
         <a
             href="flight_schedule.php"
             class="menu active">
@@ -784,7 +566,6 @@ function getScheduleBadgeClass($status)
 
         </a>
 
-
         <a
             href="gate_assignment.php"
             class="menu">
@@ -792,7 +573,6 @@ function getScheduleBadgeClass($status)
             🛫 Gate & Terminal
 
         </a>
-
 
         <a
             href="baggage_status.php"
@@ -805,7 +585,6 @@ function getScheduleBadgeClass($status)
     </nav>
 
 </div>
-
 
 <div class="sidebar-bottom">
 
@@ -820,7 +599,6 @@ function getScheduleBadgeClass($status)
         </span>
 
     </p>
-
 
     <p>
 
@@ -838,16 +616,7 @@ function getScheduleBadgeClass($status)
 
 </aside>
 
-
-
-<!-- =====================================================
-     MAIN CONTENT
-===================================================== -->
-
 <main class="main">
-
-
-<!-- PAGE HEADER -->
 
 <div class="page-top-bar">
 
@@ -863,7 +632,6 @@ function getScheduleBadgeClass($status)
 
     </div>
 
-
     <button
         type="button"
         id="toggleFormBtn"
@@ -875,24 +643,16 @@ function getScheduleBadgeClass($status)
 
 </div>
 
-
-
-<!-- =================================================
-     ADD SCHEDULE FORM
-================================================= -->
-
 <div
     id="addScheduleCard"
     class="form-card"
     style="display:none;">
-
 
     <div class="form-header">
 
         <h3>
             New Flight Schedule
         </h3>
-
 
         <span
             id="closeFormBtn"
@@ -904,16 +664,11 @@ function getScheduleBadgeClass($status)
 
     </div>
 
-
     <form
         method="POST"
         action="">
 
-
         <div class="form-grid">
-
-
-            <!-- Flight Number -->
 
             <div class="form-group">
 
@@ -929,9 +684,6 @@ function getScheduleBadgeClass($status)
 
             </div>
 
-
-            <!-- Airline -->
-
             <div class="form-group">
 
                 <label>
@@ -945,9 +697,6 @@ function getScheduleBadgeClass($status)
                     required>
 
             </div>
-
-
-            <!-- Origin -->
 
             <div class="form-group">
 
@@ -964,9 +713,6 @@ function getScheduleBadgeClass($status)
 
             </div>
 
-
-            <!-- Destination -->
-
             <div class="form-group">
 
                 <label>
@@ -982,9 +728,6 @@ function getScheduleBadgeClass($status)
 
             </div>
 
-
-            <!-- Departure Date -->
-
             <div class="form-group">
 
                 <label>
@@ -997,9 +740,6 @@ function getScheduleBadgeClass($status)
                     required>
 
             </div>
-
-
-            <!-- Departure Time -->
 
             <div class="form-group">
 
@@ -1014,9 +754,6 @@ function getScheduleBadgeClass($status)
 
             </div>
 
-
-            <!-- Arrival Date -->
-
             <div class="form-group">
 
                 <label>
@@ -1029,9 +766,6 @@ function getScheduleBadgeClass($status)
                     required>
 
             </div>
-
-
-            <!-- Arrival Time -->
 
             <div class="form-group">
 
@@ -1046,9 +780,6 @@ function getScheduleBadgeClass($status)
 
             </div>
 
-
-            <!-- Aircraft -->
-
             <div class="form-group">
 
                 <label>
@@ -1062,9 +793,6 @@ function getScheduleBadgeClass($status)
                     required>
 
             </div>
-
-
-            <!-- Gate -->
 
             <div class="form-group">
 
@@ -1081,7 +809,6 @@ function getScheduleBadgeClass($status)
 
         </div>
 
-
         <div class="form-actions">
 
             <button
@@ -1091,7 +818,6 @@ function getScheduleBadgeClass($status)
                 Save Schedule
 
             </button>
-
 
             <button
                 type="button"
@@ -1108,17 +834,9 @@ function getScheduleBadgeClass($status)
 
 </div>
 
-
-
-<!-- =================================================
-     FILTERS
-================================================= -->
-
 <div class="filter-container">
 
-
     <div class="filter-pills">
-
 
         <button
             type="button"
@@ -1129,7 +847,6 @@ function getScheduleBadgeClass($status)
 
         </button>
 
-
         <button
             type="button"
             class="filter-btn"
@@ -1138,7 +855,6 @@ function getScheduleBadgeClass($status)
             On Time
 
         </button>
-
 
         <button
             type="button"
@@ -1149,7 +865,6 @@ function getScheduleBadgeClass($status)
 
         </button>
 
-
         <button
             type="button"
             class="filter-btn"
@@ -1158,7 +873,6 @@ function getScheduleBadgeClass($status)
             Delayed
 
         </button>
-
 
         <button
             type="button"
@@ -1169,7 +883,6 @@ function getScheduleBadgeClass($status)
 
         </button>
 
-
         <button
             type="button"
             class="filter-btn"
@@ -1178,7 +891,6 @@ function getScheduleBadgeClass($status)
             Arrived
 
         </button>
-
 
         <button
             type="button"
@@ -1190,7 +902,6 @@ function getScheduleBadgeClass($status)
         </button>
 
     </div>
-
 
     <div class="flight-count-text">
 
@@ -1208,17 +919,9 @@ function getScheduleBadgeClass($status)
 
 </div>
 
-
-
-<!-- =================================================
-     FLIGHT SCHEDULE TABLE
-================================================= -->
-
 <div class="schedule-table-card">
 
-
     <table class="schedule-table">
-
 
         <thead>
 
@@ -1260,12 +963,9 @@ function getScheduleBadgeClass($status)
 
         </thead>
 
-
         <tbody>
 
-
         <?php if ($total_flights > 0): ?>
-
 
             <?php while (
                 $flight =
@@ -1273,7 +973,6 @@ function getScheduleBadgeClass($status)
                     $flights_result
                 )
             ): ?>
-
 
                 <?php
 
@@ -1288,13 +987,9 @@ function getScheduleBadgeClass($status)
 
                 ?>
 
-
                 <tr
                     class="flight-row"
                     data-status="<?php echo strtolower(trim($status)); ?>">
-
-
-                    <!-- FLIGHT -->
 
                     <td>
 
@@ -1310,9 +1005,6 @@ function getScheduleBadgeClass($status)
 
                     </td>
 
-
-                    <!-- AIRLINE -->
-
                     <td>
 
                         <span class="airline-text">
@@ -1326,9 +1018,6 @@ function getScheduleBadgeClass($status)
                         </span>
 
                     </td>
-
-
-                    <!-- ROUTE -->
 
                     <td>
 
@@ -1344,11 +1033,9 @@ function getScheduleBadgeClass($status)
 
                             </strong>
 
-
                             <span class="route-symbol">
                                 ↓
                             </span>
-
 
                             <strong class="route-iata">
 
@@ -1364,15 +1051,9 @@ function getScheduleBadgeClass($status)
 
                     </td>
 
-
-                    <!-- SCHEDULE -->
-
                     <td>
 
                         <div class="schedule-time-box">
-
-
-                            <!-- DEPARTURE -->
 
                             <span>
 
@@ -1389,9 +1070,6 @@ function getScheduleBadgeClass($status)
 
                             </span>
 
-
-                            <!-- ARRIVAL -->
-
                             <span>
 
                                 <?php
@@ -1407,13 +1085,9 @@ function getScheduleBadgeClass($status)
 
                             </span>
 
-
                         </div>
 
                     </td>
-
-
-                    <!-- AIRCRAFT -->
 
                     <td>
 
@@ -1429,28 +1103,20 @@ function getScheduleBadgeClass($status)
 
                     </td>
 
-
-                    <!-- GATE -->
-
                     <td>
 
                         <strong class="gate-bold-cyan">
 
                             <?php
-
                             echo htmlspecialchars(
                                 $flight['gate_number']
                                 ?? 'TBD'
                             );
-
                             ?>
 
                         </strong>
 
                     </td>
-
-
-                    <!-- STATUS -->
 
                     <td>
 
@@ -1469,9 +1135,6 @@ function getScheduleBadgeClass($status)
 
                     </td>
 
-
-                    <!-- ACTION -->
-
                     <td>
 
                         <button
@@ -1487,12 +1150,9 @@ function getScheduleBadgeClass($status)
 
                 </tr>
 
-
             <?php endwhile; ?>
 
-
         <?php else: ?>
-
 
             <tr>
 
@@ -1506,21 +1166,13 @@ function getScheduleBadgeClass($status)
 
             </tr>
 
-
         <?php endif; ?>
-
 
         </tbody>
 
     </table>
 
 </div>
-
-
-
-<!-- =================================================
-     EDIT SCHEDULE FORM
-================================================= -->
 
 <div
     id="editScheduleCard"
@@ -1543,24 +1195,16 @@ function getScheduleBadgeClass($status)
 
     </div>
 
-
     <form
         method="POST"
         action="">
-
-
-        <!-- Flight ID -->
 
         <input
             type="hidden"
             name="edit_flight_id"
             id="edit_flight_id">
 
-
         <div class="form-grid">
-
-
-            <!-- Flight Number -->
 
             <div class="form-group">
 
@@ -1576,9 +1220,6 @@ function getScheduleBadgeClass($status)
 
             </div>
 
-
-            <!-- Airline -->
-
             <div class="form-group">
 
                 <label>
@@ -1592,9 +1233,6 @@ function getScheduleBadgeClass($status)
                     required>
 
             </div>
-
-
-            <!-- Origin -->
 
             <div class="form-group">
 
@@ -1611,9 +1249,6 @@ function getScheduleBadgeClass($status)
 
             </div>
 
-
-            <!-- Destination -->
-
             <div class="form-group">
 
                 <label>
@@ -1629,9 +1264,6 @@ function getScheduleBadgeClass($status)
 
             </div>
 
-
-            <!-- Departure Date -->
-
             <div class="form-group">
 
                 <label>
@@ -1645,9 +1277,6 @@ function getScheduleBadgeClass($status)
                     required>
 
             </div>
-
-
-            <!-- Departure Time -->
 
             <div class="form-group">
 
@@ -1663,9 +1292,6 @@ function getScheduleBadgeClass($status)
 
             </div>
 
-
-            <!-- Arrival Date -->
-
             <div class="form-group">
 
                 <label>
@@ -1679,9 +1305,6 @@ function getScheduleBadgeClass($status)
                     required>
 
             </div>
-
-
-            <!-- Arrival Time -->
 
             <div class="form-group">
 
@@ -1697,9 +1320,6 @@ function getScheduleBadgeClass($status)
 
             </div>
 
-
-            <!-- Aircraft -->
-
             <div class="form-group">
 
                 <label>
@@ -1713,9 +1333,6 @@ function getScheduleBadgeClass($status)
                     required>
 
             </div>
-
-
-            <!-- Gate -->
 
             <div class="form-group">
 
@@ -1732,9 +1349,7 @@ function getScheduleBadgeClass($status)
 
         </div>
 
-
         <div class="form-actions">
-
 
             <button
                 type="submit"
@@ -1744,7 +1359,6 @@ function getScheduleBadgeClass($status)
                 Update Schedule
 
             </button>
-
 
             <button
                 type="button"
@@ -1761,63 +1375,45 @@ function getScheduleBadgeClass($status)
 
 </div>
 
-
-
-<!-- =================================================
-     STATUS LEGEND
-================================================= -->
-
 <div class="status-legend-bar">
-
 
     <span>
         Flight status overview
     </span>
 
-
     <div class="legend-pills">
-
 
         <span class="status-badge status-scheduled">
             • On Time
         </span>
 
-
         <span class="status-badge status-boarding">
             • Boarding
         </span>
-
 
         <span class="status-badge status-delayed">
             • Delayed
         </span>
 
-
         <span class="status-badge status-departed">
             • Departed
         </span>
-
 
         <span class="status-badge status-arrived">
             • Arrived
         </span>
 
-
         <span class="status-badge status-cancelled">
             • Cancelled
         </span>
-
 
     </div>
 
 </div>
 
-
 </main>
 
-
 <script src="../assets/js/dashboard.js"></script>
-
 
 </body>
 

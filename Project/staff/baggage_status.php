@@ -1,34 +1,15 @@
 <?php
 
-/* =====================================================
-   START SESSION
-===================================================== */
-
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
-
-/* =====================================================
-   CHECK LOGIN
-===================================================== */
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../login.php");
     exit();
 }
 
-
-/* =====================================================
-   DATABASE
-===================================================== */
-
 include "../config/database.php";
-
-
-/* =====================================================
-   STAFF INFORMATION
-===================================================== */
 
 $user_id = $_SESSION['user_id'];
 
@@ -49,11 +30,6 @@ $staff_initials = strtoupper(
     substr($staff_name, 0, 2)
 );
 
-
-/* =====================================================
-   UPDATE BAGGAGE STATUS
-===================================================== */
-
 if (
     $_SERVER['REQUEST_METHOD'] === 'POST' &&
     isset($_POST['update_baggage_status'])
@@ -65,9 +41,6 @@ if (
         $_POST['baggage_status'] ?? ''
     );
 
-
-    /* Allowed baggage statuses */
-
     $allowed_statuses = [
         "Checked",
         "Loaded",
@@ -75,9 +48,6 @@ if (
         "Arrived",
         "Delivered"
     ];
-
-
-    /* Validate status */
 
     if (
         $bag_id <= 0 ||
@@ -96,21 +66,16 @@ if (
         exit();
     }
 
-
-    /* Update database */
-
     $update_sql = "
         UPDATE baggage
         SET baggage_status = ?
         WHERE id = ?
     ";
 
-
     $stmt = mysqli_prepare(
         $conn,
         $update_sql
     );
-
 
     if (!$stmt) {
 
@@ -126,7 +91,6 @@ if (
         exit();
     }
 
-
     mysqli_stmt_bind_param(
         $stmt,
         "si",
@@ -134,18 +98,14 @@ if (
         $bag_id
     );
 
-
     $success =
         mysqli_stmt_execute($stmt);
 
-
     mysqli_stmt_close($stmt);
-
 
     header(
         'Content-Type: application/json'
     );
-
 
     echo json_encode([
         "success" => $success,
@@ -154,11 +114,6 @@ if (
 
     exit();
 }
-
-
-/* =====================================================
-   GET BAGGAGE STATUS CSS CLASS
-===================================================== */
 
 function getBaggageStatusClass($status)
 {
@@ -185,17 +140,6 @@ function getBaggageStatusClass($status)
     }
 }
 
-
-/* =====================================================
-   GET BAGGAGE DATA
-===================================================== */
-
-/*
-   IMPORTANT:
-   There is NO b.weight here because your
-   baggage table does not have a weight column.
-*/
-
 $baggage_sql = "
 
     SELECT
@@ -212,67 +156,51 @@ $baggage_sql = "
             )
         ) AS baggage_tag,
 
-
         COALESCE(
             u.name,
             'Passenger'
         ) AS passenger_name,
-
 
         COALESCE(
             f.flight_number,
             'BG-401'
         ) AS flight_number,
 
-
         COALESCE(
             f.departure,
             'DAC'
         ) AS departure,
-
 
         COALESCE(
             f.destination,
             'DXB'
         ) AS destination,
 
-
         COALESCE(
             b.baggage_status,
             'Checked'
         ) AS baggage_status
 
-
     FROM baggage b
-
 
     LEFT JOIN users u
         ON b.user_id = u.id
 
-
     LEFT JOIN bookings bk
         ON b.booking_id = bk.id
-
 
     LEFT JOIN flights f
         ON bk.flight_id = f.id
 
-
     ORDER BY b.id ASC
 
 ";
-
 
 $baggage_result =
     mysqli_query(
         $conn,
         $baggage_sql
     );
-
-
-/* =====================================================
-   STORE DATA
-===================================================== */
 
 $bags = [];
 
@@ -281,7 +209,6 @@ $loaded_count = 0;
 $transit_count = 0;
 $arrived_count = 0;
 $delivered_count = 0;
-
 
 if ($baggage_result) {
 
@@ -294,12 +221,6 @@ if ($baggage_result) {
         $status =
             trim($bag['baggage_status']);
 
-
-        /*
-         * Convert old "Checked In"
-         * records to "Checked" for display.
-         */
-
         if ($status === "Checked In") {
 
             $status = "Checked";
@@ -308,13 +229,7 @@ if ($baggage_result) {
                 "Checked";
         }
 
-
         $bags[] = $bag;
-
-
-        /* =================================================
-           COUNT BAGGAGE STATUS
-        ================================================= */
 
         if ($status === "Checked") {
 
@@ -346,7 +261,6 @@ if ($baggage_result) {
 
 }
 
-
 $total_count =
     count($bags);
 
@@ -369,7 +283,6 @@ $total_count =
         Baggage Handling - AeroPort
     </title>
 
-
     <link
         rel="stylesheet"
         href="../assets/css/dashboard.css"
@@ -377,31 +290,19 @@ $total_count =
 
 </head>
 
-
 <body class="light-mode">
-
 
 <div class="app-layout">
 
-
-    <!-- =====================================================
-         SIDEBAR
-    ====================================================== -->
-
     <aside class="sidebar">
 
-
         <div class="sidebar-top">
-
-
-            <!-- LOGO -->
 
             <div class="logo">
 
                 <div class="logo-icon">
                     ✈
                 </div>
-
 
                 <div>
 
@@ -417,9 +318,6 @@ $total_count =
 
             </div>
 
-
-            <!-- PROFILE -->
-
             <div class="profile">
 
                 <div class="avatar">
@@ -430,7 +328,6 @@ $total_count =
 
                 </div>
 
-
                 <div>
 
                     <h3>
@@ -440,7 +337,6 @@ $total_count =
                         ); ?>
 
                     </h3>
-
 
                     <span>
 
@@ -454,18 +350,11 @@ $total_count =
 
             </div>
 
-
-            <!-- MENU TITLE -->
-
             <div class="title">
                 STAFF OPERATIONS
             </div>
 
-
-            <!-- NAVIGATION -->
-
             <nav>
-
 
                 <a
                     href="dashboard.php"
@@ -474,14 +363,12 @@ $total_count =
                     ▦ Dashboard
                 </a>
 
-
                 <a
                     href="flight_schedule.php"
                     class="menu"
                 >
                     📅 Flight Schedules
                 </a>
-
 
                 <a
                     href="gate_assignment.php"
@@ -490,7 +377,6 @@ $total_count =
                     🛫 Gate & Terminal
                 </a>
 
-
                 <a
                     href="baggage_status.php"
                     class="menu active"
@@ -498,19 +384,11 @@ $total_count =
                     🧳 Baggage Handling
                 </a>
 
-
             </nav>
-
 
         </div>
 
-
-        <!-- =====================================================
-             SIDEBAR BOTTOM
-        ====================================================== -->
-
         <div class="sidebar-bottom">
-
 
             <p id="themeToggle">
 
@@ -518,13 +396,11 @@ $total_count =
                     🌙
                 </span>
 
-
                 <span id="themeText">
                     Dark Mode
                 </span>
 
             </p>
-
 
             <p>
 
@@ -537,25 +413,13 @@ $total_count =
 
             </p>
 
-
         </div>
-
 
     </aside>
 
-
-
-    <!-- =====================================================
-         MAIN CONTENT
-    ====================================================== -->
-
     <main class="main">
 
-
-        <!-- PAGE TITLE -->
-
         <div class="page-top-bar">
-
 
             <div>
 
@@ -563,33 +427,21 @@ $total_count =
                     Baggage Handling & Status
                 </h1>
 
-
                 <p class="sub">
                     Track and update baggage movement status
                 </p>
 
             </div>
 
-
         </div>
 
-
-
-        <!-- =====================================================
-             STATISTICS
-        ====================================================== -->
-
         <section class="baggage-stat-cards">
-
-
-            <!-- CHECKED -->
 
             <div class="stat-card">
 
                 <h4>
                     Checked
                 </h4>
-
 
                 <h2 class="text-blue">
 
@@ -599,15 +451,11 @@ $total_count =
 
             </div>
 
-
-            <!-- LOADED -->
-
             <div class="stat-card">
 
                 <h4>
                     Loaded
                 </h4>
-
 
                 <h2 class="text-blue">
 
@@ -617,15 +465,11 @@ $total_count =
 
             </div>
 
-
-            <!-- IN TRANSIT -->
-
             <div class="stat-card">
 
                 <h4>
                     In Transit
                 </h4>
-
 
                 <h2 class="text-blue">
 
@@ -635,15 +479,11 @@ $total_count =
 
             </div>
 
-
-            <!-- ARRIVED -->
-
             <div class="stat-card">
 
                 <h4>
                     Arrived
                 </h4>
-
 
                 <h2 class="text-blue">
 
@@ -653,15 +493,11 @@ $total_count =
 
             </div>
 
-
-            <!-- DELIVERED -->
-
             <div class="stat-card">
 
                 <h4>
                     Delivered
                 </h4>
-
 
                 <h2 class="text-blue">
 
@@ -671,25 +507,15 @@ $total_count =
 
             </div>
 
-
         </section>
-
-
-
-        <!-- =====================================================
-             SEARCH
-        ====================================================== -->
 
         <div class="search-filter-container">
 
-
             <div class="search-input-wrapper">
-
 
                 <span class="search-icon">
                     🔍
                 </span>
-
 
                 <input
                     type="text"
@@ -697,9 +523,7 @@ $total_count =
                     placeholder="Search by baggage tag, passenger name, or flight..."
                 >
 
-
             </div>
-
 
             <div class="items-count-badge">
 
@@ -713,20 +537,11 @@ $total_count =
 
             </div>
 
-
         </div>
-
-
-
-        <!-- =====================================================
-             BAGGAGE TABLE
-        ====================================================== -->
 
         <div class="baggage-table-card">
 
-
             <table class="baggage-table">
-
 
                 <thead>
 
@@ -736,26 +551,21 @@ $total_count =
                             BAGGAGE TAG
                         </th>
 
-
                         <th>
                             PASSENGER
                         </th>
-
 
                         <th>
                             FLIGHT
                         </th>
 
-
                         <th>
                             ROUTE
                         </th>
 
-
                         <th>
                             STATUS
                         </th>
-
 
                         <th>
                             ACTION
@@ -765,17 +575,13 @@ $total_count =
 
                 </thead>
 
-
                 <tbody
                     id="baggageTableBody"
                 >
 
-
                 <?php if ($total_count > 0): ?>
 
-
                     <?php foreach ($bags as $bag): ?>
-
 
                         <?php
 
@@ -783,7 +589,6 @@ $total_count =
                             getBaggageStatusClass(
                                 $bag['baggage_status']
                             );
-
 
                         $tag_parts =
                             explode(
@@ -793,19 +598,14 @@ $total_count =
 
                         ?>
 
-
                         <tr
                             class="baggage-row"
                             data-id="<?= $bag['id']; ?>"
                         >
 
-
-                            <!-- BAGGAGE TAG -->
-
                             <td>
 
                                 <div class="baggage-tag-box">
-
 
                                     <span>
 
@@ -815,7 +615,6 @@ $total_count =
 
                                     </span>
 
-
                                     <span>
 
                                         <?= htmlspecialchars(
@@ -824,14 +623,9 @@ $total_count =
 
                                     </span>
 
-
                                 </div>
 
                             </td>
-
-
-
-                            <!-- PASSENGER -->
 
                             <td
                                 class="cell-passenger"
@@ -847,10 +641,6 @@ $total_count =
 
                             </td>
 
-
-
-                            <!-- FLIGHT -->
-
                             <td
                                 class="cell-flight"
                             >
@@ -865,10 +655,6 @@ $total_count =
 
                             </td>
 
-
-
-                            <!-- ROUTE -->
-
                             <td
                                 class="cell-route"
                             >
@@ -877,23 +663,15 @@ $total_count =
                                     $bag['departure']
                                 ); ?>
 
-
                                 →
-
 
                                 <?= htmlspecialchars(
                                     $bag['destination']
                                 ); ?>
 
-
                             </td>
 
-
-
-                            <!-- STATUS -->
-
                             <td>
-
 
                                 <span
                                     class="baggage-badge <?= $badge_class; ?>"
@@ -905,18 +683,11 @@ $total_count =
                                         $bag['baggage_status']
                                     ); ?>
 
-
                                 </span>
-
 
                             </td>
 
-
-
-                            <!-- ACTION -->
-
                             <td>
-
 
                                 <button
                                     type="button"
@@ -934,21 +705,15 @@ $total_count =
 
                                 </button>
 
-
                             </td>
-
 
                         </tr>
 
-
                     <?php endforeach; ?>
-
 
                 <?php else: ?>
 
-
                     <tr>
-
 
                         <td
                             colspan="6"
@@ -960,59 +725,34 @@ $total_count =
 
                             No baggage records found.
 
-
                         </td>
-
 
                     </tr>
 
-
                 <?php endif; ?>
-
 
                 </tbody>
 
-
             </table>
-
 
         </div>
 
-
     </main>
 
-
 </div>
-
-
-
-<!-- =====================================================
-     HELP BUTTON
-===================================================== -->
 
 <div class="help-btn">
     ?
 </div>
-
-
-
-<!-- =====================================================
-     EDIT BAGGAGE STATUS MODAL
-===================================================== -->
 
 <div
     class="modal-backdrop"
     id="baggageEditModal"
 >
 
-
     <div class="modal-card">
 
-
-        <!-- MODAL HEADER -->
-
         <div class="modal-header">
-
 
             <div>
 
@@ -1020,13 +760,11 @@ $total_count =
                     Edit Baggage Status
                 </h2>
 
-
                 <p>
                     Update the current baggage status
                 </p>
 
             </div>
-
 
             <button
                 type="button"
@@ -1038,19 +776,11 @@ $total_count =
 
             </button>
 
-
         </div>
-
-
-
-        <!-- FORM -->
 
         <form
             id="baggageStatusForm"
         >
-
-
-            <!-- BAGGAGE ID -->
 
             <input
                 type="hidden"
@@ -1058,12 +788,7 @@ $total_count =
                 name="bag_id"
             >
 
-
-
-            <!-- STATUS -->
-
             <div class="modal-group">
-
 
                 <label for="editBaggageStatus">
 
@@ -1071,50 +796,37 @@ $total_count =
 
                 </label>
 
-
                 <select
                     id="editBaggageStatus"
                     name="baggage_status"
                     required
                 >
-
 
                     <option value="Checked">
                         Checked
                     </option>
 
-
                     <option value="Loaded">
                         Loaded
                     </option>
-
 
                     <option value="In Transit">
                         In Transit
                     </option>
 
-
                     <option value="Arrived">
                         Arrived
                     </option>
-
 
                     <option value="Delivered">
                         Delivered
                     </option>
 
-
                 </select>
-
 
             </div>
 
-
-
-            <!-- MODAL BUTTONS -->
-
             <div class="modal-actions">
-
 
                 <button
                     type="button"
@@ -1126,7 +838,6 @@ $total_count =
 
                 </button>
 
-
                 <button
                     type="submit"
                     class="btn-save"
@@ -1136,107 +847,15 @@ $total_count =
 
                 </button>
 
-
-            </div>
-
-
-        </form>
-
-
-    </div>
-
-
-</div>
-
-```html
-<div class="modal-backdrop" id="baggageEditModal">
-    <div class="modal-card">
-
-        <div class="modal-header">
-            <div>
-                <h2>Edit Baggage Status</h2>
-                <p>Update the current baggage status</p>
-            </div>
-
-            <button
-                type="button"
-                class="modal-close"
-                onclick="closeBaggageEditModal()"
-            >
-                ×
-            </button>
-        </div>
-
-        <form id="baggageStatusForm">
-
-            <input
-                type="hidden"
-                id="editBaggageId"
-                name="bag_id"
-            >
-
-            <div class="modal-group">
-                <label for="editBaggageStatus">Status</label>
-
-                <select
-                    id="editBaggageStatus"
-                    name="baggage_status"
-                    required
-                >
-                    <option value="Checked">Checked</option>
-                    <option value="Loaded">Loaded</option>
-                    <option value="In Transit">In Transit</option>
-                    <option value="Arrived">Arrived</option>
-                    <option value="Delivered">Delivered</option>
-                </select>
-            </div>
-
-            <div class="modal-actions">
-
-                <button
-                    type="button"
-                    class="btn-cancel"
-                    onclick="closeBaggageEditModal()"
-                >
-                    Cancel
-                </button>
-
-                <button
-                    type="submit"
-                    class="btn-save"
-                >
-                    Save
-                </button>
-
             </div>
 
         </form>
 
     </div>
+
 </div>
-```
-```php
-<button
-    type="button"
-    class="btn-edit-baggage"
-    onclick="openBaggageEditModal(
-        <?= $bag['id']; ?>,
-        '<?= htmlspecialchars($bag['baggage_status'], ENT_QUOTES); ?>'
-    )"
->
-    Edit
-</button>
-```
-
-
-
-
-<!-- =====================================================
-     DASHBOARD JS
-===================================================== -->
 
 <script src="../assets/js/dashboard.js"></script>
-
 
 </body>
 
