@@ -110,7 +110,7 @@ Our Features
 
 <div class="card">
 
-<img src="assets/images/aircraft.jpeg">
+<img src="assets/images/aircraft.png">
 
 <h3>
 Aircraft Management
