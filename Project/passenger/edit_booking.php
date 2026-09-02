@@ -6,9 +6,9 @@ $user_id = (int)$_SESSION['user_id'];
 $booking_id = isset($_GET['booking_id']) ? (int)$_GET['booking_id'] : 0;
 $message = "";
 
-// Fetch current booking details
+
 $stmt = $conn->query("SELECT b.*, f.flight_number, f.departure, f.destination, f.departure_time 
-                      FROM bookings b 
+                  FROM bookings b 
                       JOIN flights f ON b.flight_id = f.id 
                       WHERE b.id = $booking_id AND b.user_id = $user_id");
 
@@ -22,12 +22,12 @@ if (!$booking) {
 
 $flight_id = (int)$booking['flight_id'];
 
-// Handle Seat Update
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $new_seat = $conn->real_escape_string(trim($_POST['seat_number'] ?? ''));
 
     if (!empty($new_seat)) {
-        // Check if chosen seat is occupied by another passenger on this flight
+       
         $chk = $conn->query("SELECT id FROM bookings WHERE flight_id = $flight_id AND seat_number = '$new_seat' AND id != $booking_id");
         
         if ($chk && $chk->num_rows > 0) {
@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $conn->query("UPDATE bookings SET seat_number = '$new_seat' WHERE id = $booking_id");
             
-            // Notification
+            
             $conn->query("INSERT INTO notifications (user_id, message, type, status, created_at) 
                          VALUES ($user_id, 'Seat for booking #$booking_id updated to $new_seat.', 'Update', 'Unread', NOW())");
 
@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Occupied seats
+
 $booked_seats = [];
 $b_res = $conn->query("SELECT seat_number FROM bookings WHERE flight_id = $flight_id AND id != $booking_id");
 if ($b_res) {

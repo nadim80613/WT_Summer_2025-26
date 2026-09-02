@@ -4,7 +4,7 @@ include 'header.php';
 
 $user_id = (int)$_SESSION['user_id'];
 
-// Mark all as read when opened
+
 $conn->query("UPDATE notifications SET status = 'Read' WHERE user_id = $user_id");
 
 $res = $conn->query("SELECT * FROM notifications WHERE user_id = $user_id ORDER BY id DESC");

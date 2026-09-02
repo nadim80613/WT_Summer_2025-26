@@ -5,7 +5,7 @@ include 'header.php';
 $from = isset($_GET['from']) ? trim($_GET['from']) : '';
 $to   = isset($_GET['to']) ? trim($_GET['to']) : '';
 
-// Only show upcoming/available flights where departure_time is strictly in the future
+
 $sql = "SELECT * FROM flights 
         WHERE departure_time > NOW() 
         AND status NOT IN ('Departed', 'Cancelled')";

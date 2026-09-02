@@ -6,7 +6,7 @@ $flight_id = isset($_GET['flight_id']) ? (int)$_GET['flight_id'] : 0;
 $user_id = (int)$_SESSION['user_id'];
 $message = "";
 
-// Handle Single Combined Booking Record for Multiple Seats
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $selected_seats_str = trim($_POST['selected_seats'] ?? '');
     $flight_id = (int)$_POST['flight_id'];
@@ -157,7 +157,7 @@ if ($flight_id > 0) {
 
 .fare-summary { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-top: 25px; }
 
-/* MODAL STYLES (PAYMENT & SUCCESS) */
+
 .modal-overlay {
     display: none;
     position: fixed;
@@ -335,12 +335,12 @@ if ($flight_id > 0) {
         </div>
 
         <button type="button" id="open_pay_btn" onclick="openPaymentModal()" class="btn" disabled style="width: 100%; padding: 12px; margin-top: 15px; font-size: 15px; opacity: 0.6;">
-            Proceed to Payment ($0.00)
+            
         </button>
 
     </div>
 
-    <!-- PAYMENT MODAL -->
+    
     <div id="paymentModal" class="modal-overlay">
         <div class="payment-card-box">
             <div class="modal-header">
@@ -389,13 +389,13 @@ if ($flight_id > 0) {
                 </div>
 
                 <button type="submit" id="pay_now_btn" class="btn" style="width: 100%; padding: 12px; font-size: 15px; margin-top: 10px; background: #059669;">
-                    Pay & Confirm Booking
+                    
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- SUCCESS POPUP MODAL -->
+    
     <div id="successModal" class="modal-overlay">
         <div class="success-card-box">
             <div class="success-icon">✓</div>

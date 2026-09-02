@@ -3,7 +3,6 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Security Check: Kick to login if not passenger
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'passenger') {
     header("Location: ../login.php");
     exit();
@@ -18,11 +17,11 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Airport Management System - Passenger</title>
+    <link rel="stylesheet" href="passenger.css">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { display: flex; background: #f0f4f8; min-height: 100vh; color: #0f172a; }
 
-        /* Left Sidebar */
         .sidebar {
             width: 260px;
             background: #0f172a;
@@ -39,8 +38,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
             font-weight: 800;
             display: flex;
             align-items: center;
-            gap: 10px;
             border-bottom: 1px solid #1e293b;
+            letter-spacing: 0.5px;
         }
         .nav-links {
             list-style: none;
@@ -50,7 +49,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
         .nav-links li a {
             display: flex;
             align-items: center;
-            gap: 12px;
             padding: 14px 24px;
             color: #94a3b8;
             text-decoration: none;
@@ -68,7 +66,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
             color: #ef4444;
         }
 
-        /* Main Content Container */
         .main-wrapper {
             margin-left: 260px;
             flex-grow: 1;
@@ -77,7 +74,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
             min-height: 100vh;
         }
 
-        /* Topbar Header */
         .topbar {
             background: #ffffff;
             padding: 18px 32px;
@@ -102,13 +98,11 @@ $current_page = basename($_SERVER['PHP_SELF']);
             border: 1px solid #e2e8f0;
         }
 
-        /* Content Area */
         .page-content {
             padding: 30px;
             flex-grow: 1;
         }
 
-        /* Common Utility Components */
         .btn {
             background: #0284c7;
             color: #ffffff;
@@ -152,10 +146,10 @@ $current_page = basename($_SERVER['PHP_SELF']);
 </head>
 <body>
 
-    <!-- Left Sidebar -->
+    
     <aside class="sidebar">
         <div class="sidebar-brand">
-            ✈ <span>Passenger Portal</span>
+            <span>Passenger Portal</span>
         </div>
         <ul class="nav-links">
             <li><a href="dashboard.php" class="<?php echo ($current_page === 'dashboard.php') ? 'active' : ''; ?>">Dashboard</a></li>
@@ -169,7 +163,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </ul>
     </aside>
 
-    <!-- Main Content Area -->
+    
     <div class="main-wrapper">
         <header class="topbar">
             <div class="topbar-title">Airport Management System</div>

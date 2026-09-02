@@ -1,10 +1,10 @@
 <?php
-// 1. Set PHP timezone to Bangladesh
+
 date_default_timezone_set('Asia/Dhaka');
 
 require_once '../config/database.php';
 
-// 2. Set MySQL Session Timezone to Bangladesh (+06:00)
+
 $conn->query("SET time_zone = '+06:00'");
 
 include 'header.php';
@@ -12,7 +12,7 @@ include 'header.php';
 $user_id = (int)$_SESSION['user_id'];
 $requested_booking_id = isset($_GET['booking_id']) ? (int)$_GET['booking_id'] : 0;
 
-// Fetch active upcoming bookings
+
 $all_bookings_res = $conn->query("SELECT b.id AS booking_id, b.seat_number, f.flight_number, f.departure, f.destination, f.departure_time 
                                   FROM bookings b
                                   JOIN flights f ON b.flight_id = f.id
@@ -26,7 +26,7 @@ if ($all_bookings_res) {
     }
 }
 
-// Select active booking
+
 $active_booking_id = $requested_booking_id;
 if ($active_booking_id === 0 && !empty($bookings_list)) {
     $active_booking_id = (int)$bookings_list[0]['booking_id'];
@@ -46,7 +46,7 @@ if ($active_booking_id > 0) {
     }
 }
 
-// 1 Hour unlock condition check
+
 $is_unlocked = false;
 $unlock_time_str = "";
 if ($pass) {
@@ -54,11 +54,11 @@ if ($pass) {
     $departure_timestamp = strtotime($pass['departure_time']);
     $unlock_timestamp = $departure_timestamp - 3600; // 1 hour before departure
     
-    // Check if current time is greater than or equal to unlock time
+    
     $is_unlocked = ($current_timestamp >= $unlock_timestamp);
     $unlock_time_str = date('Y-m-d H:i:s', $unlock_timestamp);
 
-    // Auto luggage tagging when boarding pass is unlocked
+   
     if ($is_unlocked) {
         $chk_bag = $conn->query("SELECT id FROM baggage WHERE booking_id = {$pass['id']}");
         if ($chk_bag && $chk_bag->num_rows === 0) {
