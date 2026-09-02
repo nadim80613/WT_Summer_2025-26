@@ -2,10 +2,6 @@
 
 include "config/database.php";
 
-echo "Database Connected Successfully!";
-echo "Database Connected !";
-echo "Database Connected Successfully!||promi";
-echo "jem";
 ?>
 
 <!DOCTYPE html>
@@ -33,14 +29,23 @@ echo "jem";
 
 
 <nav>
+
 <a href="index.php">Home</a>
+
 <a href="#features">Features</a>
+
 <a href="#about">About</a>
+
 <a href="#contact">Contact</a>
 
 <a href="login.php" class="login-btn">
-Login
+Sign In
 </a>
+
+<a href="register.php" class="signup-btn">
+Sign Up
+</a>
+
 
 </nav>
 
