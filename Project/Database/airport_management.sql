@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Sep 01, 2026 at 02:38 PM
+-- Generation Time: Sep 02, 2026 at 12:43 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -105,7 +105,18 @@ INSERT INTO `activity_logs` (`id`, `user_id`, `action`, `created_at`) VALUES
 (64, 20, 'User logged in', '2026-09-01 12:28:07'),
 (65, 3, 'User logged in', '2026-09-01 12:33:12'),
 (66, 3, 'Rejected aircraft request: NA1009', '2026-09-01 12:33:24'),
-(67, 20, 'User logged in', '2026-09-01 12:33:34');
+(67, 20, 'User logged in', '2026-09-01 12:33:34'),
+(68, 3, 'User logged in', '2026-09-01 17:02:31'),
+(69, 21, 'User logged in', '2026-09-01 19:56:41'),
+(70, 20, 'User logged in', '2026-09-01 20:27:06'),
+(71, 3, 'User logged in', '2026-09-02 03:35:19'),
+(72, 3, 'User logged in', '2026-09-02 03:35:35'),
+(73, 3, 'User logged in', '2026-09-02 04:29:14'),
+(74, 22, 'User logged in', '2026-09-02 04:52:44'),
+(75, 3, 'User logged in', '2026-09-02 04:53:02'),
+(76, 20, 'User logged in', '2026-09-02 04:53:19'),
+(77, 21, 'User logged in', '2026-09-02 04:53:32'),
+(78, 22, 'User logged in', '2026-09-02 05:00:53');
 
 -- --------------------------------------------------------
 
@@ -194,7 +205,8 @@ INSERT INTO `airplanes` (`id`, `airline_id`, `airline_name`, `model`, `manufactu
 (1, 1, 'Emirates', '33401ER', NULL, NULL, 'REG-249', 200, 'Active', '2026-08-29 18:54:37'),
 (2, 1, 'Emirates', 'A1008', NULL, NULL, 'EM76589', 245, 'Active', '2026-08-31 17:38:57'),
 (6, 1, 'Emirates', 'PO-9898', 'PO', '2024-07-25', 'REG654', 290, 'Active', '2026-09-01 12:10:07'),
-(10, 1, 'Emirates', 'NA1009', 'NA', '2025-02-01', 'REG443', 160, 'Rejected', '2026-09-01 12:33:01');
+(10, 1, 'Emirates', 'NA1009', 'NA', '2025-02-01', 'REG443', 160, 'Rejected', '2026-09-01 12:33:01'),
+(11, NULL, 'Emirates', 'AH-443', NULL, NULL, 'REG-855', 200, 'Active', '2026-09-01 19:58:41');
 
 -- --------------------------------------------------------
 
@@ -239,7 +251,7 @@ CREATE TABLE `baggage` (
 --
 
 INSERT INTO `baggage` (`id`, `user_id`, `booking_id`, `baggage_status`, `location`, `updated_at`) VALUES
-(1, 4, 1, 'Checked In', 'Terminal 1 Counter (Tag Issued)', '2026-08-30 20:52:07');
+(1, 4, 1, 'Delivered', 'Terminal 1 Counter (Tag Issued)', '2026-08-30 20:52:07');
 
 -- --------------------------------------------------------
 
@@ -301,7 +313,33 @@ CREATE TABLE `flights` (
 
 INSERT INTO `flights` (`id`, `flight_number`, `airplane_id`, `departure`, `destination`, `departure_time`, `arrival_time`, `status`, `created_at`) VALUES
 (1, 'BG-310', 1, 'DAC', 'DXM', '2026-08-29 00:54:00', '2026-08-29 02:57:00', 'On Time', '2026-08-29 18:54:37'),
-(2, 'HS-32', 1, 'DHA ', 'JED', '2026-08-31 03:30:01', '2026-08-31 03:00:01', 'Scheduled', '2026-08-30 20:51:15');
+(2, 'HS-32', 1, 'DHA ', 'JED', '2026-08-31 03:30:01', '2026-08-31 03:00:01', 'Scheduled', '2026-08-30 20:51:15'),
+(3, 'BG4534', 11, 'JED', 'DHA', '2026-09-01 01:58:00', '2026-09-01 06:58:00', 'On Time', '2026-09-01 19:58:41');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `flight_schedule_requests`
+--
+
+CREATE TABLE `flight_schedule_requests` (
+  `id` int(11) NOT NULL,
+  `flight_id` int(11) NOT NULL,
+  `airline_id` int(11) NOT NULL,
+  `requested_departure` datetime NOT NULL,
+  `requested_arrival` datetime NOT NULL,
+  `reason` text NOT NULL,
+  `status` varchar(20) DEFAULT 'pending',
+  `feedback` text DEFAULT NULL,
+  `submitted_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `flight_schedule_requests`
+--
+
+INSERT INTO `flight_schedule_requests` (`id`, `flight_id`, `airline_id`, `requested_departure`, `requested_arrival`, `reason`, `status`, `feedback`, `submitted_at`) VALUES
+(1, 1, 1, '2026-09-13 02:27:00', '2026-09-14 02:28:00', 'my wish', 'pending', NULL, '2026-09-01 20:28:30');
 
 -- --------------------------------------------------------
 
@@ -312,17 +350,19 @@ INSERT INTO `flights` (`id`, `flight_number`, `airplane_id`, `departure`, `desti
 CREATE TABLE `gates` (
   `id` int(11) NOT NULL,
   `gate_number` varchar(20) NOT NULL,
-  `flight_id` int(11) NOT NULL,
+  `flight_id` int(11) DEFAULT NULL,
   `availability` varchar(50) DEFAULT 'Available',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `terminal` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `gates`
 --
 
-INSERT INTO `gates` (`id`, `gate_number`, `flight_id`, `availability`, `created_at`) VALUES
-(1, 'G50', 1, 'Occupied', '2026-08-29 18:54:37');
+INSERT INTO `gates` (`id`, `gate_number`, `flight_id`, `availability`, `created_at`, `terminal`) VALUES
+(1, 'G50', 2, 'Occupied', '2026-08-29 18:54:37', 'Terminal 1'),
+(2, 'G11', 3, 'Occupied', '2026-09-01 19:58:41', NULL);
 
 -- --------------------------------------------------------
 
@@ -409,7 +449,8 @@ INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `created_at`) VA
 (18, 'raha', 'raha@gmail.com', '$2y$10$zRYdPNYcQu7woiRSCfzcw.bEhKieLfpxhj1d/hBbu6d3JksEVcYCy', 'passenger', '2026-08-31 15:10:15'),
 (19, 'emon', 'emon@gmail.com', '$2y$10$rfDIApMskty6l81mmXDnPOkoimGejStxRdT4w9IcF.PwuCUKfH.ta', 'passenger', '2026-08-31 15:11:12'),
 (20, 'Emirates admin', 'emirates@gmail.com', '$2y$10$drhnkYXWSSud79W7J8r9gOWk0xPhv9wXBuv//JdbOirABdLcHSgky', 'airline', '2026-09-01 01:02:26'),
-(21, 'staff', 'staff@gmail.com', '$2y$10$u4/7Wg5mnvbgTGr3thympO5LnYy0aJuvRR/MA8fFAipfI.DPlehBG', 'staff', '2026-09-01 01:03:15');
+(21, 'staff', 'staff@gmail.com', '$2y$10$u4/7Wg5mnvbgTGr3thympO5LnYy0aJuvRR/MA8fFAipfI.DPlehBG', 'staff', '2026-09-01 01:03:15'),
+(22, 'rakib', 'rakib@gmail.com', '$2y$10$bWWxUioOwd4tiq4j.ldk3uUvhKnZmRj2Gpuzrv2QWwmWgy1hXBbYy', 'passenger', '2026-09-02 04:52:35');
 
 --
 -- Indexes for dumped tables
@@ -481,6 +522,12 @@ ALTER TABLE `flights`
   ADD KEY `airplane_id` (`airplane_id`);
 
 --
+-- Indexes for table `flight_schedule_requests`
+--
+ALTER TABLE `flight_schedule_requests`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `gates`
 --
 ALTER TABLE `gates`
@@ -523,7 +570,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `activity_logs`
 --
 ALTER TABLE `activity_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=79;
 
 --
 -- AUTO_INCREMENT for table `aircraft_approval_requests`
@@ -541,7 +588,7 @@ ALTER TABLE `airlines`
 -- AUTO_INCREMENT for table `airplanes`
 --
 ALTER TABLE `airplanes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `airport_services`
@@ -571,13 +618,19 @@ ALTER TABLE `emergency_alerts`
 -- AUTO_INCREMENT for table `flights`
 --
 ALTER TABLE `flights`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `flight_schedule_requests`
+--
+ALTER TABLE `flight_schedule_requests`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `gates`
 --
 ALTER TABLE `gates`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `lost_items`
@@ -601,7 +654,7 @@ ALTER TABLE `staff`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- Constraints for dumped tables
